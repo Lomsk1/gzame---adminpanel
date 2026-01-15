@@ -1,0 +1,81 @@
+@import "tailwindcss";
+
+@theme {
+  /* --- 1. CORE SURFACE COLORS (Elevation) --- */
+  /* Main background (The deepest layer) */
+  --color-admin-bg: #080e2f;
+  /* Sidebar/Navbar (Slightly lighter than bg) */
+  --color-admin-panel: #0d143d;
+  /* Cards/Modals (The layer users interact with) */
+  --color-admin-card: #151c4a;
+  /* Input fields/Borders */
+  --color-admin-border: #1e275e;
+
+  /* --- 2. TEXT COLORS --- */
+  /* Primary headings (High contrast) */
+  --color-admin-text: #f1f4ff;
+  /* Body text (Lowers eye strain) */
+  --color-admin-text-dim: #94a3b8;
+  /* Disabled/Placeholders */
+  --color-admin-text-muted: #64748b;
+
+  /* --- 3. BRAND & ACCENT (The "Pop") --- */
+  /* Primary action (Vibrant Electric Blue) */
+  --color-admin-primary: #3b82f6;
+  /* Secondary accent (Purple/Indigo) */
+  --color-admin-accent: #818cf8;
+  /* Highlight/Glow (For active states) */
+  --color-admin-glow: rgba(59, 130, 246, 0.15);
+
+  /* --- 4. STATUS COLORS (Necessary for Dashboard) --- */
+  --color-admin-success: #10b981; /* Emerald Green */
+  --color-admin-warning: #f59e0b; /* Amber */
+  --color-admin-error: #ef4444; /* Rose Red */
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@layer utilities {
+  /* Targeted scrollbar styling for the GlassTextArea */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(
+      30,
+      39,
+      94,
+      0.2
+    ); /* admin-border color with transparency */
+    border-radius: 10px;
+    margin-block: 10px; /* Gives some padding at top/bottom */
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(59, 130, 246, 0.3); /* admin-primary with transparency */
+    border-radius: 10px;
+    border: 1px solid rgba(59, 130, 246, 0.1);
+    transition: all 0.3s ease;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(59, 130, 246, 0.6); /* Brightens on hover */
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.4); /* Neon glow effect */
+  }
+
+  .no-spinner::-webkit-outer-spin-button,
+  .no-spinner::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  /* Remove arrows for Firefox */
+  .no-spinner {
+    -moz-appearance: textfield;
+  }
+}
