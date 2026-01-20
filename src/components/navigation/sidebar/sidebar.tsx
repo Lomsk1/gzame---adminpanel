@@ -5,7 +5,7 @@ export default function MainSidebar() {
         { label: "Intelligence", links: [{ to: "/", label: "Dashboard" }, { to: "/ai", label: "AI Gemini" }] },
         { label: "Users & Progression", links: [{ to: "/users", label: "Users" }, { to: "/levels", label: "Level Config" }] }, // Added
         { label: "Psychometry", links: [{ to: "/questions", label: "Questions" }, { to: "/answers", label: "Answer Logs" }] },
-        { label: "Operations", links: [{ to: "/quests", label: "Quest Templates" }, { to: "/rooms", label: "Chat Rooms" }] }, // Added
+        { label: "Operations", links: [{ to: "/quests", label: "Quest Templates" }, { to: "/daily-quests", label: "Daily Quests" }, { to: "/rooms", label: "Chat Rooms" }] }, // Added
     ];
 
     return (

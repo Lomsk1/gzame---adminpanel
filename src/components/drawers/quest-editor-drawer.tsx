@@ -2,6 +2,7 @@ import { useState } from "react";
 import { AdminDrawerShell } from "./admin-drawer-shell";
 import { AdminInput } from "../ui/input-form";
 import type { Psychotype } from "../../types/user/user";
+import { AdminTextArea } from "../ui/text-area-form";
 
 // Types matching your Quest Schema
 export interface QuestFormData {
@@ -107,8 +108,8 @@ export const QuestEditorDrawer = ({ config, onClose, onSave, isSubmitting }: Pro
                     <div className="grid grid-cols-1 gap-4">
                         <AdminInput label="EN_Title" value={form.title.en} onChange={(val) => setForm({ ...form, title: { ...form.title, en: val as string } })} />
                         <AdminInput label="KA_Title" value={form.title.ka} onChange={(val) => setForm({ ...form, title: { ...form.title, ka: val as string } })} />
-                        <AdminInput label="EN_Description" value={form.description.en} onChange={(val) => setForm({ ...form, description: { ...form.description, en: val as string } })} />
-                        <AdminInput label="KA_Description" value={form.description.ka} onChange={(val) => setForm({ ...form, description: { ...form.description, ka: val as string } })} />
+                        <AdminTextArea label="EN_Description" value={form.description.en} onChange={(val) => setForm({ ...form, description: { ...form.description, en: val as string } })} />
+                        <AdminTextArea label="KA_Description" value={form.description.ka} onChange={(val) => setForm({ ...form, description: { ...form.description, ka: val as string } })} />
                     </div>
                 </div>
 
@@ -128,6 +129,7 @@ export const QuestEditorDrawer = ({ config, onClose, onSave, isSubmitting }: Pro
                                 <button
                                     key={cat}
                                     type="button"
+                                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                     onClick={() => setForm({ ...form, category: cat as any })}
                                     className={`py-2 text-[9px] font-black uppercase border transition-all ${form.category === cat ? 'border-admin-primary text-admin-primary bg-admin-primary/10' : 'border-admin-border text-admin-text-dim'}`}
                                 >

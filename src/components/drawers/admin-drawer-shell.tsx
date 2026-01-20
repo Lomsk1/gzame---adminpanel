@@ -55,7 +55,7 @@ export const AdminDrawerShell = ({
                         <button
                             disabled={isSubmitting}
                             onClick={onClose}
-                            className="w-full py-3 border border-admin-border text-admin-text-dim font-black uppercase tracking-widest text-[10px] hover:bg-white/5 transition-all cursor-pointer"
+                            className="w-full py-3 border border-admin-border text-admin-text-dim font-black uppercase tracking-widest text-[12px] hover:bg-white/5 transition-all cursor-pointer"
                         >
                             Abort_Operation
                         </button>

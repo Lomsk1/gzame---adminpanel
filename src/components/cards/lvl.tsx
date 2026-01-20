@@ -46,12 +46,12 @@ export const LevelNodeCard = ({
 
             <div className="p-4 space-y-4">
                 <div className="flex justify-between items-end">
-                    <span className="text-[9px] font-bold text-admin-text-dim uppercase tracking-tighter">Threshold</span>
-                    <span className="text-xs font-mono text-admin-text font-bold">{config.exp_required.toLocaleString()} XP</span>
+                    <span className="text-[12px] font-bold text-admin-text-dim uppercase tracking-tighter">Threshold</span>
+                    <span className="text-sm font-mono text-admin-text font-bold">{config.exp_required.toLocaleString()} XP</span>
                 </div>
 
                 <div className="space-y-2">
-                    <p className="text-[8px] font-mono text-admin-primary uppercase tracking-widest border-b border-admin-primary/20 pb-1">Rewards_Payload</p>
+                    <p className="text-[10px] font-mono text-admin-primary uppercase tracking-widest border-b border-admin-primary/20 pb-1">Rewards_Payload</p>
                     <div className="flex flex-wrap gap-1.5">
                         {config.rewards?.energy_bonus ? <Badge color="warning" text={`+${config.rewards.energy_bonus} NRG`} /> : null}
                         {config.rewards?.unlock_features?.map(f => <Badge key={f} color="primary" text={f} />)}
@@ -63,7 +63,7 @@ export const LevelNodeCard = ({
             <div className="p-2 grid grid-cols-2 gap-2 bg-admin-panel/20">
                 <button
                     onClick={onEdit}
-                    className="py-1.5 text-[8px] font-black text-admin-text-dim hover:text-white uppercase tracking-tighter bg-admin-bg/40 border border-admin-border/30 rounded transition-colors cursor-pointer"
+                    className="py-1.5 text-[10px] font-black text-admin-text-dim hover:text-white uppercase tracking-tighter bg-admin-bg/40 border border-admin-border/30 rounded transition-colors cursor-pointer"
                     disabled={isSubmitting}
                 >
                     Modify_Config
@@ -80,7 +80,7 @@ export const LevelNodeCard = ({
                     isFixed={true}
                 >
                     {/* TRIGGER ONLY - No onClick here! */}
-                    <button className="w-full py-1.5 text-[8px] font-black text-admin-error/60 hover:text-admin-error uppercase tracking-tighter bg-admin-bg/40 border border-admin-border/30 rounded transition-colors cursor-pointer">
+                    <button className="w-full py-1.5 text-[10px] font-black text-admin-error/60 hover:text-admin-error uppercase tracking-tighter bg-admin-bg/40 border border-admin-border/30 rounded transition-colors cursor-pointer">
                         Destruct
                     </button>
                 </AdminConfirmWrapper>
@@ -95,5 +95,5 @@ const Badge = ({ text, color }: { text: string, color: 'primary' | 'warning' | '
         warning: "text-admin-warning border-admin-warning/30 bg-admin-warning/5",
         accent: "text-admin-accent border-admin-accent/30 bg-admin-accent/5",
     };
-    return <span className={`px-1.5 py-0.5 border text-[7px] font-black rounded-sm uppercase ${colors[color]}`}>{text}</span>;
+    return <span className={`px-1.5 py-0.5 border text-[9px] font-black rounded-sm uppercase ${colors[color]}`}>{text}</span>;
 };

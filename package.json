@@ -12,6 +12,7 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.1.18",
     "axios": "^1.13.2",
+    "date-fns": "^4.1.0",
     "install": "^0.13.0",
     "js-cookie": "^3.0.5",
     "lucide-react": "^0.562.0",
@@ -20,6 +21,7 @@
     "react-dom": "^19.2.0",
     "react-router": "^7.12.0",
     "recharts": "^3.6.0",
+    "socket.io-client": "^4.8.3",
     "sonner": "^2.0.7",
     "swr": "^2.3.8",
     "tailwindcss": "^4.1.18",

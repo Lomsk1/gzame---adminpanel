@@ -106,12 +106,12 @@ export default function UsersPage() {
                                                     >
                                                         <td className="px-6 py-3">
                                                             <div className="flex items-center gap-3">
-                                                                <span className="flex items-center justify-center min-w-6 h-6 rounded bg-admin-card border border-admin-border text-[10px] font-bold text-admin-primary">
+                                                                <span className="flex items-center justify-center min-w-6 h-6 rounded bg-admin-card border border-admin-border text-[13px] font-bold text-admin-primary">
                                                                     {user.currentLevel}
                                                                 </span>
                                                                 <div className="flex flex-col">
-                                                                    <span className="text-xs font-bold text-admin-text">{user.nickname}</span>
-                                                                    <span className="text-[9px] text-admin-text-dim font-mono">{user.email}</span>
+                                                                    <span className="text-[15px] font-bold text-admin-text">{user.nickname}</span>
+                                                                    <span className="text-[12px] text-admin-text-dim font-mono">{user.email}</span>
                                                                 </div>
                                                             </div>
                                                         </td>

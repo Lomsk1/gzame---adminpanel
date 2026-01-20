@@ -24,13 +24,15 @@ export const MetricCard = ({ label, value, subValue, variant = "primary", classN
         error: "bg-admin-error",
     };
 
+
+
     return (
         <div className="group h-full">
             <GlassCard
-                className={`p-4 h-full transition-all duration-500 transform group-hover:-translate-y-1 ${glowColors[variant]} ${className}`}
+                className={`p-4 h-full transition-all duration-500 transform group-hover:-translate-y-1 ${glowColors[variant]} ${className} overflow-hidden`}
             >
                 <div className="flex justify-between items-start mb-1">
-                    <p className="text-[9px] font-black uppercase tracking-[0.2em] text-admin-text-dim group-hover:text-admin-text transition-colors">
+                    <p className="text-[13px] font-black uppercase tracking-[0.2em] text-admin-text-dim group-hover:text-admin-text transition-colors">
                         {label}
                     </p>
                     <div className={`h-1 w-1 rounded-full animate-pulse ${dotColors[variant]}`} />

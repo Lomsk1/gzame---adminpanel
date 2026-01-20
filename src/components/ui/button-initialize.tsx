@@ -12,7 +12,9 @@ export default function ButtonInitialization({ onClick }: Props) {
             className="w-full md:w-auto px-2 py-3 shadow-[0_0_20px_rgba(var(--admin-primary-rgb),0.2)]"
             size="sm"
         >
-            + INITIALIZE_NEW_NODE
+            <span className='text-xs'>
+                + INITIALIZE_NEW_NODE
+            </span>
         </ButtonComponent>
     )
 }

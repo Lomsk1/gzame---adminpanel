@@ -21,17 +21,26 @@ import AnswersPage from "./pages/answer/page";
 import { answersLoader } from "./features/answers/answers.loaders";
 import QuestsPage from "./pages/quest/page";
 import { questsLoader } from "./features/quests/quests.loaders";
+import { questTemplateAction } from "./features/quests/quests.actions";
+import ActiveQuestsPage from "./pages/quest-daily/page";
+import { questsDailyLoader } from "./features/quests-daily/quest-daily.loaders";
+import AdminChatPage from "./pages/chat/page";
+import { chatsRoomsLoader } from "./features/chat/chats.loaders";
+import { GlobalRouteError } from "./components/error/element";
+import { chatActions } from "./features/chat/chat.actions";
 
 
 export const router = createBrowserRouter([
   {
     path: "/login",
     element: <LoginPage />,
-    action: loginAction
+    action: loginAction,
+    errorElement: <GlobalRouteError />,
   },
   {
     path: "/",
     element: <RootLayout />,
+    errorElement: <GlobalRouteError />,
     loader: async () => {
       return await requireAdmin();
     },
@@ -81,7 +90,19 @@ export const router = createBrowserRouter([
       {
         path: "quests",
         element: <QuestsPage />,
-        loader: questsLoader
+        loader: questsLoader,
+        action: questTemplateAction
+      },
+      {
+        path: "daily-quests",
+        element: <ActiveQuestsPage />,
+        loader: questsDailyLoader
+      },
+      {
+        path: "rooms",
+        element: <AdminChatPage />,
+        loader: chatsRoomsLoader,
+        action: chatActions
       }
     ]
   },
