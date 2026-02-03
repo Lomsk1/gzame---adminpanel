@@ -7,7 +7,7 @@ import { AdminConfirmWrapper } from "../wrapper/wrapper";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useRevalidator } from "react-router";
-import type { UserActivityLogsType } from "../../types/logs/log";
+import type { UserActivityLogsType } from "../../types/logss/log";
 import useUserStore from "../../store/user/user";
 import ButtonCloseDrawer from "../ui/button-close-drawer";
 
@@ -382,7 +382,7 @@ export const UserDetailDrawer = ({ user, onClose }: UserDetailDrawerProps) => {
                                         // Calculate max value to normalize bar heights
                                         const maxVal = Math.max(...userActivity.data.sessionHistory, 1);
 
-                                        return userActivity.data.sessionHistory.map((count, i) => {
+                                        return userActivity.data.sessionHistory.map((count: number, i: number) => {
                                             const heightPercent = (count / maxVal) * 100;
                                             return (
                                                 <div
@@ -424,7 +424,7 @@ export const UserDetailDrawer = ({ user, onClose }: UserDetailDrawerProps) => {
                                         <span className="text-[8px] animate-pulse">SYNCING_MATRIX...</span>
                                     </div>
                                 ) : (
-                                    userActivity?.data.hourlyActivity.map((density, i) => {
+                                    userActivity?.data.hourlyActivity.map((density: number, i: number) => {
                                         const opacity = Math.min(density * 0.2 + 0.1, 1);
 
                                         return (
@@ -457,7 +457,15 @@ export const UserDetailDrawer = ({ user, onClose }: UserDetailDrawerProps) => {
                                 {userActivityIsLoading ? (
                                     <div className="text-[10px] text-admin-text-dim animate-pulse">READING_PULSE_DATA...</div>
                                 ) : userActivity?.data.logs && userActivity.data.logs.length > 0 ? (
-                                    userActivity.data.logs.map((log) => {
+                                    userActivity.data.logs.map((log: {
+                                        _id: string;
+                                        userId: string;
+                                        event: string;
+                                        status: "SUCCESS" | "ERROR" | "SYSTEM" | "WARNING";
+                                        created_at: Date;
+                                        updated_at: Date;
+                                        __v: number;
+                                    }) => {
                                         // Determine color based on status
                                         const statusColor = {
                                             SUCCESS: 'text-admin-success',

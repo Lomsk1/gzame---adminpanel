@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { PsychotypeBadge } from "../../../components/ui/psychotypeBadge";
 import { GlassCard } from "../../../components/cards/card-glass";
+import type { Psychotype } from "../../../types/user/user";
 
 const MOCK_LOGS = [
     {
@@ -61,7 +62,7 @@ export default function AIGeminiLogsPage() {
                                         <p className="text-[10px] text-admin-text-dim">{new Date(log.created_at).toLocaleTimeString()}</p>
                                     </div>
                                 </div>
-                                <PsychotypeBadge type={log.finalPsychotype} />
+                                <PsychotypeBadge type={log.finalPsychotype as Psychotype} />
                             </div>
                             <p className="text-xs text-admin-text-dim line-clamp-1 italic opacity-60 group-hover:opacity-100 transition-opacity">
                                 "{log.gemini_decisionReason}"
