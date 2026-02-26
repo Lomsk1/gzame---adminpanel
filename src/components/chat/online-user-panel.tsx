@@ -10,9 +10,11 @@ interface OnlineUsersPanelProps {
     users: User[];
     title?: string;
     className?: string;
+    /** When provided, clicking an avatar opens menu (e.g. for admin). */
+    onAvatarClick?: (user: User, anchorEl: HTMLElement) => void;
 }
 
-export const OnlineUsersPanel: React.FC<OnlineUsersPanelProps> = ({ users = [], title }) => {
+export const OnlineUsersPanel: React.FC<OnlineUsersPanelProps> = ({ users = [], title, onAvatarClick }) => {
     // Filter out invalid users
     const validUsers = users?.filter(user =>
         user &&
@@ -26,12 +28,12 @@ export const OnlineUsersPanel: React.FC<OnlineUsersPanelProps> = ({ users = [], 
     if (validUsers.length === 0) {
         return (
             <div className="h-full flex flex-col font-mono">
-                <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-admin-primary mb-4 flex items-center gap-2">
+                <h3 className="text-sm font-black uppercase tracking-[0.3em] text-admin-primary mb-4 flex items-center gap-2">
                     <span className="w-2 h-2 bg-admin-primary animate-pulse" />
                     {title || "Online Users"}
                 </h3>
                 <div className="flex-1 flex items-center justify-center">
-                    <p className="text-gray-500 text-sm italic">No users online</p>
+                    <p className="text-gray-500 text-base italic">No users online</p>
                 </div>
             </div>
         );
@@ -39,7 +41,7 @@ export const OnlineUsersPanel: React.FC<OnlineUsersPanelProps> = ({ users = [], 
 
     return (
         <div className="h-full flex flex-col font-mono">
-            <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-admin-primary mb-4 flex items-center gap-2">
+            <h3 className="text-sm font-black uppercase tracking-[0.3em] text-admin-primary mb-4 flex items-center gap-2">
                 <span className="w-2 h-2 bg-admin-primary animate-pulse" />
                 {title || `Online Users (${validUsers.length})`}
             </h3>
@@ -57,32 +59,49 @@ export const OnlineUsersPanel: React.FC<OnlineUsersPanelProps> = ({ users = [], 
                     const shortId = userId.length >= 6 ? userId.substring(0, 6) : userId;
 
                     return (
-                        <div key={userId} className="group border border-white/5 p-2 hover:border-admin-primary/30 transition-all bg-white/2">
+                        <div key={userId} className="group border border-white/5 p-2.5 hover:border-admin-primary/30 transition-all bg-white/2">
                             <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 border border-admin-primary/20 p-0.5 relative">
-                                    <img
-                                        src={avatarUrl}
-                                        className="w-full h-full grayscale hover:grayscale-0 transition-all"
-                                        alt={`${nickname}'s avatar`}
-                                        onError={(e) => {
-                                            // Fallback if image fails to load
-                                            e.currentTarget.src = `https://api.dicebear.com/7.x/identicon/svg?seed=${nickname}`;
-                                        }}
-                                    />
-                                    <div className="absolute -bottom-1 -right-1 w-2 h-2 bg-admin-primary border border-black" />
-                                </div>
+                                {onAvatarClick ? (
+                                    <button
+                                        type="button"
+                                        onClick={(e) => onAvatarClick(user, e.currentTarget)}
+                                        className="w-9 h-9 border border-admin-primary/20 p-0.5 relative shrink-0 rounded overflow-hidden hover:border-admin-primary/50 transition-colors focus:outline-none focus:ring-2 focus:ring-admin-primary/50"
+                                    >
+                                        <img
+                                            src={avatarUrl}
+                                            className="w-full h-full grayscale hover:grayscale-0 transition-all object-cover"
+                                            alt={`${nickname}'s avatar`}
+                                            onError={(e) => {
+                                                e.currentTarget.src = `https://api.dicebear.com/7.x/identicon/svg?seed=${nickname}`;
+                                            }}
+                                        />
+                                        <div className="absolute -bottom-1 -right-1 w-2 h-2 bg-admin-primary border border-black" />
+                                    </button>
+                                ) : (
+                                    <div className="w-9 h-9 border border-admin-primary/20 p-0.5 relative shrink-0">
+                                        <img
+                                            src={avatarUrl}
+                                            className="w-full h-full grayscale hover:grayscale-0 transition-all"
+                                            alt={`${nickname}'s avatar`}
+                                            onError={(e) => {
+                                                e.currentTarget.src = `https://api.dicebear.com/7.x/identicon/svg?seed=${nickname}`;
+                                            }}
+                                        />
+                                        <div className="absolute -bottom-1 -right-1 w-2 h-2 bg-admin-primary border border-black" />
+                                    </div>
+                                )}
                                 <div className="flex-1 min-w-0">
-                                    <div className="text-[11px] font-bold text-white uppercase truncate tracking-tighter">
+                                    <div className="text-sm font-bold text-white uppercase truncate tracking-tighter">
                                         {nickname}
                                     </div>
                                     <div className="flex justify-between items-center mt-1">
-                                        <span className="text-[8px] text-admin-primary/60">LVL_{currentLevel}</span>
-                                        <span className="text-[7px] text-gray-600">ID: {shortId}</span>
+                                        <span className="text-xs text-admin-primary/60">LVL_{currentLevel}</span>
+                                        <span className="text-xs text-gray-600">ID: {shortId}</span>
                                     </div>
                                 </div>
                             </div>
                             {psychotype && (
-                                <div className="mt-2 text-[8px] text-center bg-admin-primary/5 border border-admin-primary/10 py-0.5 text-admin-primary/70 uppercase italic tracking-widest">
+                                <div className="mt-2 text-xs text-center bg-admin-primary/5 border border-admin-primary/10 py-0.5 text-admin-primary/70 uppercase italic tracking-widest">
                                     {psychotype}
                                 </div>
                             )}

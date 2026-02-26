@@ -32,16 +32,16 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     return (
         <div className="relative font-mono">
             {replyTo && (
-                <div className="absolute bottom-full left-0 right-0 bg-admin-primary/10 border-x border-t border-admin-primary/30 p-2 flex justify-between items-center animate-in slide-in-from-bottom-2">
-                    <span className="text-[9px] text-admin-primary uppercase tracking-widest font-bold">
+                <div className="absolute bottom-full left-0 right-0 bg-admin-primary/10 border-x border-t border-admin-primary/30 p-2.5 flex justify-between items-center animate-in slide-in-from-bottom-2">
+                    <span className="text-sm text-admin-primary uppercase tracking-widest font-bold">
                         {`> RE_LINKING: ${replyTo.username}`}
                     </span>
-                    <button onClick={onCancelReply} className="text-[10px] text-admin-primary hover:text-white px-2">ABORT</button>
+                    <button onClick={onCancelReply} className="text-sm text-admin-primary hover:text-white px-2">ABORT</button>
                 </div>
             )}
 
-            <div className={`border ${isConnected ? 'border-admin-primary/30' : 'border-admin-error/30'} bg-black p-2 flex items-end gap-3`}>
-                <span className="text-admin-primary pb-2 font-bold animate-pulse">{'>'}</span>
+            <div className={`border ${isConnected ? 'border-admin-primary/30' : 'border-admin-error/30'} bg-black p-3 flex items-end gap-3`}>
+                <span className="text-admin-primary pb-2 font-bold animate-pulse text-base">{'>'}</span>
                 <textarea
                     ref={textareaRef}
                     value={input}
@@ -53,13 +53,13 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                         }
                     }}
                     placeholder={isConnected ? "ENTER_COMMAND..." : "CONNECTION_LOST"}
-                    className="flex-1 bg-transparent border-none focus:ring-0 text-[12px] text-admin-primary placeholder:text-admin-primary/20 resize-none py-1 custom-scrollbar min-h-8"
+                    className="flex-1 bg-transparent border-none focus:ring-0 text-base text-admin-primary placeholder:text-admin-primary/20 resize-none py-1 custom-scrollbar min-h-10"
                     rows={1}
                 />
                 <button
                     onClick={() => handleSubmit()}
                     disabled={!input.trim()}
-                    className="bg-admin-primary/10 border border-admin-primary/40 text-admin-primary px-4 py-1 text-[10px] font-bold hover:bg-admin-primary hover:text-black transition-all"
+                    className="bg-admin-primary/10 border border-admin-primary/40 text-admin-primary px-4 py-2 text-sm font-bold hover:bg-admin-primary hover:text-black transition-all"
                 >
                     EXECUTE
                 </button>

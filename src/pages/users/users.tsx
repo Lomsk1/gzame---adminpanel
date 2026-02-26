@@ -1,5 +1,5 @@
-import { useState, Suspense } from "react";
-import { useLoaderData, Await, Form, useSubmit, useNavigation } from "react-router";
+import { useState, Suspense, useEffect } from "react";
+import { useLoaderData, Await, Form, useSubmit, useNavigation, useLocation, useNavigate } from "react-router";
 import { GlassCard } from "../../components/cards/card-glass";
 import { UserDetailDrawer } from "../../components/drawers/user-detail-drawer";
 import { MetricCard, PsychotypeBadge } from "../../components/ui/psychotypeBadge";
@@ -8,6 +8,7 @@ import { TopOperatorsCard } from "../../components/cards/top-operator";
 import type { StatsUserTypes } from "../../types/stats/user";
 import type { UsersDataType } from "../../types/user/user";
 import { useDebounceCallback } from "usehooks-ts";
+import axiosAuth from "../../helper/axios";
 
 export default function UsersPage() {
     const { userStatsData, usersData, initialEmail } = useLoaderData() as {
@@ -15,10 +16,24 @@ export default function UsersPage() {
         usersData: Promise<UsersDataType>,
         initialEmail: string
     };
+    const location = useLocation();
+    const navigate = useNavigate();
     const [selectedUser, setSelectedUser] = useState<UsersDataType['data'][0] | null>(null);
 
     const submit = useSubmit();
     const navigation = useNavigation();
+
+    // Open user profile from chat (e.g. "Open user's profile" on avatar)
+    useEffect(() => {
+        const openUserId = (location.state as { openUserId?: string })?.openUserId;
+        if (!openUserId) return;
+        axiosAuth.get<{ data: UsersDataType["data"][0] }>(`/api/v1/auth/users/${openUserId}`)
+            .then((res) => {
+                setSelectedUser(res.data.data);
+                navigate(location.pathname, { replace: true, state: {} });
+            })
+            .catch(() => {});
+    }, [location.state, location.pathname, navigate]);
 
     // 1. Create a debounced submit function
     // This function will only execute after 500ms of silence

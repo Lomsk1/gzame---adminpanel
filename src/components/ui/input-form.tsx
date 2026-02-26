@@ -6,7 +6,12 @@ interface Props {
     type?: "text" | "number" | "password" | "email";
     className?: string;
     placeholder?: string;
+    labelClassName?: string;
+    inputClassName?: string;
 }
+
+const defaultLabelClass = "text-[10px] font-black text-admin-text-dim uppercase tracking-widest block";
+const defaultInputClass = "w-full bg-admin-panel/40 border border-admin-border p-2 text-sm text-admin-text outline-none focus:border-admin-primary transition-colors no-spinner";
 
 export const AdminInput = ({
     label,
@@ -14,7 +19,9 @@ export const AdminInput = ({
     onChange,
     type = "text",
     className = "",
-    placeholder
+    placeholder,
+    labelClassName,
+    inputClassName
 }: Props) => {
 
     // Logic to handle the "Annoying 0" only for number types
@@ -22,13 +29,13 @@ export const AdminInput = ({
 
     return (
         <div className={`space-y-1 ${className}`}>
-            <label className="text-[10px] font-black text-admin-text-dim uppercase tracking-widest block">
+            <label className={labelClassName ?? defaultLabelClass}>
                 {label}
             </label>
             <input
                 type={type}
                 placeholder={placeholder}
-                className="w-full bg-admin-panel/40 border border-admin-border p-2 text-sm text-admin-text outline-none focus:border-admin-primary transition-colors no-spinner"
+                className={inputClassName ?? defaultInputClass}
                 value={displayValue}
                 onChange={(e) => {
                     const val = e.target.value;

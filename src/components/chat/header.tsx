@@ -22,8 +22,8 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ roomName, roomType, isCo
                 <div className="flex items-center gap-6">
                     {/* Status Hexagon */}
                     <div className="relative">
-                        <div className={`w-10 h-10 flex items-center justify-center border ${isConnected ? 'border-admin-primary' : 'border-admin-error'} rotate-45`}>
-                            <span className={`-rotate-45 text-[12px] font-bold ${isConnected ? 'text-admin-primary' : 'text-admin-error'}`}>
+                        <div className={`w-12 h-12 flex items-center justify-center border ${isConnected ? 'border-admin-primary' : 'border-admin-error'} rotate-45`}>
+                            <span className={`-rotate-45 text-sm font-bold ${isConnected ? 'text-admin-primary' : 'text-admin-error'}`}>
                                 {isConnected ? 'ON' : 'OFF'}
                             </span>
                         </div>
@@ -31,16 +31,16 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ roomName, roomType, isCo
 
                     <div>
                         <div className="flex items-center gap-3 mb-0.5">
-                            <h2 className="text-lg font-black tracking-tighter text-white uppercase italic">
+                            <h2 className="text-xl font-black tracking-tighter text-white uppercase italic">
                                 {roomName}
                             </h2>
-                            <span className="px-2 py-0.5 bg-admin-primary/10 border border-admin-primary/30 text-admin-primary text-[11px] font-bold rounded-sm">
+                            <span className="px-2 py-1 bg-admin-primary/10 border border-admin-primary/30 text-admin-primary text-sm font-bold rounded-sm">
                                 {roomType}
                             </span>
                         </div>
-                        <div className="flex items-center gap-4 text-[11px] text-gray-500 font-mono">
+                        <div className="flex items-center gap-4 text-sm text-gray-500 font-mono">
                             <span className="flex items-center gap-1">
-                                <span className="w-1 h-1 bg-admin-primary rounded-full" />
+                                <span className="w-1.5 h-1.5 bg-admin-primary rounded-full" />
                                 SECURE_CHANNEL: ACTIVE
                             </span>
                             <span>ID: </span>
@@ -49,7 +49,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ roomName, roomType, isCo
                 </div>
 
                 <div className="flex items-center gap-2">
-                    <button onClick={onRefresh} className="p-2 border shrink-0 border-admin-border/20 text-admin-primary hover:bg-admin-primary/10 transition-all text-xs">
+                    <button onClick={onRefresh} className="p-2.5 border shrink-0 border-admin-border/20 text-admin-primary hover:bg-admin-primary/10 transition-all text-sm">
                         CMD: RE_SYNC
                     </button>
                     <div className="h-8 w-px bg-admin-border/20 mx-2" />
@@ -61,7 +61,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ roomName, roomType, isCo
                         isFixed
                         confirmWord='delete'
                     >
-                        <button className="p-2 border border-admin-border/20 text-gray-400 hover:text-white transition-all text-xs">
+                        <button className="p-2.5 border border-admin-border/20 text-gray-400 hover:text-white transition-all text-sm">
                             TERMINATE
                         </button>
                     </AdminConfirmWrapper>
@@ -71,8 +71,8 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ roomName, roomType, isCo
             </div>
 
             {/* Bottom Telemetry Bar */}
-            <div className="bg-admin-primary/5 border-t border-admin-border/10 px-4 py-1 flex justify-between items-center">
-                <div className="flex gap-4 text-[10px] font-mono text-admin-primary/60">
+            <div className="bg-admin-primary/5 border-t border-admin-border/10 px-4 py-1.5 flex justify-between items-center">
+                <div className="flex gap-4 text-xs font-mono text-admin-primary/60">
                     <span>UPTIME: 12:44:02</span>
                     <span>PACKETS: 1.2k/s</span>
                     <span>BUFFER: 0ms</span>

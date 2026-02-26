@@ -94,29 +94,37 @@ export interface SocketConnectionStats {
   pendingMessages: number;
 }
 
+export type RoomTypeServer =
+  | "class"
+  | "guild"
+  | "mission"
+  | "leadership"
+  | "mastermind"
+  | "private";
+
 export interface RoomsTypes {
   status: "success";
-  fromCache: boolean;
+  fromCache?: boolean;
   total: number;
   result: number;
-  data: [
-    {
-      region: {
-        continent: string;
-        geo_scope: string;
-        language: "en" | "ka";
-      };
-      _id: string;
-      name: string;
-      description: string;
-      type: "private" | "public";
-      min_level: number;
-      required_consistency: number;
-      is_public: boolean;
-      created_by: string;
-      moderators: [];
-      created_at: Date;
-      updated_at: Date;
-    },
-  ];
+  data: Array<{
+    region: {
+      continent: string;
+      geo_scope?: string;
+      language?: string;
+      subregion?: string;
+      country?: string;
+    };
+    _id: string;
+    name: string;
+    description?: string;
+    type: RoomTypeServer;
+    min_level: number;
+    required_consistency?: number;
+    is_public: boolean;
+    created_by: string;
+    moderators: string[];
+    created_at: Date;
+    updated_at: Date;
+  }>;
 }

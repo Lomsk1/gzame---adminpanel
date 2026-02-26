@@ -5,6 +5,7 @@ import { io, Socket } from "socket.io-client";
 import type { ChatMessage } from "../types/chat/chat";
 import { BASE_URL } from "../config/env.config";
 import useUserStore from "../store/user/user";
+import { getRoomMessages } from "../features/chat/chats.loaders";
 
 export const useChatSocket = (roomId: string | null) => {
   // User data
@@ -24,10 +25,13 @@ export const useChatSocket = (roomId: string | null) => {
   const [error, setError] = useState<string | null>(null);
   const [onlineUsers, setOnlineUsers] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [hasMoreOlder, setHasMoreOlder] = useState(true);
+  const [loadingOlder, setLoadingOlder] = useState(false);
 
   // Refs
   const socketRef = useRef<Socket | null>(null);
   const roomIdRef = useRef<string | null>(roomId);
+  const messagesRef = useRef<ChatMessage[]>([]);
   const typingTimeoutsRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(
     new Map(),
   );
@@ -36,6 +40,11 @@ export const useChatSocket = (roomId: string | null) => {
   useEffect(() => {
     roomIdRef.current = roomId;
   }, [roomId]);
+
+  // Keep messages ref in sync for loadOlderMessages
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
 
   // Event handlers
   const handleConnectError = useCallback((err: Error) => {
@@ -52,9 +61,11 @@ export const useChatSocket = (roomId: string | null) => {
     console.log("🚪 Room joined:", data.roomName);
 
     if (data.roomId === roomIdRef.current) {
-      setMessages(data.history || []);
+      const history = data.history || [];
+      setMessages(history);
       setOnlineUsers(data.onlineUsers || []);
       setUnreadCount(0);
+      setHasMoreOlder(history.length >= 30);
     }
   }, []);
 
@@ -115,22 +126,29 @@ export const useChatSocket = (roomId: string | null) => {
 
   const handleUserJoined = useCallback((data: any) => {
     if (data.roomId !== roomIdRef.current) return;
+    const user = data.user;
+    const id = user?._id ?? user?.id;
 
     setOnlineUsers((prev) => {
-      const exists = prev.find((u) => u._id === data.user._id);
-      return exists ? prev : [...prev, data.user];
+      const exists = prev.find((u) => (u._id ?? (u as any).id) === id);
+      return exists ? prev : [...prev, { ...user, _id: id }];
     });
   }, []);
 
   const handleUserLeft = useCallback((data: any) => {
     if (data.roomId !== roomIdRef.current) return;
+    const id = data.user?._id ?? data.user?.id;
 
-    setOnlineUsers((prev) => prev.filter((u) => u._id !== data.user._id));
+    setOnlineUsers((prev) => prev.filter((u) => (u._id ?? (u as any).id) !== id));
   }, []);
 
   const handleError = useCallback((errorData: any) => {
+    const msg = errorData?.message ?? errorData?.error ?? String(errorData);
+    if (msg.toLowerCase().includes("room not found")) {
+      return;
+    }
     console.error("Socket error:", errorData);
-    setError(errorData.message || "Socket error");
+    setError(msg || "Socket error");
   }, []);
 
   // Setup socket connection
@@ -185,6 +203,10 @@ export const useChatSocket = (roomId: string | null) => {
     socket.on("user_typing", handleUserTyping);
     socket.on("user_joined", handleUserJoined);
     socket.on("user_left", handleUserLeft);
+    socket.on("message_deleted", (data: { messageId: string; roomId?: string }) => {
+      if (data.roomId && data.roomId !== roomIdRef.current) return;
+      setMessages((prev) => prev.filter((m) => m._id !== data.messageId));
+    });
     socket.on("error", handleError);
 
     // Set initial connection state
@@ -370,6 +392,26 @@ export const useChatSocket = (roomId: string | null) => {
     setError(null);
   }, []);
 
+  const loadOlderMessages = useCallback(async () => {
+    const rId = roomIdRef.current;
+    const list = messagesRef.current;
+    const beforeId = list[0]?._id;
+    if (!rId || !beforeId || loadingOlder || !hasMoreOlder) return;
+    setLoadingOlder(true);
+    try {
+      const res = await getRoomMessages(rId, { limit: 30, before: beforeId });
+      const older = res.data || [];
+      if (older.length > 0) {
+        setMessages((prev) => [...older, ...prev]);
+      }
+      setHasMoreOlder(res.hasMore ?? false);
+    } catch (err) {
+      console.error("Failed to load older room messages:", err);
+    } finally {
+      setLoadingOlder(false);
+    }
+  }, [loadingOlder, hasMoreOlder]);
+
   // Component cleanup
   useEffect(() => {
     return () => {
@@ -401,6 +443,8 @@ export const useChatSocket = (roomId: string | null) => {
     onlineUsers,
     error,
     unreadCount,
+    hasMoreOlder,
+    loadingOlder,
 
     // Methods
     sendMessage,
@@ -410,6 +454,7 @@ export const useChatSocket = (roomId: string | null) => {
     deleteMessage,
     clearUnread,
     clearError,
+    loadOlderMessages,
 
     // Derived state
     connectionStatus,

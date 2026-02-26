@@ -20,6 +20,7 @@ export async function chatActions({ request }: { request: Request }) {
       await axiosAuth.post("/api/v1/rooms/admin/create", {
         ...payload,
         created_by,
+        moderators: payload.moderators ?? [],
       });
       return { success: true, message: "NEW_NODE_INITIALIZED" };
     }

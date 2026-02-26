@@ -28,6 +28,9 @@ import AdminChatPage from "./pages/chat/page";
 import { chatsRoomsLoader } from "./features/chat/chats.loaders";
 import { GlobalRouteError } from "./components/error/element";
 import { chatActions } from "./features/chat/chat.actions";
+import SpecialistsPage from "./pages/specialists/page";
+import { specialistsPageLoader } from "./features/specialists/specialists.loaders";
+import { specialistsPageAction } from "./features/specialists/specialists-page.actions";
 
 
 export const router = createBrowserRouter([
@@ -103,6 +106,12 @@ export const router = createBrowserRouter([
         element: <AdminChatPage />,
         loader: chatsRoomsLoader,
         action: chatActions
+      },
+      {
+        path: "specialists",
+        element: <SpecialistsPage />,
+        loader: specialistsPageLoader,
+        action: specialistsPageAction
       }
     ]
   },

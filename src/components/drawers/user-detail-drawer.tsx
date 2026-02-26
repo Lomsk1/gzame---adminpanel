@@ -66,12 +66,13 @@ export const UserDetailDrawer = ({ user, onClose }: UserDetailDrawerProps) => {
     );
 
     const latestSession = response?.data?.[0];
+    const percentageScores = latestSession?.percentageScores ?? {};
 
     const scoreMatrix = Object.entries(PSYCHOTYPE_CONFIG)
         .filter(([key]) => key !== 'PENDING')
         .map(([key, config]) => ({
             label: key as Exclude<Psychotype, 'PENDING'>,
-            val: response?.data[0]['percentageScores'][key as Exclude<Psychotype, 'PENDING'>] || 0,
+            val: percentageScores[key as Exclude<Psychotype, 'PENDING'>] ?? 0,
             color: config.bg
         }));
 
@@ -205,8 +206,8 @@ export const UserDetailDrawer = ({ user, onClose }: UserDetailDrawerProps) => {
                         <div className="space-y-1">
                             <div className="flex items-center gap-2">
                                 <h2 className="text-xl font-black uppercase tracking-tighter italic text-admin-primary">User Dossier</h2>
-                                <span className={`text-[8px] px-1.5 py-0.5 rounded border font-black tracking-widest ${user.role === 'admin' ? 'bg-admin-accent/20 border-admin-accent text-admin-accent' : 'bg-admin-text-dim/10 border-admin-border text-admin-text-dim'}`}>
-                                    {user.role.toUpperCase()}
+                                <span className={`text-[8px] px-1.5 py-0.5 rounded border font-black tracking-widest ${user?.role === 'admin' ? 'bg-admin-accent/20 border-admin-accent text-admin-accent' : 'bg-admin-text-dim/10 border-admin-border text-admin-text-dim'}`}>
+                                    {(user?.role ?? "user").toUpperCase()}
                                 </span>
                             </div>
                             <p className="text-[10px] font-mono text-admin-text-dim">{user._id} / IP: {user.signup_ip || "0.0.0.0"}</p>
@@ -224,16 +225,16 @@ export const UserDetailDrawer = ({ user, onClose }: UserDetailDrawerProps) => {
                                 <div className="space-y-3">
                                     <div className="p-4 rounded-xl bg-admin-primary/5 border border-admin-primary/20">
                                         <p className="text-[8px] font-black text-admin-primary uppercase mb-2">Gemini_Decision_Log:</p>
-                                        <p className="text-[11px] text-admin-text italic leading-relaxed">"{latestSession.gemini_decisionReason}"</p>
+                                        <p className="text-[11px] text-admin-text italic leading-relaxed">"{latestSession?.gemini_decisionReason ?? "—"}"</p>
                                     </div>
                                     <div className="grid grid-cols-2 gap-2">
                                         <div className="p-2 bg-admin-card border border-admin-border rounded flex flex-col items-center">
                                             <span className="text-[7px] text-admin-text-dim uppercase font-bold">Class</span>
-                                            <span className="text-xs font-black text-admin-accent">{latestSession.finalPsychotype}</span>
+                                            <span className="text-xs font-black text-admin-accent">{latestSession?.finalPsychotype ?? "—"}</span>
                                         </div>
                                         <div className="p-2 bg-admin-card border border-admin-border rounded flex flex-col items-center">
                                             <span className="text-[7px] text-admin-text-dim uppercase font-bold">Combined</span>
-                                            <span className="text-xs font-black text-admin-text">{latestSession.isCombinedClass ? "YES" : "NO"}</span>
+                                            <span className="text-xs font-black text-admin-text">{latestSession?.isCombinedClass ? "YES" : "NO"}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -291,7 +292,7 @@ export const UserDetailDrawer = ({ user, onClose }: UserDetailDrawerProps) => {
                             </div>
                             <div className="p-4 rounded-xl bg-admin-bg border border-admin-border">
                                 <label className="text-[8px] font-black text-admin-primary uppercase mb-1 block">Working Space</label>
-                                <p className="text-xs text-admin-text-dim italic leading-relaxed">"{user.profile.workingSpace || "No directive established."}"</p>
+                                <p className="text-xs text-admin-text-dim italic leading-relaxed">"{user.profile?.workingSpace || "No directive established."}"</p>
                             </div>
                         </section>
 
@@ -321,7 +322,7 @@ export const UserDetailDrawer = ({ user, onClose }: UserDetailDrawerProps) => {
 
                         {/* --- ACTIONS --- */}
                         <div className="pt-6 space-y-3">
-                            {user.role === "user" && (
+                            {user?.role === "user" && (
                                 <AdminConfirmWrapper
                                     title="Elevate Permissions"
                                     description={`You are about to grant ${user.nickname} administrative privileges. This entity will be able to modify system parameters.`}
@@ -424,7 +425,7 @@ export const UserDetailDrawer = ({ user, onClose }: UserDetailDrawerProps) => {
                                         <span className="text-[8px] animate-pulse">SYNCING_MATRIX...</span>
                                     </div>
                                 ) : (
-                                    userActivity?.data.hourlyActivity.map((density: number, i: number) => {
+                                    (userActivity?.data?.hourlyActivity ?? []).map((density: number, i: number) => {
                                         const opacity = Math.min(density * 0.2 + 0.1, 1);
 
                                         return (

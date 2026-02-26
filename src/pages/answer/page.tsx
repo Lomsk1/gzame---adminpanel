@@ -162,7 +162,7 @@ function AnswerRow({ session }: { session: AnswerSession }) {
                     </div>
 
                     <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
-                        {Object.entries(session.percentageScores).map(([key, val]) => (
+                        {Object.entries(session?.percentageScores ?? {}).map(([key, val]) => (
                             <div key={key} className="space-y-1.5">
                                 <div className="flex justify-between text-[9px] font-black uppercase text-admin-text-dim">
                                     <span>{key.slice(0, 3)}</span>

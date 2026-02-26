@@ -7,6 +7,32 @@ const getAuthToken = () => {
   return token ? token : null;
 };
 
+const INVALID_SIGNATURE_PATTERNS = [
+  "invalid signature",
+  "jwt signature",
+  "invalid token",
+  "jwt malformed",
+  "invalid algorithm",
+  "jwt expired",
+  "invalid jwt",
+];
+
+function isInvalidSignatureError(error: unknown): boolean {
+  const message =
+    (axios.isAxiosError(error) && (error.response?.data?.message ?? error.message)) ||
+    (error instanceof Error && error.message) ||
+    String(error);
+  const lower = message.toLowerCase();
+  return INVALID_SIGNATURE_PATTERNS.some((p) => lower.includes(p));
+}
+
+function clearAuthAndRedirect(): void {
+  Cookies.remove("auth_token");
+  if (!window.location.pathname.includes("/login")) {
+    window.location.href = "/login";
+  }
+}
+
 /* Auth */
 
 const axiosInstance = axios.create({
@@ -25,21 +51,26 @@ axiosInstance.interceptors.request.use((config) => {
   return config;
 });
 
+const authResponseInterceptor = (
+  response: axios.AxiosResponse
+): axios.AxiosResponse => response;
+
+const authResponseErrorInterceptor = (error: axios.AxiosError): Promise<never> => {
+  const shouldClearAuth =
+    error.response?.status === 401 || isInvalidSignatureError(error);
+
+  if (shouldClearAuth) {
+    clearAuthAndRedirect();
+  }
+
+  return Promise.reject(error);
+};
+
 const axiosAuth = axiosInstance;
 
 axiosAuth.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      Cookies.remove("auth_token");
-
-      // Only redirect if NOT already on the login page
-      if (!window.location.pathname.includes("/login")) {
-        window.location.href = "/login";
-      }
-    }
-    return Promise.reject(error);
-  }
+  authResponseInterceptor,
+  authResponseErrorInterceptor
 );
 
 export default axiosAuth;
@@ -59,6 +90,11 @@ axiosMultipartAuth.interceptors.request.use((config) => {
   }
   return config;
 });
+
+axiosMultipartAuth.interceptors.response.use(
+  authResponseInterceptor,
+  authResponseErrorInterceptor
+);
 
 /* Publics */
 
