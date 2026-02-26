@@ -12,12 +12,12 @@ import { MessageInput } from "../../components/chat/message-input";
 import { AvatarMenu } from "../../components/chat/avatar-menu";
 import type { ChatMessage } from "../../types/chat/chat";
 import {
-  getOrCreateDirectConversation,
-  getDirectMessages,
-  getDirectConversations,
-  sendDirectMessage as sendDirectMessageApi,
-  type DirectMessagePayload,
-  type DirectConversationListItem,
+    getOrCreateDirectConversation,
+    getDirectMessages,
+    getDirectConversations,
+    sendDirectMessage as sendDirectMessageApi,
+    type DirectMessagePayload,
+    type DirectConversationListItem,
 } from "../../features/chat/direct.api";
 import { deleteRoom } from "../../features/chat/chats.loaders";
 import { DirectConversationList } from "../../components/chat/direct-list";
@@ -283,22 +283,20 @@ export default function AdminChatPage() {
                             setViewMode("rooms");
                             handleBackFromDirect();
                         }}
-                        className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-colors ${
-                            viewMode === "rooms"
+                        className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-colors ${viewMode === "rooms"
                                 ? "bg-admin-primary/20 text-admin-primary border border-admin-primary/40"
                                 : "text-admin-text-dim hover:bg-white/5 border border-transparent"
-                        }`}
+                            }`}
                     >
                         Rooms
                     </button>
                     <button
                         type="button"
                         onClick={() => setViewMode("direct")}
-                        className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-colors ${
-                            viewMode === "direct"
+                        className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-colors ${viewMode === "direct"
                                 ? "bg-admin-primary/20 text-admin-primary border border-admin-primary/40"
                                 : "text-admin-text-dim hover:bg-white/5 border border-transparent"
-                        }`}
+                            }`}
                     >
                         Direct
                     </button>
@@ -380,11 +378,11 @@ export default function AdminChatPage() {
                                     <div className="p-4 border-t border-admin-border/30 bg-black/40 backdrop-blur-sm">
                                         <MessageInput
                                             onSubmit={handleSendDirectMessage}
-                                            onTypingStart={() => {}}
-                                            onTypingStop={() => {}}
+                                            onTypingStart={() => { }}
+                                            onTypingStop={() => { }}
                                             isConnected={!directSending}
                                             replyTo={null}
-                                            onCancelReply={() => {}}
+                                            onCancelReply={() => { }}
                                         />
                                     </div>
                                 </>

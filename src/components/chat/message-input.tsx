@@ -11,7 +11,7 @@ interface MessageInputProps {
         messageId: string;
         username: string;
         preview: string;
-    };
+    } | null;
     onCancelReply?: () => void;
 }
 

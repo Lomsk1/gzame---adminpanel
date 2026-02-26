@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from "react";
 
 export interface ChatUserMinimal {
   _id: string;
-  nickname: string;
+  nickname?: string;
   avatar_url?: string;
 }
 

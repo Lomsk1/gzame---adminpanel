@@ -66,7 +66,8 @@ export const UserDetailDrawer = ({ user, onClose }: UserDetailDrawerProps) => {
     );
 
     const latestSession = response?.data?.[0];
-    const percentageScores = latestSession?.percentageScores ?? {};
+    const percentageScores: Partial<Record<Exclude<Psychotype, "PENDING">, number>> =
+      latestSession?.percentageScores ?? {};
 
     const scoreMatrix = Object.entries(PSYCHOTYPE_CONFIG)
         .filter(([key]) => key !== 'PENDING')

@@ -1,4 +1,5 @@
 import axios from "axios";
+import type { AxiosResponse, AxiosError } from "axios";
 import Cookies from "js-cookie";
 import { BASE_URL } from "../config/env.config";
 
@@ -52,10 +53,10 @@ axiosInstance.interceptors.request.use((config) => {
 });
 
 const authResponseInterceptor = (
-  response: axios.AxiosResponse
-): axios.AxiosResponse => response;
+  response: AxiosResponse
+): AxiosResponse => response;
 
-const authResponseErrorInterceptor = (error: axios.AxiosError): Promise<never> => {
+const authResponseErrorInterceptor = (error: AxiosError): Promise<never> => {
   const shouldClearAuth =
     error.response?.status === 401 || isInvalidSignatureError(error);
 
