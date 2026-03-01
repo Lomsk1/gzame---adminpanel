@@ -16,7 +16,7 @@ export const categoriesAction = async ({ request }: ActionFunctionArgs): Promise
 
     const payloadRaw = formData.get("payload") as string;
     if (!payloadRaw) return { success: false, error: "Missing payload." };
-    const payload = JSON.parse(payloadRaw) as { title: { en: string; ka: string } };
+    const payload = JSON.parse(payloadRaw) as { title: { en: string; ka: string; ru?: string } };
 
     if (intent === "create") {
       await axiosAuth.post("/api/v1/specialists/categories", payload);

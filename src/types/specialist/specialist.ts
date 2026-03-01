@@ -1,7 +1,7 @@
-/** Category for specialists (e.g. "Coach", "Therapist") - title in en/ka */
+/** Category for specialists (e.g. "Coach", "Therapist") - title in en/ka/ru */
 export interface SpecialistCategory {
   _id: string;
-  title: { en: string; ka: string };
+  title: { en: string; ka: string; ru?: string };
   created_at?: string;
   updated_at?: string;
 }

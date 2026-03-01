@@ -4,11 +4,11 @@ import { AdminInput } from "../ui/input-form";
 import type { Psychotype } from "../../types/user/user";
 import { AdminTextArea } from "../ui/text-area-form";
 
-// Types matching your Quest Schema
+// Types matching your Quest Schema (en, ka required; ru optional for i18n)
 export interface QuestFormData {
     _id?: string;
-    title: { ka: string; en: string };
-    description: { ka: string; en: string };
+    title: { ka: string; en: string; ru?: string };
+    description: { ka: string; en: string; ru?: string };
     psychotype: Psychotype[];
     category: "mental" | "stalking" | "action";
     expReward: number;
@@ -29,8 +29,8 @@ const PSYCHOTYPES: Psychotype[] = ["WARRIOR", "SHAMAN", "ARCHITECT", "STALKER", 
 
 export const QuestEditorDrawer = ({ config, onClose, onSave, isSubmitting }: Props) => {
     const [form, setForm] = useState<QuestFormData>({
-        title: config?.title || { ka: "", en: "" },
-        description: config?.description || { ka: "", en: "" },
+        title: config?.title || { ka: "", en: "", ru: "" },
+        description: config?.description || { ka: "", en: "", ru: "" },
         psychotype: config?.psychotype || [],
         category: config?.category || "mental",
         expReward: config?.expReward ?? 10,
@@ -108,8 +108,10 @@ export const QuestEditorDrawer = ({ config, onClose, onSave, isSubmitting }: Pro
                     <div className="grid grid-cols-1 gap-4">
                         <AdminInput label="EN_Title" value={form.title.en} onChange={(val) => setForm({ ...form, title: { ...form.title, en: val as string } })} />
                         <AdminInput label="KA_Title" value={form.title.ka} onChange={(val) => setForm({ ...form, title: { ...form.title, ka: val as string } })} />
+                        <AdminInput label="RU_Title" value={form.title.ru ?? ""} onChange={(val) => setForm({ ...form, title: { ...form.title, ru: (val as string) || undefined } })} />
                         <AdminTextArea label="EN_Description" value={form.description.en} onChange={(val) => setForm({ ...form, description: { ...form.description, en: val as string } })} />
                         <AdminTextArea label="KA_Description" value={form.description.ka} onChange={(val) => setForm({ ...form, description: { ...form.description, ka: val as string } })} />
+                        <AdminTextArea label="RU_Description" value={form.description.ru ?? ""} onChange={(val) => setForm({ ...form, description: { ...form.description, ru: (val as string) || undefined } })} />
                     </div>
                 </div>
 

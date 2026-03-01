@@ -6,16 +6,23 @@ import type { SpecialistCategory } from "../../types/specialist/specialist";
 interface Props {
   category: SpecialistCategory | null;
   onClose: () => void;
-  onSave: (data: { title: { en: string; ka: string } }) => void;
+  onSave: (data: { title: { en: string; ka: string; ru?: string } }) => void;
   isSubmitting?: boolean;
 }
 
 export const CategoryEditorDrawer = ({ category, onClose, onSave, isSubmitting }: Props) => {
   const [titleEn, setTitleEn] = useState(category?.title?.en ?? "");
   const [titleKa, setTitleKa] = useState(category?.title?.ka ?? "");
+  const [titleRu, setTitleRu] = useState(category?.title?.ru ?? "");
 
   const handleSave = () => {
-    onSave({ title: { en: titleEn.trim(), ka: titleKa.trim() } });
+    onSave({
+      title: {
+        en: titleEn.trim(),
+        ka: titleKa.trim(),
+        ...(titleRu.trim() && { ru: titleRu.trim() }),
+      },
+    });
   };
 
   const footer = (
@@ -54,6 +61,14 @@ export const CategoryEditorDrawer = ({ category, onClose, onSave, isSubmitting }
           value={titleKa}
           onChange={(v) => setTitleKa(String(v ?? ""))}
           placeholder="e.g. მწვრთნელი"
+          labelClassName={inputLabelClass}
+          inputClassName={inputFieldClass}
+        />
+        <AdminInput
+          label="Title (RU)"
+          value={titleRu}
+          onChange={(v) => setTitleRu(String(v ?? ""))}
+          placeholder="e.g. Коуч"
           labelClassName={inputLabelClass}
           inputClassName={inputFieldClass}
         />

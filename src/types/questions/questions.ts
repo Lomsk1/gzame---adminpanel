@@ -8,6 +8,7 @@ export interface QuestionsTypes {
       title: {
         en: string;
         ka: string;
+        ru?: string;
       };
       _id: string;
       created_at: Date;
@@ -17,6 +18,7 @@ export interface QuestionsTypes {
           title: {
             ka: string;
             en: string;
+            ru?: string;
           };
           scores: {
             WARRIOR: number;
