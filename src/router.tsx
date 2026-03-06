@@ -31,6 +31,8 @@ import { chatActions } from "./features/chat/chat.actions";
 import SpecialistsPage from "./pages/specialists/page";
 import { specialistsPageLoader } from "./features/specialists/specialists.loaders";
 import { specialistsPageAction } from "./features/specialists/specialists-page.actions";
+import BookingClicksPage from "./pages/specialists/booking-clicks";
+import { bookingClicksPageLoader } from "./features/specialists/booking-clicks.loaders";
 
 
 export const router = createBrowserRouter([
@@ -112,6 +114,11 @@ export const router = createBrowserRouter([
         element: <SpecialistsPage />,
         loader: specialistsPageLoader,
         action: specialistsPageAction
+      },
+      {
+        path: "specialists/booking-clicks",
+        element: <BookingClicksPage />,
+        loader: bookingClicksPageLoader
       }
     ]
   },
