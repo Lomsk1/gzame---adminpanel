@@ -35,6 +35,7 @@ import BookingClicksPage from "./pages/specialists/booking-clicks";
 import { bookingClicksPageLoader } from "./features/specialists/booking-clicks.loaders";
 import EarlyAccessPage from "./pages/early-access/page";
 import { earlyAccessPageLoader } from "./features/early-access/early-access.loaders";
+import NotificationBroadcastPage from "./pages/notification-broadcast/page";
 
 
 export const router = createBrowserRouter([
@@ -126,6 +127,10 @@ export const router = createBrowserRouter([
         path: "early-access",
         element: <EarlyAccessPage />,
         loader: earlyAccessPageLoader,
+      },
+      {
+        path: "notification-broadcast",
+        element: <NotificationBroadcastPage />,
       },
     ]
   },
