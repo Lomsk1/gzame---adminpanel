@@ -14,6 +14,7 @@ export const CategoryEditorDrawer = ({ category, onClose, onSave, isSubmitting }
   const [titleEn, setTitleEn] = useState(category?.title?.en ?? "");
   const [titleKa, setTitleKa] = useState(category?.title?.ka ?? "");
   const [titleRu, setTitleRu] = useState(category?.title?.ru ?? "");
+  const [titleJa, setTitleJa] = useState(category?.title?.ja ?? "");
 
   const handleSave = () => {
     onSave({
@@ -21,6 +22,7 @@ export const CategoryEditorDrawer = ({ category, onClose, onSave, isSubmitting }
         en: titleEn.trim(),
         ka: titleKa.trim(),
         ...(titleRu.trim() && { ru: titleRu.trim() }),
+        ...(titleJa.trim() && { ja: titleJa.trim() }),
       },
     });
   };
