@@ -146,7 +146,7 @@ export const UserDetailDrawer = ({ user, onClose }: UserDetailDrawerProps) => {
 
         try {
             const actionUrl = actionUrlMessage.trim() || "/notifications";
-            await axiosAuth.post('/api/v1/notification', {
+            const res = await axiosAuth.post('/api/v1/notification', {
                 user_id: user._id,
                 sender_id: adminStore?._id,
                 content: directiveMessage.trim(),
@@ -154,12 +154,32 @@ export const UserDetailDrawer = ({ user, onClose }: UserDetailDrawerProps) => {
                 priority: priority,
                 actionUrl,
             });
+            const push = (res.data as { push?: { sent?: number; failed?: number }; pushWarning?: string })?.push;
+            const sent = Number(push?.sent ?? 0);
+            const failed = Number(push?.failed ?? 0);
+            const pushWarning = (res.data as { pushWarning?: string })?.pushWarning;
 
-            toast.success("SIGNAL_RECEIVED", { id: toastId });
+            if (sent > 0) {
+                toast.success("SIGNAL_RECEIVED", {
+                    id: toastId,
+                    description: `Push delivered to ${sent} device${sent > 1 ? "s" : ""}.`,
+                });
+            } else if (pushWarning) {
+                toast.success("SIGNAL_RECEIVED", {
+                    id: toastId,
+                    description: `${pushWarning} In-app notification was still created.`,
+                });
+            } else if (failed > 0) {
+                toast.success("SIGNAL_RECEIVED", {
+                    id: toastId,
+                    description: `Notification saved, but push failed for ${failed} device${failed > 1 ? "s" : ""}.`,
+                });
+            } else {
+                toast.success("SIGNAL_RECEIVED", { id: toastId });
+            }
             setShowDirectiveModal(false);
             setDirectiveMessage("");
             setActionUrlMessage("")
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (err: unknown) {
             const msg =
                 err &&
