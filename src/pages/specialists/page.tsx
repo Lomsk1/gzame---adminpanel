@@ -44,7 +44,7 @@ export default function SpecialistsPage() {
     }
   }, [fetcher.state, fetcher.data, revalidator, fetcher]);
 
-  const handleSaveCategory = (payload: { title: { en: string; ka: string } }) => {
+  const handleSaveCategory = (payload: { title: { en: string; ka: string; ru?: string; ja?: string } }) => {
     fetcher.submit(
       {
         type: "category",

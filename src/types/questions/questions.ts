@@ -9,6 +9,7 @@ export interface QuestionsTypes {
         en: string;
         ka: string;
         ru?: string;
+        ja?: string;
       };
       _id: string;
       created_at: Date;
@@ -19,6 +20,7 @@ export interface QuestionsTypes {
             ka: string;
             en: string;
             ru?: string;
+            ja?: string;
           };
           scores: {
             WARRIOR: number;

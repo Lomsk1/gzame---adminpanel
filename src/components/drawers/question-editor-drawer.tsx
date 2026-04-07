@@ -8,13 +8,13 @@ import { AdminConfirmWrapper } from "../wrapper/wrapper";
 export type Psychotype = "WARRIOR" | "SHAMAN" | "ARCHITECT" | "STALKER" | "SPARK" | "ANOMALY";
 
 export interface Option {
-    title: { ka: string; en: string; ru?: string };
+    title: { ka: string; en: string; ru?: string; ja?: string };
     scores: Record<Psychotype, number | string>;
     sequence: number | string;
 }
 
 export interface Question {
-    title: { ka: string; en: string; ru?: string };
+    title: { ka: string; en: string; ru?: string; ja?: string };
     sequence?: number | string;
     isActive: boolean;
     options: Option[];
@@ -30,7 +30,7 @@ interface Props {
 // --- Helpers ---
 
 const createNewOption = (sequence: number): Option => ({
-    title: { ka: "", en: "", ru: "" },
+    title: { ka: "", en: "", ru: "", ja: "" },
     scores: {
         WARRIOR: 0, SHAMAN: 0, ARCHITECT: 0, STALKER: 0, SPARK: 0, ANOMALY: 0
     },
@@ -39,7 +39,9 @@ const createNewOption = (sequence: number): Option => ({
 
 export const QuestionEditorDrawer = ({ config, onClose, onSave, isSubmitting }: Props) => {
     const [form, setForm] = useState<Question>({
-        title: config?.title ? { ka: config.title.ka, en: config.title.en, ru: config.title.ru ?? "" } : { ka: "", en: "", ru: "" },
+        title: config?.title
+            ? { ka: config.title.ka, en: config.title.en, ru: config.title.ru ?? "", ja: config.title.ja ?? "" }
+            : { ka: "", en: "", ru: "", ja: "" },
         sequence: config?.sequence ?? 1,
         isActive: config?.isActive ?? true,
         options: config?.options
@@ -143,6 +145,11 @@ export const QuestionEditorDrawer = ({ config, onClose, onSave, isSubmitting }: 
                         value={form.title.ru ?? ""}
                         onChange={(val) => setForm({ ...form, title: { ...form.title, ru: (val as string) || undefined } })}
                     />
+                    <AdminInput
+                        label="JA_Title"
+                        value={form.title.ja ?? ""}
+                        onChange={(val) => setForm({ ...form, title: { ...form.title, ja: (val as string) || undefined } })}
+                    />
                 </div>
 
                 {/* Response Matrix */}
@@ -217,6 +224,15 @@ export const QuestionEditorDrawer = ({ config, onClose, onSave, isSubmitting }: 
                                     onChange={(val) => {
                                         const next = [...form.options];
                                         next[idx].title.ru = (val as string) || undefined;
+                                        setForm({ ...form, options: next });
+                                    }}
+                                />
+                                <AdminInput
+                                    label="日本語"
+                                    value={opt.title.ja ?? ""}
+                                    onChange={(val) => {
+                                        const next = [...form.options];
+                                        next[idx].title.ja = (val as string) || undefined;
                                         setForm({ ...form, options: next });
                                     }}
                                 />

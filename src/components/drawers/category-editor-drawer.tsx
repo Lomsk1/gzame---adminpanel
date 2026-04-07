@@ -6,7 +6,7 @@ import type { SpecialistCategory } from "../../types/specialist/specialist";
 interface Props {
   category: SpecialistCategory | null;
   onClose: () => void;
-  onSave: (data: { title: { en: string; ka: string; ru?: string } }) => void;
+  onSave: (data: { title: { en: string; ka: string; ru?: string; ja?: string } }) => void;
   isSubmitting?: boolean;
 }
 
@@ -69,6 +69,14 @@ export const CategoryEditorDrawer = ({ category, onClose, onSave, isSubmitting }
           value={titleRu}
           onChange={(v) => setTitleRu(String(v ?? ""))}
           placeholder="e.g. Коуч"
+          labelClassName={inputLabelClass}
+          inputClassName={inputFieldClass}
+        />
+        <AdminInput
+          label="Title (JA)"
+          value={titleJa}
+          onChange={(v) => setTitleJa(String(v ?? ""))}
+          placeholder="e.g. コーチ"
           labelClassName={inputLabelClass}
           inputClassName={inputFieldClass}
         />

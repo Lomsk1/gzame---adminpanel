@@ -33,6 +33,8 @@ import { specialistsPageLoader } from "./features/specialists/specialists.loader
 import { specialistsPageAction } from "./features/specialists/specialists-page.actions";
 import BookingClicksPage from "./pages/specialists/booking-clicks";
 import { bookingClicksPageLoader } from "./features/specialists/booking-clicks.loaders";
+import EarlyAccessPage from "./pages/early-access/page";
+import { earlyAccessPageLoader } from "./features/early-access/early-access.loaders";
 
 
 export const router = createBrowserRouter([
@@ -119,7 +121,12 @@ export const router = createBrowserRouter([
         path: "specialists/booking-clicks",
         element: <BookingClicksPage />,
         loader: bookingClicksPageLoader
-      }
+      },
+      {
+        path: "early-access",
+        element: <EarlyAccessPage />,
+        loader: earlyAccessPageLoader,
+      },
     ]
   },
 ]);

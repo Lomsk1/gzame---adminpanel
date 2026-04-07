@@ -22,7 +22,7 @@ async function runAction(
     }
     const payloadRaw = formData.get("payload") as string;
     if (!payloadRaw) return { success: false, error: "Missing payload." };
-    const payload = JSON.parse(payloadRaw) as { title: { en: string; ka: string } };
+    const payload = JSON.parse(payloadRaw) as { title: { en: string; ka: string; ru?: string; ja?: string } };
     if (intent === "create") {
       await axiosAuth.post("/api/v1/specialists/categories", payload);
       return { success: true, message: "Category created." };

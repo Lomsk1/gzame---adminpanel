@@ -104,6 +104,39 @@ export const UserDetailDrawer = ({ user, onClose }: UserDetailDrawerProps) => {
         }
     };
 
+    const handleDeleteUser = async () => {
+        setIsProcessing(true);
+        const toastId = toast.loading("PURGING_USER_DATA...");
+        try {
+            await axiosAuth.delete(`/api/v1/auth/users/${user._id}`);
+            revalidator.revalidate();
+            toast.success("USER_DELETED", {
+                id: toastId,
+                description: "User and linked records were removed from the database.",
+            });
+            onClose();
+        } catch (err: unknown) {
+            const msg =
+                err &&
+                typeof err === "object" &&
+                "response" in err &&
+                err.response &&
+                typeof err.response === "object" &&
+                "data" in err.response &&
+                err.response.data &&
+                typeof err.response.data === "object" &&
+                "message" in err.response.data
+                    ? String((err.response.data as { message?: string }).message)
+                    : undefined;
+            toast.error("DELETE_FAILED", {
+                id: toastId,
+                description: msg || "Request failed.",
+            });
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
     /* Notification Handler */
     const handleSendNotification = async () => {
         if (!directiveMessage.trim()) return toast.error("DIRECTIVE_REQUIRED");
@@ -112,13 +145,14 @@ export const UserDetailDrawer = ({ user, onClose }: UserDetailDrawerProps) => {
         const toastId = toast.loading("TRANSMITTING_SIGNAL...");
 
         try {
+            const actionUrl = actionUrlMessage.trim() || "/notifications";
             await axiosAuth.post('/api/v1/notification', {
                 user_id: user._id,
                 sender_id: adminStore?._id,
-                content: directiveMessage,
+                content: directiveMessage.trim(),
                 type: 'SYSTEM_DIRECTIVE',
                 priority: priority,
-                actionUrl: actionUrlMessage
+                actionUrl,
             });
 
             toast.success("SIGNAL_RECEIVED", { id: toastId });
@@ -126,8 +160,20 @@ export const UserDetailDrawer = ({ user, onClose }: UserDetailDrawerProps) => {
             setDirectiveMessage("");
             setActionUrlMessage("")
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        } catch (err) {
-            toast.error("SIGNAL_LOST", { id: toastId });
+        } catch (err: unknown) {
+            const msg =
+                err &&
+                typeof err === "object" &&
+                "response" in err &&
+                err.response &&
+                typeof err.response === "object" &&
+                "data" in err.response &&
+                err.response.data &&
+                typeof err.response.data === "object" &&
+                "message" in err.response.data
+                    ? String((err.response.data as { message?: string }).message)
+                    : "Request failed.";
+            toast.error("SIGNAL_LOST", { id: toastId, description: msg });
         } finally {
             setIsProcessing(false);
         }
@@ -336,6 +382,28 @@ export const UserDetailDrawer = ({ user, onClose }: UserDetailDrawerProps) => {
                                         className="w-full text-[10px] border-admin-accent/50 text-admin-accent hover:bg-admin-accent/10"
                                     >
                                         PROMOTE_TO_ADMIN
+                                    </ButtonComponent>
+                                </AdminConfirmWrapper>
+                            )}
+
+                            {user?.role === "user" && (
+                                <AdminConfirmWrapper
+                                    title="Permanent user deletion"
+                                    description={`Removes ${user.nickname} and all related data: profile (avatar on Cloudinary), quiz answers, activity logs, notifications, room messages they sent, read cursors, DEVI conversations and messages, direct message threads, active/completed quests, daily feels, specialist booking clicks. Chat rooms they created are kept; ownership is reassigned to another admin (or any user if no admin). Type DELETE to confirm.`}
+                                    confirmText="DELETE_USER"
+                                    confirmWord="DELETE"
+                                    variant="danger"
+                                    onConfirm={() => {
+                                        void handleDeleteUser();
+                                    }}
+                                    isLoading={isProcessing}
+                                    isFixed
+                                >
+                                    <ButtonComponent
+                                        variant="secondary"
+                                        className="w-full text-[10px] border-admin-error/50 text-admin-error hover:bg-admin-error/10"
+                                    >
+                                        PURGE_USER_AND_DATA
                                     </ButtonComponent>
                                 </AdminConfirmWrapper>
                             )}

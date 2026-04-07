@@ -11,11 +11,13 @@ export interface QuestsTypes {
         ka: string;
         en: string;
         ru?: string;
+        ja?: string;
       };
       description: {
         ka: string;
         en: string;
         ru?: string;
+        ja?: string;
       };
       _id: string;
       psychotype: Psychotype[];

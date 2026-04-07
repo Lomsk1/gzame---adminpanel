@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ButtonComponent } from "../form/button";
 import { toast } from "sonner";
 import axiosAuth from "../../helper/axios";
+import useUserStore from "../../store/user/user";
 
 interface DirectiveModalProps {
     isOpen: boolean;
@@ -13,6 +14,7 @@ interface DirectiveModalProps {
 }
 
 export const DirectiveModal = ({ isOpen, onClose, recipient }: DirectiveModalProps) => {
+    const adminUser = useUserStore((s) => s.user);
     const [message, setMessage] = useState("");
     const [priority, setPriority] = useState<"LOW" | "MEDIUM" | "HIGH">("MEDIUM");
     const [isSending, setIsSending] = useState(false);
@@ -26,11 +28,13 @@ export const DirectiveModal = ({ isOpen, onClose, recipient }: DirectiveModalPro
         const toastId = toast.loading("TRANSMITTING_SIGNAL...");
 
         try {
-            await axiosAuth.post("/api/v1/notifications/send", {
-                recipientId: recipient.id,
-                content: message,
+            await axiosAuth.post("/api/v1/notification", {
+                user_id: recipient.id,
+                sender_id: adminUser?._id,
+                content: message.trim(),
                 priority,
-                type: "SYSTEM_DIRECTIVE"
+                type: "SYSTEM_DIRECTIVE",
+                actionUrl: "/notifications",
             });
 
             toast.success("SIGNAL_BROADCAST_COMPLETE", {
