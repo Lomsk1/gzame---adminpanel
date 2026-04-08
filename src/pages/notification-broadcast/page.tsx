@@ -19,6 +19,19 @@ type NotificationType =
   | "STREAK_MILESTONE"
   | "LEVEL_UP";
 
+const SUGGESTED_ACTION_URL: Record<NotificationType, string> = {
+  SYSTEM_DIRECTIVE: "/notifications",
+  SECURITY_ALERT: "/notifications",
+  ACHIEVEMENT: "/notifications",
+  NEURAL_UPDATE: "/notifications",
+  NEW_MESSAGE: "/chat",
+  QUEST_REMINDER: "/quests",
+  ENERGY_FILLED: "/quests",
+  DAILY_MOTIVATION: "/quests",
+  STREAK_MILESTONE: "/quests",
+  LEVEL_UP: "/quests",
+};
+
 const PSYCHOTYPES = [
   "STALKER",
   "WARRIOR",
@@ -36,7 +49,7 @@ export default function NotificationBroadcastPage() {
   const [content, setContent] = useState("");
   const [priority, setPriority] = useState<Priority>("HIGH");
   const [type, setType] = useState<NotificationType>("SYSTEM_DIRECTIVE");
-  const [actionUrl, setActionUrl] = useState("/notifications");
+  const [actionUrl, setActionUrl] = useState(SUGGESTED_ACTION_URL.SYSTEM_DIRECTIVE);
   const [sending, setSending] = useState(false);
   const [lastResult, setLastResult] = useState<{
     totalUsers: number;
@@ -144,7 +157,11 @@ export default function NotificationBroadcastPage() {
               <span className="text-[10px] font-black uppercase tracking-wider text-admin-text-dim">Type</span>
               <select
                 value={type}
-                onChange={(e) => setType(e.target.value as NotificationType)}
+                onChange={(e) => {
+                  const nextType = e.target.value as NotificationType;
+                  setType(nextType);
+                  setActionUrl(SUGGESTED_ACTION_URL[nextType]);
+                }}
                 className="w-full rounded-lg border border-admin-border bg-admin-bg/80 p-3 text-sm text-admin-text outline-none focus:border-admin-primary"
               >
                 <option value="SYSTEM_DIRECTIVE">SYSTEM_DIRECTIVE</option>
@@ -176,9 +193,19 @@ export default function NotificationBroadcastPage() {
               <input
                 value={actionUrl}
                 onChange={(e) => setActionUrl(e.target.value)}
-                placeholder="/notifications"
+                placeholder={SUGGESTED_ACTION_URL[type]}
                 className="w-full rounded-lg border border-admin-border bg-admin-bg/80 p-3 text-sm text-admin-text outline-none focus:border-admin-primary"
               />
+              <p className="text-[10px] text-admin-text-dim">
+                Suggested for <span className="font-bold">{type}</span>:{" "}
+                <button
+                  type="button"
+                  onClick={() => setActionUrl(SUGGESTED_ACTION_URL[type])}
+                  className="text-admin-primary underline"
+                >
+                  {SUGGESTED_ACTION_URL[type]}
+                </button>
+              </p>
             </label>
           </div>
 
