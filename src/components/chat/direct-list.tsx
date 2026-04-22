@@ -5,14 +5,14 @@ const DEFAULT_AVATAR = "https://api.dicebear.com/7.x/identicon/svg?seed=user";
 
 interface DirectListProps {
   conversations: DirectConversationListItem[];
-  activeUserId: string | null;
-  onSelect: (userId: string, nickname: string) => void;
+  activeConversationId: string | null;
+  onSelect: (conversationId: string, nickname: string) => void;
   loading?: boolean;
 }
 
 export const DirectConversationList: React.FC<DirectListProps> = ({
   conversations,
-  activeUserId,
+  activeConversationId,
   onSelect,
   loading = false,
 }) => {
@@ -44,9 +44,10 @@ export const DirectConversationList: React.FC<DirectListProps> = ({
   return (
     <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-2">
       {conversations.map((conv) => {
-        const other = conv.other_user;
-        if (!other) return null;
-        const isActive = activeUserId === other._id;
+        const other =
+          conv.other_user ??
+          conv.participants?.[0] ?? { _id: conv._id, nickname: "Conversation" };
+        const isActive = activeConversationId === conv._id;
         const avatarUrl = other.avatar_url || DEFAULT_AVATAR;
         // Don't show unread for the conversation we're currently viewing
         const hasUnread = (conv.unread_count ?? 0) > 0 && !isActive;
@@ -55,7 +56,7 @@ export const DirectConversationList: React.FC<DirectListProps> = ({
           <button
             key={conv._id}
             type="button"
-            onClick={() => onSelect(other._id, other.nickname || "User")}
+            onClick={() => onSelect(conv._id, other.nickname || "User")}
             className={`w-full text-left transition-all duration-150 rounded-lg border overflow-hidden ${
               isActive
                 ? "bg-admin-primary/10 border-admin-primary/50 border-l-2 border-l-admin-primary"

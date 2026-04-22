@@ -13,6 +13,8 @@ interface AvatarMenuProps {
   onClose: () => void;
   onOpenChat: (userId: string) => void;
   onOpenProfile: (userId: string) => void;
+  isChatBlocked?: boolean;
+  onToggleChatBlock?: (userId: string, shouldBlock: boolean) => void;
 }
 
 const defaultAvatar = "https://api.dicebear.com/7.x/identicon/svg?seed=user";
@@ -24,6 +26,8 @@ export const AvatarMenu: React.FC<AvatarMenuProps> = ({
   onClose,
   onOpenChat,
   onOpenProfile,
+  isChatBlocked = false,
+  onToggleChatBlock,
 }) => {
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -102,6 +106,24 @@ export const AvatarMenu: React.FC<AvatarMenuProps> = ({
           <span className="text-admin-primary">👤</span>
           Open user&apos;s profile
         </button>
+        {onToggleChatBlock && (
+          <button
+            type="button"
+            onClick={() => {
+              onToggleChatBlock(user._id, !isChatBlocked);
+              onClose();
+            }}
+            className={`w-full text-left px-3 py-2 text-sm rounded-lg transition-colors flex items-center gap-2 ${
+              isChatBlocked
+                ? "text-emerald-300 hover:bg-emerald-500/10"
+                : "text-admin-error hover:bg-admin-error/10"
+            }`}
+            role="menuitem"
+          >
+            <span>{isChatBlocked ? "✅" : "⛔"}</span>
+            {isChatBlocked ? "Unblock from chat" : "Block from chat"}
+          </button>
+        )}
       </div>
     </>
   );

@@ -12,15 +12,29 @@ import { MessageInput } from "../../components/chat/message-input";
 import { AvatarMenu } from "../../components/chat/avatar-menu";
 import type { ChatMessage } from "../../types/chat/chat";
 import {
-    getOrCreateDirectConversation,
-    getDirectMessages,
-    getDirectConversations,
-    sendDirectMessage as sendDirectMessageApi,
-    type DirectMessagePayload,
-    type DirectConversationListItem,
+  adminDeleteDirectConversation,
+  adminDeleteDirectMessage,
+  getAdminDirectConversations,
+  getAdminDirectMessages,
+  getDirectConversations,
+  getDirectMessages,
+  getOrCreateDirectConversation,
+  sendDirectMessage as sendDirectMessageApi,
+  type DirectConversationListItem,
+  type DirectMessagePayload,
 } from "../../features/chat/direct.api";
 import { deleteRoom } from "../../features/chat/chats.loaders";
 import { DirectConversationList } from "../../components/chat/direct-list";
+import {
+  addBlockedWord,
+  adminBlockUserFromChat,
+  adminUnblockUserFromChat,
+  deleteBlockedWord,
+  getBlockedWords,
+  getChatBlockedUsers,
+  type ChatBlockedUserItem,
+  type ChatBlockedWordItem,
+} from "../../features/chat/moderation.api";
 
 // Types
 import type { RoomsTypes } from "../../types/chat/chat";
@@ -49,9 +63,8 @@ export default function AdminChatPage() {
     const [viewMode, setViewMode] = useState<"rooms" | "direct">("rooms");
 
     // Direct messages
-    const [activeDirectUserId, setActiveDirectUserId] = useState<string | null>(null);
+    const [activeDirectConversationId, setActiveDirectConversationId] = useState<string | null>(null);
     const [directUserName, setDirectUserName] = useState<string>("");
-    const [directConversationId, setDirectConversationId] = useState<string | null>(null);
     const [directMessages, setDirectMessages] = useState<DirectMessagePayload[]>([]);
     const [directLoading, setDirectLoading] = useState(false);
     const [directSending, setDirectSending] = useState(false);
@@ -59,6 +72,10 @@ export default function AdminChatPage() {
     const [directListLoading, setDirectListLoading] = useState(false);
     const [directHasMoreOlder, setDirectHasMoreOlder] = useState(true);
     const [directLoadingOlder, setDirectLoadingOlder] = useState(false);
+    const [blockedUsers, setBlockedUsers] = useState<ChatBlockedUserItem[]>([]);
+    const [blockedWords, setBlockedWords] = useState<ChatBlockedWordItem[]>([]);
+    const [newBlockedWord, setNewBlockedWord] = useState("");
+    const isAdmin = user?.role === "admin";
 
     // Socket Hook - Automatically connects/disconnects based on activeRoom
     const socketData = useChatSocket(activeRoom);
@@ -67,46 +84,37 @@ export default function AdminChatPage() {
     useEffect(() => {
         if (viewMode !== "direct" || !user) return;
         setDirectListLoading(true);
-        getDirectConversations()
+        const loadConversations = isAdmin ? getAdminDirectConversations : getDirectConversations;
+        loadConversations()
             .then((res) => {
                 const data = res.data || [];
-                // Clear unread for the conversation we have open so the badge doesn't stick
                 setDirectConversations(
                     data.map((c) => {
-                        const other = c.other_user;
-                        if (!other || other._id !== activeDirectUserId) return c;
+                        if (c._id !== activeDirectConversationId) return c;
                         return { ...c, unread_count: 0 };
                     })
                 );
             })
             .catch(console.error)
             .finally(() => setDirectListLoading(false));
-    }, [viewMode, user?._id, activeDirectUserId]);
+    }, [viewMode, user?._id, activeDirectConversationId, isAdmin]);
 
-    // Load direct conversation and messages when opening DM with a user
+    // Load direct messages when opening a conversation
     useEffect(() => {
-        if (!activeDirectUserId || !user) return;
+        if (!activeDirectConversationId || !user) return;
         setDirectLoading(true);
-        setDirectConversationId(null);
         setDirectMessages([]);
-        getOrCreateDirectConversation(activeDirectUserId)
-            .then(({ data: conv }) => {
-                setDirectConversationId(conv._id);
-                const other = conv.participants?.find((p) => p._id !== user._id);
-                setDirectUserName(other?.nickname || "User");
-                return getDirectMessages(conv._id, { limit: 30 });
-            })
+        const loader = isAdmin ? getAdminDirectMessages : getDirectMessages;
+        loader(activeDirectConversationId, { limit: 30 })
             .then((res) => {
                 const list = res.data || [];
                 setDirectMessages(list);
                 setDirectHasMoreOlder(res.hasMore ?? list.length >= 30);
-                // Fix list preview: backend may send wrong order — use actual last message for this conversation
-                if (activeDirectUserId && list.length > 0) {
+                if (activeDirectConversationId && list.length > 0) {
                     const last = list[list.length - 1];
                     setDirectConversations((prev) =>
                         prev.map((c) => {
-                            const other = c.other_user;
-                            if (!other || other._id !== activeDirectUserId) return c;
+                            if (c._id !== activeDirectConversationId) return c;
                             return {
                                 ...c,
                                 last_message: { content: last.content, created_at: last.created_at },
@@ -118,53 +126,45 @@ export default function AdminChatPage() {
             })
             .catch(console.error)
             .finally(() => setDirectLoading(false));
-    }, [activeDirectUserId, user?._id]);
+    }, [activeDirectConversationId, user?._id, isAdmin]);
 
     const handleOpenChatWithUser = useCallback((userId: string) => {
         setAvatarMenuUser(null);
         setAvatarMenuAnchor(null);
         setViewMode("direct");
-        setActiveDirectUserId(userId);
-        getDirectConversations()
-            .then((res) => {
-                const data = res.data || [];
-                setDirectConversations(
-                    data.map((c) => {
-                        const other = c.other_user;
-                        if (!other || other._id !== userId) return c;
-                        return { ...c, unread_count: 0 };
-                    })
-                );
+        getOrCreateDirectConversation(userId)
+            .then(({ data }) => {
+                setActiveDirectConversationId(data._id);
+                const other = data.participants?.find((p) => p._id !== user?._id);
+                setDirectUserName(other?.nickname || "User");
             })
             .catch(console.error);
-    }, []);
+    }, [user?._id]);
 
-    const handleSelectDirectConversation = useCallback((userId: string, nickname: string) => {
-        setActiveDirectUserId(userId);
+    const handleSelectDirectConversation = useCallback((conversationId: string, nickname: string) => {
+        setActiveDirectConversationId(conversationId);
         setDirectUserName(nickname);
-        // Mark as read when opening: clear unread badge for this conversation
         setDirectConversations((prev) =>
             prev.map((c) => {
-                const other = c.other_user;
-                if (!other || other._id !== userId) return c;
+                if (c._id !== conversationId) return c;
                 return { ...c, unread_count: 0 };
             })
         );
     }, []);
 
     const handleBackFromDirect = useCallback(() => {
-        setActiveDirectUserId(null);
-        setDirectConversationId(null);
+        setActiveDirectConversationId(null);
         setDirectMessages([]);
         setDirectHasMoreOlder(true);
     }, []);
 
     const handleLoadOlderDirect = useCallback(() => {
-        if (!directConversationId || directLoadingOlder || !directHasMoreOlder) return;
+        if (!activeDirectConversationId || directLoadingOlder || !directHasMoreOlder) return;
         const beforeId = directMessages[0]?._id;
         if (!beforeId) return;
         setDirectLoadingOlder(true);
-        getDirectMessages(directConversationId, { limit: 30, before: beforeId })
+        const loader = isAdmin ? getAdminDirectMessages : getDirectMessages;
+        loader(activeDirectConversationId, { limit: 30, before: beforeId })
             .then((res) => {
                 const older = res.data || [];
                 setDirectMessages((prev) => [...older, ...prev]);
@@ -172,7 +172,7 @@ export default function AdminChatPage() {
             })
             .catch(console.error)
             .finally(() => setDirectLoadingOlder(false));
-    }, [directConversationId, directLoadingOlder, directHasMoreOlder, directMessages]);
+    }, [activeDirectConversationId, directLoadingOlder, directHasMoreOlder, directMessages, isAdmin]);
 
     const handleOpenProfile = useCallback((userId: string) => {
         setAvatarMenuUser(null);
@@ -187,17 +187,17 @@ export default function AdminChatPage() {
     }, [user?._id]);
 
     const handleSendDirectMessage = useCallback(async (content: string) => {
-        if (!directConversationId || directSending) return;
+        if (!activeDirectConversationId || directSending) return;
         setDirectSending(true);
         try {
-            const { data: newMsg } = await sendDirectMessageApi(directConversationId, content);
+            const { data: newMsg } = await sendDirectMessageApi(activeDirectConversationId, content);
             setDirectMessages((prev) => [...prev, newMsg]);
         } catch (e) {
             console.error(e);
         } finally {
             setDirectSending(false);
         }
-    }, [directConversationId, directSending]);
+    }, [activeDirectConversationId, directSending]);
 
     const handleTerminateRoom = useCallback(async () => {
         if (!activeRoom) return;
@@ -215,7 +215,7 @@ export default function AdminChatPage() {
         _id: m._id,
         content: m.content,
         user_id: m.user_id as ChatMessage["user_id"],
-        room_id: directConversationId!,
+        room_id: activeDirectConversationId!,
         message_type: "text" as const,
         moderation_status: "approved" as const,
         created_at: m.created_at,
@@ -257,6 +257,47 @@ export default function AdminChatPage() {
             revalidator.revalidate();
         }
     }, [fetcher.state, fetcher.data, revalidator]);
+
+    const refreshModerationData = useCallback(() => {
+        if (!isAdmin) return;
+        getChatBlockedUsers()
+            .then((res) => setBlockedUsers(Array.isArray(res.data) ? res.data : []))
+            .catch(console.error);
+        getBlockedWords()
+            .then((res) => setBlockedWords(Array.isArray(res.data) ? res.data : []))
+            .catch(console.error);
+    }, [isAdmin]);
+
+    useEffect(() => {
+        refreshModerationData();
+    }, [refreshModerationData]);
+
+    const blockedUserIdSet = new Set(blockedUsers.map((x) => x.user_id?._id).filter(Boolean));
+
+    const handleToggleChatBlock = useCallback(async (userId: string, shouldBlock: boolean) => {
+        try {
+            if (shouldBlock) {
+                await adminBlockUserFromChat(userId, "Blocked by admin from chat panel");
+            } else {
+                await adminUnblockUserFromChat(userId);
+            }
+            refreshModerationData();
+        } catch (error) {
+            console.error(error);
+        }
+    }, [refreshModerationData]);
+
+    const handleAddBlockedWord = useCallback(async () => {
+        const value = newBlockedWord.trim();
+        if (!value) return;
+        try {
+            await addBlockedWord(value);
+            setNewBlockedWord("");
+            refreshModerationData();
+        } catch (error) {
+            console.error(error);
+        }
+    }, [newBlockedWord, refreshModerationData]);
 
     const handleSendMessage = useCallback((content: string) => {
         socketData.sendMessage(content, replyTo?.messageId);
@@ -335,7 +376,7 @@ export default function AdminChatPage() {
                         </div>
                         <DirectConversationList
                             conversations={directConversations}
-                            activeUserId={activeDirectUserId}
+                            activeConversationId={activeDirectConversationId}
                             onSelect={handleSelectDirectConversation}
                             loading={directListLoading}
                         />
@@ -346,7 +387,7 @@ export default function AdminChatPage() {
             {/* MAIN CONTENT AREA */}
             <div className="flex-1 flex flex-col border-x border-admin-border/20 relative">
                 {/* Direct Messages view */}
-                {activeDirectUserId ? (
+                {activeDirectConversationId ? (
                     <>
                         <div className="border-b border-admin-border/40 bg-black/60 backdrop-blur-xl p-4 flex items-center gap-4">
                             <button
@@ -359,6 +400,27 @@ export default function AdminChatPage() {
                             <h2 className="text-xl font-black text-white uppercase tracking-tighter">
                                 Direct: {directUserName || "..."}
                             </h2>
+                            {isAdmin && (
+                                <button
+                                    type="button"
+                                    onClick={async () => {
+                                        if (!activeDirectConversationId) return;
+                                        try {
+                                            await adminDeleteDirectConversation(activeDirectConversationId);
+                                            setDirectMessages([]);
+                                            setActiveDirectConversationId(null);
+                                            setDirectConversations((prev) =>
+                                                prev.filter((c) => c._id !== activeDirectConversationId)
+                                            );
+                                        } catch (error) {
+                                            console.error(error);
+                                        }
+                                    }}
+                                    className="ml-auto text-xs text-admin-error border border-admin-error/40 px-3 py-1.5 rounded hover:bg-admin-error/10"
+                                >
+                                    Erase conversation
+                                </button>
+                            )}
                         </div>
                         <div className="flex-1 flex flex-col min-h-0">
                             {directLoading ? (
@@ -370,21 +432,32 @@ export default function AdminChatPage() {
                                     <MessageList
                                         messages={directMessagesAsChat}
                                         currentUserId={user._id}
+                                        canDeleteAnyMessage={isAdmin}
+                                        onDeleteMessage={(messageId) => {
+                                            if (!isAdmin) return;
+                                            adminDeleteDirectMessage(messageId)
+                                                .then(() =>
+                                                    setDirectMessages((prev) => prev.filter((m) => m._id !== messageId))
+                                                )
+                                                .catch(console.error);
+                                        }}
                                         onLoadOlder={handleLoadOlderDirect}
                                         hasMoreOlder={directHasMoreOlder}
                                         loadingOlder={directLoadingOlder}
                                         className="flex-1 overflow-y-auto"
                                     />
-                                    <div className="p-4 border-t border-admin-border/30 bg-black/40 backdrop-blur-sm">
-                                        <MessageInput
-                                            onSubmit={handleSendDirectMessage}
-                                            onTypingStart={() => { }}
-                                            onTypingStop={() => { }}
-                                            isConnected={!directSending}
-                                            replyTo={null}
-                                            onCancelReply={() => { }}
-                                        />
-                                    </div>
+                                    {!isAdmin && (
+                                        <div className="p-4 border-t border-admin-border/30 bg-black/40 backdrop-blur-sm">
+                                            <MessageInput
+                                                onSubmit={handleSendDirectMessage}
+                                                onTypingStart={() => { }}
+                                                onTypingStop={() => { }}
+                                                isConnected={!directSending}
+                                                replyTo={null}
+                                                onCancelReply={() => { }}
+                                            />
+                                        </div>
+                                    )}
                                 </>
                             )}
                         </div>
@@ -464,6 +537,64 @@ export default function AdminChatPage() {
                     onAvatarClick={user?.role === "admin" ? (u, el) => handleAvatarClick(u, el) : undefined}
                 />
 
+                {isAdmin && (
+                    <div className="mt-4 p-3 border border-admin-border/30 bg-black/40 space-y-3">
+                        <h4 className="text-xs uppercase tracking-widest text-admin-primary">Word Control</h4>
+                        <div className="flex gap-2">
+                            <input
+                                value={newBlockedWord}
+                                onChange={(e) => setNewBlockedWord(e.target.value)}
+                                placeholder="blocked word"
+                                className="flex-1 bg-black border border-admin-border/30 rounded px-2 py-1 text-xs"
+                            />
+                            <button
+                                type="button"
+                                onClick={handleAddBlockedWord}
+                                className="text-xs px-2 py-1 border border-admin-primary/30 text-admin-primary rounded"
+                            >
+                                Add
+                            </button>
+                        </div>
+                        <div className="max-h-24 overflow-y-auto space-y-1">
+                            {blockedWords.map((word) => (
+                                <div key={word._id} className="flex items-center justify-between text-xs">
+                                    <span className="text-admin-text">{word.word}</span>
+                                    <button
+                                        type="button"
+                                        onClick={() => deleteBlockedWord(word._id).then(refreshModerationData).catch(console.error)}
+                                        className="text-admin-error"
+                                    >
+                                        remove
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {isAdmin && (
+                    <div className="mt-4 p-3 border border-admin-border/30 bg-black/40 space-y-2">
+                        <h4 className="text-xs uppercase tracking-widest text-admin-primary">Blocked Users</h4>
+                        <div className="max-h-28 overflow-y-auto space-y-1">
+                            {blockedUsers.length === 0 && (
+                                <p className="text-xs text-admin-text-dim">No blocked users</p>
+                            )}
+                            {blockedUsers.map((item) => (
+                                <div key={item._id} className="flex items-center justify-between gap-2 text-xs">
+                                    <span className="truncate">{item.user_id?.nickname || item.user_id?._id}</span>
+                                    <button
+                                        type="button"
+                                        onClick={() => handleToggleChatBlock(item.user_id._id, false)}
+                                        className="text-emerald-300"
+                                    >
+                                        unblock
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
                 {/* System Stats Block */}
                 <div className="mt-auto p-4 border border-admin-primary/10 bg-admin-primary/5 text-sm font-mono space-y-2">
                     <div className="flex justify-between">
@@ -507,6 +638,8 @@ export default function AdminChatPage() {
                 }}
                 onOpenChat={handleOpenChatWithUser}
                 onOpenProfile={handleOpenProfile}
+                isChatBlocked={avatarMenuUser ? blockedUserIdSet.has(avatarMenuUser._id) : false}
+                onToggleChatBlock={handleToggleChatBlock}
             />
         </div>
     );
