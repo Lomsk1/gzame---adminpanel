@@ -7,6 +7,8 @@ import { BASE_URL } from "../config/env.config";
 import useUserStore from "../store/user/user";
 import { getRoomMessages } from "../features/chat/chats.loaders";
 
+const INITIAL_VISIBLE_MESSAGES = 40;
+
 export const useChatSocket = (roomId: string | null) => {
   // User data
   const user = useUserStore((state) => state.user);
@@ -61,11 +63,12 @@ export const useChatSocket = (roomId: string | null) => {
     console.log("🚪 Room joined:", data.roomName);
 
     if (data.roomId === roomIdRef.current) {
-      const history = data.history || [];
-      setMessages(history);
+      const history = Array.isArray(data.history) ? data.history : [];
+      const recentHistory = history.slice(-INITIAL_VISIBLE_MESSAGES);
+      setMessages(recentHistory);
       setOnlineUsers(data.onlineUsers || []);
       setUnreadCount(0);
-      setHasMoreOlder(history.length >= 30);
+      setHasMoreOlder(history.length > recentHistory.length);
     }
   }, []);
 

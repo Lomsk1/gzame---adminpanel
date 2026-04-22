@@ -11,7 +11,6 @@ interface AvatarMenuProps {
   anchorEl: HTMLElement | null;
   user: ChatUserMinimal | null;
   onClose: () => void;
-  onOpenChat: (userId: string) => void;
   onOpenProfile: (userId: string) => void;
   isChatBlocked?: boolean;
   onToggleChatBlock?: (userId: string, shouldBlock: boolean) => void;
@@ -24,7 +23,6 @@ export const AvatarMenu: React.FC<AvatarMenuProps> = ({
   anchorEl,
   user,
   onClose,
-  onOpenChat,
   onOpenProfile,
   isChatBlocked = false,
   onToggleChatBlock,
@@ -82,18 +80,6 @@ export const AvatarMenu: React.FC<AvatarMenuProps> = ({
             {user.nickname}
           </span>
         </div>
-        <button
-          type="button"
-          onClick={() => {
-            onOpenChat(user._id);
-            onClose();
-          }}
-          className="w-full text-left px-3 py-2 text-sm text-admin-text hover:bg-admin-primary/10 rounded-lg transition-colors flex items-center gap-2"
-          role="menuitem"
-        >
-          <span className="text-admin-primary">💬</span>
-          Open chat with him
-        </button>
         <button
           type="button"
           onClick={() => {

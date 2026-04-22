@@ -12,75 +12,51 @@ interface ChatHeaderProps {
     onDelete: () => void
 }
 
-export const ChatHeader: React.FC<ChatHeaderProps> = ({ roomName, roomType, isConnected, onRefresh, onDelete }) => {
+export const ChatHeader: React.FC<ChatHeaderProps> = ({ roomName, roomType, participantCount, isConnected, onRefresh, onDelete }) => {
     return (
-        <div className="border-b border-admin-border/40 bg-black/60 backdrop-blur-xl relative overflow-hidden">
-            {/* Subtle Scanline Overlay for Header */}
-            <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.1)_50%)] bg-size-[100%_4px] pointer-events-none" />
-
-            <div className="p-4 flex items-center justify-between relative z-10">
-                <div className="flex items-center gap-6">
-                    {/* Status Hexagon */}
-                    <div className="relative">
-                        <div className={`w-12 h-12 flex items-center justify-center border ${isConnected ? 'border-admin-primary' : 'border-admin-error'} rotate-45`}>
-                            <span className={`-rotate-45 text-sm font-bold ${isConnected ? 'text-admin-primary' : 'text-admin-error'}`}>
-                                {isConnected ? 'ON' : 'OFF'}
-                            </span>
-                        </div>
+        <div className="border-b border-admin-border/30 bg-admin-panel/50 px-5 py-4">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <div className="min-w-0">
+                    <div className="flex items-center gap-3">
+                        <h2 className="truncate text-xl font-black tracking-tight text-admin-text">
+                            {roomName}
+                        </h2>
+                        <span className="rounded-md border border-admin-primary/30 bg-admin-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-admin-primary">
+                            {roomType}
+                        </span>
                     </div>
-
-                    <div>
-                        <div className="flex items-center gap-3 mb-0.5">
-                            <h2 className="text-xl font-black tracking-tighter text-white uppercase italic">
-                                {roomName}
-                            </h2>
-                            <span className="px-2 py-1 bg-admin-primary/10 border border-admin-primary/30 text-admin-primary text-sm font-bold rounded-sm">
-                                {roomType}
-                            </span>
-                        </div>
-                        <div className="flex items-center gap-4 text-sm text-gray-500 font-mono">
-                            <span className="flex items-center gap-1">
-                                <span className="w-1.5 h-1.5 bg-admin-primary rounded-full" />
-                                SECURE_CHANNEL: ACTIVE
-                            </span>
-                            <span>ID: </span>
-                        </div>
+                    <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-admin-text-dim">
+                        <span className="inline-flex items-center gap-1">
+                            <span className={`h-2 w-2 rounded-full ${isConnected ? "bg-admin-success" : "bg-admin-error"}`} />
+                            {isConnected ? "Connected" : "Disconnected"}
+                        </span>
+                        <span>{participantCount} online now</span>
                     </div>
                 </div>
 
                 <div className="flex items-center gap-2">
-                    <button onClick={onRefresh} className="p-2.5 border shrink-0 border-admin-border/20 text-admin-primary hover:bg-admin-primary/10 transition-all text-sm">
-                        CMD: RE_SYNC
+                    <button
+                        type="button"
+                        onClick={onRefresh}
+                        className="rounded-lg border border-admin-border bg-admin-bg/40 px-3 py-2 text-xs font-semibold text-admin-text hover:border-admin-primary/40 hover:text-admin-primary transition-colors"
+                    >
+                        Refresh
                     </button>
-                    <div className="h-8 w-px bg-admin-border/20 mx-2" />
                     <AdminConfirmWrapper
-                        title="TERMINATE_NODE"
-                        description={`This will permanently purge "${roomName}" from the database.`}
+                        title="Delete room?"
+                        description={`This permanently deletes "${roomName}" and all its messages.`}
                         onConfirm={onDelete}
                         variant="danger"
                         isFixed
-                        confirmWord='delete'
+                        confirmWord="delete"
                     >
-                        <button className="p-2.5 border border-admin-border/20 text-gray-400 hover:text-white transition-all text-sm">
-                            TERMINATE
+                        <button
+                            type="button"
+                            className="rounded-lg border border-admin-error/40 bg-admin-error/10 px-3 py-2 text-xs font-semibold text-admin-error hover:bg-admin-error/20 transition-colors"
+                        >
+                            Delete room
                         </button>
                     </AdminConfirmWrapper>
-
-
-                </div>
-            </div>
-
-            {/* Bottom Telemetry Bar */}
-            <div className="bg-admin-primary/5 border-t border-admin-border/10 px-4 py-1.5 flex justify-between items-center">
-                <div className="flex gap-4 text-xs font-mono text-admin-primary/60">
-                    <span>UPTIME: 12:44:02</span>
-                    <span>PACKETS: 1.2k/s</span>
-                    <span>BUFFER: 0ms</span>
-                </div>
-                <div className="flex items-center gap-1">
-                    <div className="w-16 h-1 bg-white/5 rounded-full overflow-hidden">
-                        <div className="w-2/3 h-full bg-admin-primary animate-pulse" />
-                    </div>
                 </div>
             </div>
         </div>

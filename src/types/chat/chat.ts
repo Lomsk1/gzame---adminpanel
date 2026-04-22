@@ -20,13 +20,21 @@ export interface ChatMessage {
   room_id: string;
   user_id: User;
   content: string;
-  message_type: "text" | "system";
+  message_type: "text" | "system" | "impulse" | "image" | "file";
   moderation_status: "pending" | "approved" | "rejected" | "flagged";
   moderation_score?: number;
   replied_to?: string;
   created_at: string;
   updated_at: string;
   isOptimistic?: boolean;
+  quest_title?: string;
+  attachment?: {
+    url: string;
+    public_id?: string;
+    file_name?: string;
+    mime_type?: string;
+    size_bytes?: number;
+  };
   attachments?: string[];
 }
 
