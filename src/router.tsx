@@ -36,6 +36,8 @@ import { bookingClicksPageLoader } from "./features/specialists/booking-clicks.l
 import EarlyAccessPage from "./pages/early-access/page";
 import { earlyAccessPageLoader } from "./features/early-access/early-access.loaders";
 import NotificationBroadcastPage from "./pages/notification-broadcast/page";
+import CloudPage from "./pages/cloud/page";
+import { cloudPageLoader } from "./features/cloud/cloud.loaders";
 
 
 export const router = createBrowserRouter([
@@ -131,6 +133,11 @@ export const router = createBrowserRouter([
       {
         path: "notification-broadcast",
         element: <NotificationBroadcastPage />,
+      },
+      {
+        path: "cloud",
+        element: <CloudPage />,
+        loader: cloudPageLoader,
       },
     ]
   },
