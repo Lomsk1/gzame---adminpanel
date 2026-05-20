@@ -38,6 +38,13 @@ import { earlyAccessPageLoader } from "./features/early-access/early-access.load
 import NotificationBroadcastPage from "./pages/notification-broadcast/page";
 import CloudPage from "./pages/cloud/page";
 import { cloudPageLoader } from "./features/cloud/cloud.loaders";
+import WikiPage from "./pages/wiki/page";
+import { wikiPageLoader } from "./features/wiki/wiki.loaders";
+import { wikiPageAction } from "./features/wiki/wiki.actions";
+import AiMemoryPage from "./pages/ai/memory/page";
+import { aiMemoryLoader } from "./features/ai-memory/ai-memory.loaders";
+import AiOverviewPage from "./pages/ai/overview/page";
+import { aiOverviewLoader } from "./features/ai-overview/ai-overview.loaders";
 
 
 export const router = createBrowserRouter([
@@ -69,16 +76,26 @@ export const router = createBrowserRouter([
         path: "ai",
         children: [
           {
+            path: "overview",
+            element: <AiOverviewPage />,
+            loader: aiOverviewLoader,
+          },
+          {
             index: true,
             element: <AIGeminiPage />,
             action: geminiAction,
             loader: AIInstructionLoader,
           },
           {
+            path: "memory",
+            element: <AiMemoryPage />,
+            loader: aiMemoryLoader,
+          },
+          {
             path: "logs",
             element: <AIGeminiLogsPage />,
-          }
-        ]
+          },
+        ],
       },
       {
         path: 'levels',
@@ -138,6 +155,12 @@ export const router = createBrowserRouter([
         path: "cloud",
         element: <CloudPage />,
         loader: cloudPageLoader,
+      },
+      {
+        path: "wiki",
+        element: <WikiPage />,
+        loader: wikiPageLoader,
+        action: wikiPageAction,
       },
     ]
   },
