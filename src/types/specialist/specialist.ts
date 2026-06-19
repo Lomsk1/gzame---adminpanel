@@ -26,6 +26,18 @@ export interface Specialist {
   tags?: string[];
   specialty?: string;
   isActive?: boolean;
+  portal_enabled?: boolean;
+  invite_code?: string;
+  suggested_spheres?: string[];
+  kyc_status?: 'none' | 'pending' | 'verified' | 'rejected';
+  services?: {
+    title: string;
+    duration_minutes: number;
+    price_cents: number;
+    currency?: string;
+  }[];
+  user_id?: string;
+  portal_user_email?: string;
   created_at?: string;
   updated_at?: string;
 }

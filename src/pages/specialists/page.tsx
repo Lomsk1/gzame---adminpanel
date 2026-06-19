@@ -64,6 +64,17 @@ export default function SpecialistsPage() {
 
   const handleSaveSpecialist = async (payload: SpecialistFormData) => {
     const { avatarFile, ...rest } = payload;
+    const services =
+      rest.serviceTitle && rest.servicePriceCents
+        ? [
+            {
+              title: rest.serviceTitle,
+              duration_minutes: rest.serviceDuration ?? 60,
+              price_cents: rest.servicePriceCents,
+              currency: "eur",
+            },
+          ]
+        : [];
     const body = {
       avatar: payload.avatar || undefined,
       name: rest.name,
@@ -75,51 +86,60 @@ export default function SpecialistsPage() {
       tags: rest.tags ?? [],
       specialty: rest.specialty || undefined,
       isActive: rest.isActive !== false,
+      suggested_spheres: rest.suggestedSpheres ?? [],
+      services,
     };
 
-    if (avatarFile) {
-      setIsSubmittingSpecialistWithFile(true);
-      try {
-        let specialistId: string | null = editingSpecialist?._id ?? null;
-        if (editingSpecialist) {
-          await axiosAuth.patch(`/api/v1/specialists/${editingSpecialist._id}`, body);
-        } else {
-          const res = await axiosAuth.post<{ data?: { _id?: string }; _id?: string }>("/api/v1/specialists", body);
-          const created = res.data?.data ?? res.data;
-          specialistId =
-            created && typeof created === "object" && "_id" in created
-              ? (created as { _id: string })._id
-              : null;
-        }
-        if (specialistId) {
-          const uploadForm = new FormData();
-          uploadForm.append("avatar", avatarFile);
-          await axiosMultipartAuth.patch(`/api/v1/specialists/${specialistId}/avatar`, uploadForm);
-        }
-        toast.success(editingSpecialist ? "Specialist updated." : "Specialist created.");
-        revalidator.revalidate();
-        setSpecialistDrawerOpen(false);
-        setEditingSpecialist(null);
-      } catch (err: unknown) {
-        const msg =
-          err && typeof err === "object" && "response" in err
-            ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
-            : "Request failed.";
-        toast.error(msg ?? "Request failed.");
-      } finally {
-        setIsSubmittingSpecialistWithFile(false);
+    setIsSubmittingSpecialistWithFile(true);
+    try {
+      let specialistId: string | null = editingSpecialist?._id ?? null;
+      if (editingSpecialist) {
+        await axiosAuth.patch(`/api/v1/specialists/${editingSpecialist._id}`, body);
+      } else {
+        const res = await axiosAuth.post<{ data?: { _id?: string }; _id?: string }>(
+          "/api/v1/specialists",
+          body,
+        );
+        const created = res.data?.data ?? res.data;
+        specialistId =
+          created && typeof created === "object" && "_id" in created
+            ? (created as { _id: string })._id
+            : null;
       }
-      return;
+      if (specialistId && avatarFile) {
+        const uploadForm = new FormData();
+        uploadForm.append("avatar", avatarFile);
+        await axiosMultipartAuth.patch(`/api/v1/specialists/${specialistId}/avatar`, uploadForm);
+      }
+      if (rest.portalEmail && specialistId) {
+        await axiosAuth.post(`/api/v1/specialists/${specialistId}/enable-portal`, {
+          email: rest.portalEmail,
+          suggested_spheres: rest.suggestedSpheres ?? [],
+          services,
+        });
+      }
+      if (
+        specialistId &&
+        rest.kycStatus &&
+        rest.kycStatus !== (editingSpecialist?.kyc_status ?? "none")
+      ) {
+        await axiosAuth.patch(`/api/v1/specialists/${specialistId}/kyc-status`, {
+          kyc_status: rest.kycStatus,
+        });
+      }
+      toast.success(editingSpecialist ? "Specialist updated." : "Specialist created.");
+      revalidator.revalidate();
+      setSpecialistDrawerOpen(false);
+      setEditingSpecialist(null);
+    } catch (err: unknown) {
+      const msg =
+        err && typeof err === "object" && "response" in err
+          ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+          : "Request failed.";
+      toast.error(msg ?? "Request failed.");
+    } finally {
+      setIsSubmittingSpecialistWithFile(false);
     }
-
-    const formData = new FormData();
-    formData.append("type", "specialist");
-    formData.append("intent", editingSpecialist ? "update" : "create");
-    formData.append("id", editingSpecialist?._id ?? "");
-    formData.append("payload", JSON.stringify({ ...rest, avatar: payload.avatar }));
-    fetcher.submit(formData, { method: "post" });
-    setSpecialistDrawerOpen(false);
-    setEditingSpecialist(null);
   };
 
   const handleDeleteSpecialist = (id: string) => {
@@ -234,12 +254,18 @@ export default function SpecialistsPage() {
                     {spec.isActive === false && (
                       <span className="text-xs px-2 py-0.5 bg-admin-error/20 text-admin-error rounded border border-admin-error/30">INACTIVE</span>
                     )}
+                    {spec.portal_enabled && (
+                      <span className="text-xs px-2 py-0.5 bg-admin-success/20 text-admin-success rounded border border-admin-success/30">PORTAL</span>
+                    )}
                     {(spec.order ?? 0) > 0 && (
                       <span className="text-xs text-admin-text-dim font-mono">#{spec.order}</span>
                     )}
                   </div>
                   {spec.specialty ? (
                     <p className="text-sm text-admin-primary font-medium">{spec.specialty}</p>
+                  ) : null}
+                  {spec.invite_code ? (
+                    <p className="text-xs text-admin-text-dim font-mono mt-0.5">Invite: {spec.invite_code}</p>
                   ) : null}
                   <p className="text-sm text-admin-text-dim line-clamp-2 mt-0.5">{spec.bio || "—"}</p>
                   <div className="flex flex-wrap gap-1.5 mt-1">

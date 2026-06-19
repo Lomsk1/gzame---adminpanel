@@ -21,6 +21,12 @@ export type SpecialistFormData = {
   tags: string[];
   specialty: string;
   isActive: boolean;
+  portalEmail?: string;
+  suggestedSpheres?: string[];
+  serviceTitle?: string;
+  serviceDuration?: number;
+  servicePriceCents?: number;
+  kycStatus?: Specialist['kyc_status'];
 };
 
 interface Props {
@@ -46,6 +52,32 @@ export const SpecialistEditorDrawer = ({ specialist, categories, onClose, onSave
   );
   const [specialty, setSpecialty] = useState(specialist?.specialty ?? "");
   const [isActive, setIsActive] = useState(specialist?.isActive !== false);
+  const [portalEmail, setPortalEmail] = useState(specialist?.portal_user_email ?? "");
+  const [kycStatus, setKycStatus] = useState<Specialist['kyc_status']>(
+    specialist?.kyc_status ?? 'none',
+  );
+  const [suggestedSpheres, setSuggestedSpheres] = useState<string[]>(
+    specialist?.suggested_spheres ?? [],
+  );
+  const [serviceTitle, setServiceTitle] = useState(
+    specialist?.services?.[0]?.title ?? "Consultation",
+  );
+  const [serviceDuration, setServiceDuration] = useState(
+    specialist?.services?.[0]?.duration_minutes ?? 60,
+  );
+  const [servicePriceCents, setServicePriceCents] = useState(
+    specialist?.services?.[0]?.price_cents ?? 8000,
+  );
+
+  const LIFE_SPHERES = [
+    "finance",
+    "relationships",
+    "energy",
+    "health",
+    "self_realization",
+    "environment",
+    "skills",
+  ] as const;
 
   useEffect(() => {
     return () => {
@@ -92,6 +124,12 @@ export const SpecialistEditorDrawer = ({ specialist, categories, onClose, onSave
       tags,
       specialty: specialty.trim(),
       isActive,
+      portalEmail: portalEmail.trim() || undefined,
+      suggestedSpheres,
+      serviceTitle,
+      serviceDuration,
+      servicePriceCents,
+      kycStatus,
     });
   };
 
@@ -240,6 +278,88 @@ export const SpecialistEditorDrawer = ({ specialist, categories, onClose, onSave
           labelClassName="text-sm font-black text-admin-text-dim uppercase tracking-widest block"
           inputClassName="w-full bg-admin-panel/40 border border-admin-border p-3 text-base text-admin-text outline-none focus:border-admin-primary transition-colors no-spinner"
         />
+        <div className="border-t border-admin-border pt-4 mt-4">
+          <p className="text-sm font-black text-admin-primary uppercase tracking-widest mb-3">
+            Specialist portal (mobile app)
+          </p>
+          {specialist?.portal_enabled ? (
+            <p className="text-sm text-admin-success mb-2 font-bold">Portal enabled — linked user can open /specialist in the app.</p>
+          ) : (
+            <p className="text-sm text-admin-text-dim mb-2">Portal not enabled yet. Enter an existing user email below to link access.</p>
+          )}
+          {specialist?.invite_code ? (
+            <p className="text-sm text-admin-text mb-2">
+              Invite code: <code className="text-admin-primary">{specialist.invite_code}</code>
+            </p>
+          ) : null}
+          <label className="text-sm font-black text-admin-text-dim uppercase tracking-widest block mb-1 mt-2">
+            KYC status
+          </label>
+          <select
+            value={kycStatus ?? 'none'}
+            onChange={(e) => setKycStatus(e.target.value as Specialist['kyc_status'])}
+            className="w-full bg-admin-panel/40 border border-admin-border p-3 text-base text-admin-text outline-none focus:border-admin-primary transition-colors mb-3"
+          >
+            <option value="none">None</option>
+            <option value="pending">Pending</option>
+            <option value="verified">Verified</option>
+            <option value="rejected">Rejected</option>
+          </select>
+          <AdminInput
+            label="Portal user email (existing GzaMe account)"
+            value={portalEmail}
+            onChange={(v) => setPortalEmail(String(v ?? ""))}
+            placeholder="specialist@email.com"
+            labelClassName="text-sm font-black text-admin-text-dim uppercase tracking-widest block"
+            inputClassName="w-full bg-admin-panel/40 border border-admin-border p-3 text-base text-admin-text outline-none focus:border-admin-primary transition-colors no-spinner"
+          />
+          <label className="text-sm font-black text-admin-text-dim uppercase tracking-widest block mb-2 mt-3">
+            Suggested spheres
+          </label>
+          <div className="flex flex-wrap gap-2 mb-3">
+            {LIFE_SPHERES.map((s) => (
+              <label key={s} className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={suggestedSpheres.includes(s)}
+                  onChange={() =>
+                    setSuggestedSpheres((prev) =>
+                      prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s],
+                    )
+                  }
+                  className="rounded border-admin-border"
+                />
+                <span className="text-xs text-admin-text">{s}</span>
+              </label>
+            ))}
+          </div>
+          <AdminInput
+            label="Service title"
+            value={serviceTitle}
+            onChange={(v) => setServiceTitle(String(v ?? ""))}
+            placeholder="60 min consultation"
+            labelClassName="text-sm font-black text-admin-text-dim uppercase tracking-widest block"
+            inputClassName="w-full bg-admin-panel/40 border border-admin-border p-3 text-base text-admin-text outline-none focus:border-admin-primary transition-colors no-spinner"
+          />
+          <div className="grid grid-cols-2 gap-3 mt-2">
+            <AdminInput
+              label="Duration (min)"
+              type="number"
+              value={serviceDuration}
+              onChange={(v) => setServiceDuration(Number(v) || 60)}
+              labelClassName="text-sm font-black text-admin-text-dim uppercase tracking-widest block"
+              inputClassName="w-full bg-admin-panel/40 border border-admin-border p-3 text-base text-admin-text outline-none focus:border-admin-primary transition-colors no-spinner"
+            />
+            <AdminInput
+              label="Price (cents)"
+              type="number"
+              value={servicePriceCents}
+              onChange={(v) => setServicePriceCents(Number(v) || 0)}
+              labelClassName="text-sm font-black text-admin-text-dim uppercase tracking-widest block"
+              inputClassName="w-full bg-admin-panel/40 border border-admin-border p-3 text-base text-admin-text outline-none focus:border-admin-primary transition-colors no-spinner"
+            />
+          </div>
+        </div>
       </div>
     </AdminDrawerShell>
   );
