@@ -36,6 +36,7 @@ export interface Specialist {
     price_cents: number;
     currency?: string;
   }[];
+  monthly_client_limit?: number;
   user_id?: string;
   portal_user_email?: string;
   created_at?: string;

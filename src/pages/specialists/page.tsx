@@ -88,6 +88,7 @@ export default function SpecialistsPage() {
       isActive: rest.isActive !== false,
       suggested_spheres: rest.suggestedSpheres ?? [],
       services,
+      monthly_client_limit: Math.max(1, rest.monthlyClientLimit ?? 10),
     };
 
     setIsSubmittingSpecialistWithFile(true);
@@ -116,6 +117,7 @@ export default function SpecialistsPage() {
           email: rest.portalEmail,
           suggested_spheres: rest.suggestedSpheres ?? [],
           services,
+          monthly_client_limit: Math.max(1, rest.monthlyClientLimit ?? 10),
         });
       }
       if (

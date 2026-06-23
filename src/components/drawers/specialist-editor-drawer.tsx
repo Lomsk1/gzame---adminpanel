@@ -27,6 +27,7 @@ export type SpecialistFormData = {
   serviceDuration?: number;
   servicePriceCents?: number;
   kycStatus?: Specialist['kyc_status'];
+  monthlyClientLimit?: number;
 };
 
 interface Props {
@@ -67,6 +68,9 @@ export const SpecialistEditorDrawer = ({ specialist, categories, onClose, onSave
   );
   const [servicePriceCents, setServicePriceCents] = useState(
     specialist?.services?.[0]?.price_cents ?? 8000,
+  );
+  const [monthlyClientLimit, setMonthlyClientLimit] = useState(
+    specialist?.monthly_client_limit ?? 10,
   );
 
   const LIFE_SPHERES = [
@@ -130,6 +134,7 @@ export const SpecialistEditorDrawer = ({ specialist, categories, onClose, onSave
       serviceDuration,
       servicePriceCents,
       kycStatus,
+      monthlyClientLimit,
     });
   };
 
@@ -310,6 +315,14 @@ export const SpecialistEditorDrawer = ({ specialist, categories, onClose, onSave
             value={portalEmail}
             onChange={(v) => setPortalEmail(String(v ?? ""))}
             placeholder="specialist@email.com"
+            labelClassName="text-sm font-black text-admin-text-dim uppercase tracking-widest block"
+            inputClassName="w-full bg-admin-panel/40 border border-admin-border p-3 text-base text-admin-text outline-none focus:border-admin-primary transition-colors no-spinner"
+          />
+          <AdminInput
+            label="Monthly client limit (min 1)"
+            type="number"
+            value={monthlyClientLimit}
+            onChange={(v) => setMonthlyClientLimit(Math.max(1, Number(v) || 1))}
             labelClassName="text-sm font-black text-admin-text-dim uppercase tracking-widest block"
             inputClassName="w-full bg-admin-panel/40 border border-admin-border p-3 text-base text-admin-text outline-none focus:border-admin-primary transition-colors no-spinner"
           />

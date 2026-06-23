@@ -409,7 +409,7 @@ export const UserDetailDrawer = ({ user, onClose }: UserDetailDrawerProps) => {
                             {user?.role === "user" && (
                                 <AdminConfirmWrapper
                                     title="Permanent user deletion"
-                                    description={`Removes ${user.nickname} and all related data: profile (avatar on Cloudinary), quiz answers, activity logs, notifications, room messages they sent, read cursors, DEVI conversations and messages, direct message threads, active/completed quests, daily feels, specialist booking clicks. Chat rooms they created are kept; ownership is reassigned to another admin (or any user if no admin). Type DELETE to confirm.`}
+                                    description={`Removes ${user.nickname} and all related data: profile (avatar on Cloudinary), quiz answers, activity logs, notifications, planner tasks/projects/labels, life map check-ins and reviews, room messages they sent (group chats kept), read cursors, DEVI conversations, direct message threads, AI memories, active/completed quests, specialist links, consultation bookings, and uploaded files (queued Cloudinary cleanup on failure). Chat rooms they created are kept; ownership is reassigned. Type DELETE to confirm.`}
                                     confirmText="DELETE_USER"
                                     confirmWord="DELETE"
                                     variant="danger"
