@@ -9,6 +9,7 @@ interface AdminDrawerShellProps {
     isSubmitting?: boolean;
     children: React.ReactNode;
     footer?: React.ReactNode;
+    panelClassName?: string;
 }
 
 export const AdminDrawerShell = ({
@@ -18,7 +19,8 @@ export const AdminDrawerShell = ({
     subtitle,
     isSubmitting,
     children,
-    footer
+    footer,
+    panelClassName = "max-w-md",
 }: AdminDrawerShellProps) => {
     if (!isOpen) return null;
 
@@ -27,7 +29,7 @@ export const AdminDrawerShell = ({
             {/* Backdrop click to close */}
             <div className="absolute inset-0" onClick={!isSubmitting ? onClose : undefined} />
 
-            <div className="relative w-full max-w-md h-full bg-admin-bg border-l border-admin-primary/30 p-8 shadow-2xl slide-in-from-right duration-300 animate-in flex flex-col">
+            <div className={`relative w-full ${panelClassName} h-full bg-admin-bg border-l border-admin-primary/30 p-6 sm:p-8 shadow-2xl slide-in-from-right duration-300 animate-in flex flex-col`}>
 
                 {/* Header */}
                 <div className="flex justify-between items-center mb-8 shrink-0">

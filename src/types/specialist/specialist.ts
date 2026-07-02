@@ -33,10 +33,14 @@ export interface Specialist {
   services?: {
     title: string;
     duration_minutes: number;
-    price_cents: number;
+    price_cents?: number;
     currency?: string;
   }[];
   monthly_client_limit?: number;
+  /** ISO 3166-1 alpha-2 country codes. */
+  countries?: string[];
+  /** Languages the specialist works in (en, ka, ru, ja). */
+  languages?: string[];
   user_id?: string;
   portal_user_email?: string;
   created_at?: string;

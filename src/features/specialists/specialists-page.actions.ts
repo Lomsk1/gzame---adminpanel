@@ -51,6 +51,8 @@ async function runAction(
       tags: string[];
       specialty: string;
       isActive: boolean;
+      countries?: string[];
+      languages?: string[];
     };
     const body = {
       avatar: payload.avatar || undefined,
@@ -63,6 +65,8 @@ async function runAction(
       tags: payload.tags ?? [],
       specialty: payload.specialty || undefined,
       isActive: payload.isActive !== false,
+      countries: payload.countries ?? [],
+      languages: payload.languages ?? [],
     };
     let specialistId: string | null = id;
     if (intent === "create") {
