@@ -22,12 +22,15 @@ import {
   type ChatBlockedWordItem,
 } from "../../features/chat/moderation.api";
 import type { RoomsTypes } from "../../types/chat/chat";
+import { AdminPageHeader, AdminPageShell } from "../../components/admin";
+import { useAdminT } from "../../store/locale/locale";
 
 type AdminRoom = RoomsTypes["data"][number];
 
 const isPublicRoom = (room: AdminRoom) => room.is_public && room.type !== "private";
 
 export default function AdminChatPage() {
+  const { t } = useAdminT();
   const user = useUserStore((state) => state.user);
   const navigate = useNavigate();
   const { roomsData } = useLoaderData() as { roomsData: Promise<RoomsTypes> };
@@ -159,31 +162,28 @@ export default function AdminChatPage() {
   if (!user) {
     return (
       <div className="h-screen bg-black flex items-center justify-center text-admin-primary font-mono tracking-widest animate-pulse">
-        [!] AUTH_REQUIRED_ACCESS_DENIED
+        [!] {t("chat.authRequired")}
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 p-2 animate-in fade-in duration-500">
-      <section className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <h1 className="text-3xl font-black tracking-tight text-admin-text">Public Room Moderation</h1>
-          <p className="mt-2 text-sm text-admin-text-dim max-w-2xl">
-            This panel monitors only public chat rooms. Direct chats are intentionally excluded from admin controls.
-          </p>
-        </div>
-        <div className="inline-flex items-center gap-2 rounded-xl border border-admin-primary/30 bg-admin-primary/10 px-3 py-2 text-xs text-admin-primary">
-          <span className="h-2 w-2 rounded-full bg-admin-success" />
-          live moderation
-        </div>
-      </section>
+    <AdminPageShell noPadding className="space-y-6 p-2">
+      <AdminPageHeader
+        title={t("pages.chat.title")}
+        badge={
+          <div className="inline-flex items-center gap-2 rounded-xl border border-admin-primary/30 bg-admin-primary/10 px-3 py-2 text-xs text-admin-primary mb-2">
+            <span className="h-2 w-2 rounded-full bg-admin-success" />
+            {t("chat.liveModeration")}
+          </div>
+        }
+      />
 
-      <section className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <MetricCard label="Scope" value="Public only" />
-        <MetricCard label="Rooms" value={String(publicRoomCount)} />
-        <MetricCard label="Online users" value={String(socketData.onlineUsers.length)} />
-        <MetricCard label="Connection" value={socketData.isConnected ? "Healthy" : "Reconnecting"} />
+      <section className="grid grid-cols-1 md:grid-cols-4 gap-4 admin-fade-up" style={{ animationDelay: "80ms" }}>
+        <MetricCard label={t("chat.scope")} value={t("chat.scopePublic")} />
+        <MetricCard label={t("chat.rooms")} value={String(publicRoomCount)} />
+        <MetricCard label={t("chat.onlineUsers")} value={String(socketData.onlineUsers.length)} />
+        <MetricCard label={t("chat.connection")} value={socketData.isConnected ? t("chat.healthy") : t("chat.reconnecting")} />
       </section>
 
       <section className="grid grid-cols-1 xl:grid-cols-12 gap-5 min-h-[70vh]">
@@ -212,9 +212,9 @@ export default function AdminChatPage() {
                         setActiveRoom(id);
                       }}
                       onCreateRoom={() => setIsDrawerOpen(true)}
-                      title="Room Directory"
-                      description="Select a public room to inspect live conversation and moderation events."
-                      emptyMessage="No public rooms found. Create one to begin monitoring."
+                      title={t("chat.roomDirectory")}
+                      description={t("chat.roomDirectoryDesc")}
+                      emptyMessage={t("chat.noPublicRooms")}
                     />
                   );
                 }}
@@ -228,7 +228,7 @@ export default function AdminChatPage() {
             <Suspense
               fallback={
                 <div className="h-full flex items-center justify-center text-sm text-admin-text-dim">
-                  Loading room data...
+                  {t("chat.loadingRoom")}
                 </div>
               }
             >
@@ -241,9 +241,9 @@ export default function AdminChatPage() {
                     return (
                       <div className="h-full flex items-center justify-center p-6 text-center">
                         <div>
-                          <h3 className="text-lg font-bold text-admin-text">No room selected</h3>
+                          <h3 className="text-lg font-bold text-admin-text">{t("chat.noRoomSelected")}</h3>
                           <p className="mt-2 text-sm text-admin-text-dim">
-                            Choose a public room from the directory to start monitoring messages.
+                            {t("chat.selectRoomHint")}
                           </p>
                         </div>
                       </div>
@@ -254,7 +254,7 @@ export default function AdminChatPage() {
                     <div className="h-full min-h-0 flex flex-col">
                       <ChatHeader
                         roomName={currentRoom.name}
-                        roomType="Public"
+                        roomType={t("chat.roomTypePublic")}
                         participantCount={socketData.onlineUsers.length}
                         isConnected={socketData.isConnected}
                         onRefresh={socketData.reconnect}
@@ -292,19 +292,19 @@ export default function AdminChatPage() {
           <GlassCard className="h-[38vh] overflow-hidden border-admin-border/40">
             <OnlineUsersPanel
               users={socketData.onlineUsers}
-              title="Participants"
+              title={t("chat.participants")}
               onAvatarClick={user.role === "admin" ? (u, el) => handleAvatarClick(u, el) : undefined}
             />
           </GlassCard>
 
           {isAdmin && (
             <GlassCard className="border-admin-border/40">
-              <h4 className="text-sm font-semibold text-admin-text mb-3">Blocked words</h4>
+              <h4 className="text-sm font-semibold text-admin-text mb-3">{t("chat.blockedWords")}</h4>
               <div className="flex gap-2">
                 <input
                   value={newBlockedWord}
                   onChange={(e) => setNewBlockedWord(e.target.value)}
-                  placeholder="add blocked word"
+                  placeholder={t("chat.addBlockedWordPh")}
                   className="flex-1 rounded-lg border border-admin-border bg-admin-bg/40 px-2 py-1.5 text-xs text-admin-text outline-none focus:ring-1 ring-admin-primary/40"
                 />
                 <button
@@ -312,7 +312,7 @@ export default function AdminChatPage() {
                   onClick={handleAddBlockedWord}
                   className="rounded-lg bg-admin-primary px-3 py-1.5 text-xs font-semibold text-admin-bg hover:bg-admin-accent transition-colors"
                 >
-                  Add
+                  {t("common.add")}
                 </button>
               </div>
               <div className="mt-3 max-h-24 space-y-1 overflow-y-auto custom-scrollbar">
@@ -324,20 +324,20 @@ export default function AdminChatPage() {
                       onClick={() => deleteBlockedWord(word._id).then(refreshModerationData).catch(console.error)}
                       className="text-admin-error hover:underline"
                     >
-                      remove
+                      {t("chat.remove")}
                     </button>
                   </div>
                 ))}
-                {blockedWords.length === 0 && <p className="text-xs text-admin-text-dim">No blocked words.</p>}
+                {blockedWords.length === 0 && <p className="text-xs text-admin-text-dim">{t("chat.noBlockedWords")}</p>}
               </div>
             </GlassCard>
           )}
 
           {isAdmin && (
             <GlassCard className="border-admin-border/40">
-              <h4 className="text-sm font-semibold text-admin-text mb-3">Blocked users</h4>
+              <h4 className="text-sm font-semibold text-admin-text mb-3">{t("chat.blockedUsers")}</h4>
               <div className="max-h-28 overflow-y-auto custom-scrollbar space-y-1">
-                {blockedUsers.length === 0 && <p className="text-xs text-admin-text-dim">No blocked users.</p>}
+                {blockedUsers.length === 0 && <p className="text-xs text-admin-text-dim">{t("chat.noBlockedUsers")}</p>}
                 {blockedUsers.map((item) => (
                   <div key={item._id} className="flex items-center justify-between gap-2 rounded border border-admin-border/30 bg-admin-bg/20 px-2 py-1 text-xs">
                     <span className="truncate">{item.user_id?.nickname || item.user_id?._id}</span>
@@ -346,7 +346,7 @@ export default function AdminChatPage() {
                       onClick={() => handleToggleChatBlock(item.user_id._id, false)}
                       className="text-admin-success hover:underline"
                     >
-                      unblock
+                      {t("chat.unblock")}
                     </button>
                   </div>
                 ))}
@@ -377,7 +377,7 @@ export default function AdminChatPage() {
         isChatBlocked={avatarMenuUser ? blockedUserIdSet.has(avatarMenuUser._id) : false}
         onToggleChatBlock={handleToggleChatBlock}
       />
-    </div>
+    </AdminPageShell>
   );
 }
 

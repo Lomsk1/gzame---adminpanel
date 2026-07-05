@@ -45,6 +45,10 @@ import AiMemoryPage from "./pages/ai/memory/page";
 import { aiMemoryLoader } from "./features/ai-memory/ai-memory.loaders";
 import AiOverviewPage from "./pages/ai/overview/page";
 import { aiOverviewLoader } from "./features/ai-overview/ai-overview.loaders";
+import PaymentsPage from "./pages/payments/page";
+import { paymentsPageLoader } from "./features/payments/payments.loaders";
+import ReportsPage from "./pages/reports/page";
+import { reportsPageLoader } from "./features/reports/reports.loaders";
 
 
 export const router = createBrowserRouter([
@@ -141,6 +145,16 @@ export const router = createBrowserRouter([
         path: "specialists/booking-clicks",
         element: <BookingClicksPage />,
         loader: bookingClicksPageLoader
+      },
+      {
+        path: "payments",
+        element: <PaymentsPage />,
+        loader: paymentsPageLoader,
+      },
+      {
+        path: "reports",
+        element: <ReportsPage />,
+        loader: reportsPageLoader,
       },
       {
         path: "early-access",

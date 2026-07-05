@@ -1,7 +1,7 @@
 import { Suspense, useState, useEffect } from "react";
 import { useLoaderData, Await, useSearchParams, useFetcher } from "react-router";
 import {
-    Sword, ChevronLeft, ChevronRight, Search, Database, Activity,
+    Sword, ChevronLeft, ChevronRight, Search, Database,
 } from "lucide-react";
 
 // Types
@@ -10,10 +10,13 @@ import { QuestEditorDrawer, type QuestFormData } from "../../components/drawers/
 import { toast } from "sonner";
 import ButtonInitialization from "../../components/ui/button-initialize";
 import QuestCard from "../../components/cards/quest-card";
+import { AdminPageHeader, AdminPageShell } from "../../components/admin";
+import { useAdminT } from "../../store/locale/locale";
 
 type Quest = QuestsTypes["data"][number];
 
 export default function QuestsPage() {
+    const { t } = useAdminT();
     const { questsData } = useLoaderData() as { questsData: Promise<QuestsTypes> };
     const [searchParams, setSearchParams] = useSearchParams();
     const fetcher = useFetcher();
@@ -69,50 +72,31 @@ export default function QuestsPage() {
     };
 
     return (
-        <div className="p-8 space-y-8 bg-admin-bg min-h-screen font-mono animate-in fade-in slide-in-from-bottom-4 duration-700">
-            {/* --- HEADER --- */}
-            <header className="flex flex-col xl:flex-row justify-between items-start xl:items-end gap-6 border-b border-admin-primary/20 pb-8">
-                <div className="space-y-2">
-                    <h1 className="text-4xl font-black text-admin-text uppercase italic tracking-tighter flex items-center gap-3">
-                        <Sword className="text-admin-primary w-8 h-8" />
-                        Quest_Nodes<span className="text-admin-primary">.db</span>
-                    </h1>
-                    <div className="flex items-center gap-4">
-                        <Suspense fallback={<div className="h-4 w-20 bg-admin-panel animate-pulse" />}>
-                            <Await resolve={questsData}>
-                                {(res) => (
-                                    <span className="text-[12px] text-admin-primary font-mono bg-admin-primary/10 px-2 py-0.5 border border-admin-primary/20">
-                                        TOTAL_RECORDS: {res.total || 0}
-                                    </span>
-                                )}
-                            </Await>
-                        </Suspense>
-                        <span className="text-[12px] text-admin-text-dim font-mono uppercase tracking-widest flex items-center gap-2">
-                            <Activity size={10} className="text-admin-accent animate-pulse" /> System_Online
-                        </span>
-                    </div>
-                </div>
+        <AdminPageShell className="space-y-8 font-mono">
+            <AdminPageHeader
+                title={t("pages.quests.title")}
+                icon={<Sword className="text-admin-primary w-5 h-5" />}
+                actions={
+                    <div className="flex flex-wrap items-center gap-4">
+                        <div className="flex gap-1 p-1 bg-admin-panel rounded-lg border border-admin-border">
+                            {["all", "true", "false"].map((val) => (
+                                <button
+                                    key={val}
+                                    onClick={() => updateFilter("is_foundational", val)}
+                                    className={`px-4 py-1.5 rounded text-[11.5px] cursor-pointer font-black tracking-wider uppercase transition-all ${foundationalFilter === val
+                                        ? 'bg-admin-primary text-admin-bg shadow-lg shadow-admin-primary/20'
+                                        : 'text-admin-text-dim hover:text-admin-text'
+                                        }`}
+                                >
+                                    {val === "all" ? t("quests.filter.all") : val === "true" ? t("quests.filter.foundational") : t("quests.filter.daily")}
+                                </button>
+                            ))}
+                        </div>
 
-                <div className="flex flex-wrap items-center gap-4">
-                    {/* --- TOGGLE FILTER --- */}
-                    <div className="flex gap-1 p-1 bg-admin-panel rounded-lg border border-admin-border">
-                        {["all", "true", "false"].map((val) => (
-                            <button
-                                key={val}
-                                onClick={() => updateFilter("is_foundational", val)}
-                                className={`px-4 py-1.5 rounded text-[11.5px] cursor-pointer font-black tracking-wider uppercase transition-all ${foundationalFilter === val
-                                    ? 'bg-admin-primary text-admin-bg shadow-lg shadow-admin-primary/20'
-                                    : 'text-admin-text-dim hover:text-admin-text'
-                                    }`}
-                            >
-                                {val === "all" ? "All" : val === "true" ? "Foundational" : "Daily"}
-                            </button>
-                        ))}
+                        <ButtonInitialization onClick={() => { setEditingQuest(null); setDrawerOpen(true); }} />
                     </div>
-
-                    <ButtonInitialization onClick={() => { setEditingQuest(null); setDrawerOpen(true); }} />
-                </div>
-            </header>
+                }
+            />
 
             <Suspense fallback={<div className="grid grid-cols-3 gap-6 animate-pulse">{[...Array(6)].map((_, i) => <div key={i} className="h-48 bg-admin-panel rounded-xl" />)}</div>}>
                 <Await resolve={questsData}>
@@ -120,10 +104,10 @@ export default function QuestsPage() {
                         <div className="space-y-8">
                             {/* --- STATS BARS --- */}
                             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                                <QuickStat label="Live_Nodes" val={resolved.total} icon={<Database size={14} />} />
-                                <QuickStat label="Uplink_Type" val={resolved.fromCache ? "CACHED" : "DATABASE"} color="text-admin-accent" />
-                                <QuickStat label="Sector_Page" val={currentPage} />
-                                <QuickStat label="Active_Buffer" val={resolved.data.length} />
+                                <QuickStat label={t("quests.stats.liveNodes")} val={resolved.total} icon={<Database size={14} />} />
+                                <QuickStat label={t("quests.stats.uplinkType")} val={resolved.fromCache ? t("quests.stats.cached") : t("quests.stats.database")} color="text-admin-accent" />
+                                <QuickStat label={t("quests.stats.sectorPage")} val={currentPage} />
+                                <QuickStat label={t("quests.stats.activeBuffer")} val={resolved.data.length} />
                             </div>
 
                             {/* --- GRID --- */}
@@ -140,7 +124,7 @@ export default function QuestsPage() {
                                 ) : (
                                     <div className="col-span-full h-64 border border-dashed border-admin-border flex flex-col items-center justify-center opacity-40">
                                         <Search size={40} className="mb-2" />
-                                        <p className="text-xs font-black uppercase tracking-widest">No_Nodes_Detected</p>
+                                        <p className="text-xs font-black uppercase tracking-widest">{t("quests.empty")}</p>
                                     </div>
                                 )}
                             </div>
@@ -150,6 +134,7 @@ export default function QuestsPage() {
                                 total={resolved.total}
                                 limit={20}
                                 onPageChange={(p) => updateFilter("page", p.toString())}
+                                t={t}
                             />
                         </div>
                     )}
@@ -164,7 +149,7 @@ export default function QuestsPage() {
                     isSubmitting={fetcher.state !== "idle"}
                 />
             )}
-        </div>
+        </AdminPageShell>
     );
 }
 
@@ -182,13 +167,13 @@ function QuickStat({ label, val, color = "text-admin-text", icon }: { label: str
     );
 }
 
-function Pagination({ current, total, limit, onPageChange }: { current: number, total: number, limit: number, onPageChange: (p: number) => void }) {
+function Pagination({ current, total, limit, onPageChange, t }: { current: number, total: number, limit: number, onPageChange: (p: number) => void, t: ReturnType<typeof useAdminT>["t"] }) {
     const maxPage = Math.ceil(total / limit);
     if (maxPage <= 1) return null;
     return (
         <div className="flex justify-between items-center bg-admin-panel border border-admin-border p-3 rounded-xl">
             <button disabled={current === 1} onClick={() => onPageChange(current - 1)} className="p-2 border border-admin-border rounded hover:bg-admin-primary/10 disabled:opacity-20 transition-all"><ChevronLeft size={16} /></button>
-            <span className="text-[10px] font-black uppercase text-admin-text-dim">Sector {current} // {maxPage}</span>
+            <span className="text-[10px] font-black uppercase text-admin-text-dim">{t("quests.pagination", { current, max: maxPage })}</span>
             <button disabled={current >= maxPage} onClick={() => onPageChange(current + 1)} className="p-2 border border-admin-border rounded hover:bg-admin-primary/10 disabled:opacity-20 transition-all"><ChevronRight size={16} /></button>
         </div>
     );

@@ -30,6 +30,9 @@ export interface Specialist {
   invite_code?: string;
   suggested_spheres?: string[];
   kyc_status?: 'none' | 'pending' | 'verified' | 'rejected';
+  trust_tier?: 'T0' | 'T1' | 'T2';
+  reserve_pct?: number;
+  dispute_rate_90d?: number;
   services?: {
     title: string;
     duration_minutes: number;
@@ -43,6 +46,20 @@ export interface Specialist {
   languages?: string[];
   user_id?: string;
   portal_user_email?: string;
+  stripe_connect_account_id?: string;
+  is_ambassador?: boolean;
+  ambassador_country_code?: string;
+  ambassador_referral_code?: string;
+  referred_by_specialist_id?: string;
+  referred_by_specialist?: { _id: string; name: string };
+  legal_name?: string;
+  entity_type?: string;
+  tax_id?: string;
+  tax_country?: string;
+  address_line1?: string;
+  address_city?: string;
+  address_postal_code?: string;
+  address_country?: string;
   created_at?: string;
   updated_at?: string;
 }

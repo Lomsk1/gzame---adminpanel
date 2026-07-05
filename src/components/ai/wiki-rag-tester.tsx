@@ -4,8 +4,10 @@ import axiosAuth from "../../helper/axios";
 import { GlassCard } from "../cards/card-glass";
 import { ButtonComponent } from "../form/button";
 import { WikiCategoryBadge } from "../wiki/wiki-category-badge";
-import { WIKI_CATEGORIES, WIKI_CATEGORY_META } from "../../features/wiki/wiki.constants";
+import { WIKI_CATEGORIES } from "../../features/wiki/wiki.constants";
+import { wikiCategoryLabel } from "../../i18n/domain-labels";
 import type { WikiCategory } from "../../types/wiki/wiki";
+import { useAdminT } from "../../store/locale/locale";
 
 type WikiSearchHit = {
   _id: string;
@@ -17,6 +19,7 @@ type WikiSearchHit = {
 };
 
 export function WikiRagTester({ compact = false }: { compact?: boolean }) {
+  const { t } = useAdminT();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<WikiCategory | "all">("all");
   const [hits, setHits] = useState<WikiSearchHit[]>([]);
@@ -41,7 +44,7 @@ export function WikiRagTester({ compact = false }: { compact?: boolean }) {
       setHits(res.data.data.hits);
       setLastQuery(q);
     } catch {
-      setError("Search failed. Check server connection and Atlas vector index.");
+      setError(t("wiki.rag.searchFailed"));
       setHits([]);
     } finally {
       setLoading(false);
@@ -53,19 +56,17 @@ export function WikiRagTester({ compact = false }: { compact?: boolean }) {
       <div className="flex items-center gap-2 mb-3">
         <Sparkles className="w-4 h-4 text-admin-primary" />
         <h3 className="text-xs font-black text-admin-primary uppercase tracking-widest">
-          Test wiki retrieval (RAG)
+          {t("wiki.rag.title")}
         </h3>
       </div>
-      <p className="text-sm text-admin-text-dim mb-4">
-        Simulates what DEVI would pull from the wiki for a user message. Uses the same vector search as production.
-      </p>
+      <p className="text-sm text-admin-text-dim mb-4">{t("wiki.rag.hint")}</p>
 
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-admin-text-dim" />
           <input
             className="w-full pl-10 pr-4 py-2.5 bg-admin-panel/40 border border-admin-border rounded-xl text-sm text-admin-text outline-none focus:border-admin-primary"
-            placeholder='e.g. "How should a Warrior handle stress?"'
+            placeholder={t("wiki.rag.placeholder")}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && runSearch()}
@@ -76,10 +77,10 @@ export function WikiRagTester({ compact = false }: { compact?: boolean }) {
           value={category}
           onChange={(e) => setCategory(e.target.value as WikiCategory | "all")}
         >
-          <option value="all">All categories</option>
+          <option value="all">{t("wiki.rag.allCategories")}</option>
           {WIKI_CATEGORIES.map((c) => (
             <option key={c} value={c}>
-              {WIKI_CATEGORY_META[c].label}
+              {wikiCategoryLabel(t, c)}
             </option>
           ))}
         </select>
@@ -90,24 +91,22 @@ export function WikiRagTester({ compact = false }: { compact?: boolean }) {
           onClick={runSearch}
           isLoading={loading}
         >
-          Run search
+          {t("wiki.rag.runSearch")}
         </ButtonComponent>
       </div>
 
-      {error && (
-        <p className="text-sm text-admin-error mb-3">{error}</p>
-      )}
+      {error && <p className="text-sm text-admin-error mb-3">{error}</p>}
 
       {lastQuery && !loading && (
         <p className="text-[10px] text-admin-text-dim uppercase tracking-wider mb-3">
-          Results for &quot;{lastQuery}&quot; · {hits.length} hit{hits.length !== 1 ? "s" : ""}
+          {t("wiki.rag.results", { query: lastQuery, count: hits.length })}
         </p>
       )}
 
       <div className="space-y-2 max-h-[280px] overflow-y-auto custom-scrollbar">
         {hits.length === 0 && lastQuery && !loading ? (
           <p className="text-sm text-admin-text-dim italic py-4 text-center">
-            No matches. Add active wiki entries or create Atlas index on M10+.
+            {t("wiki.rag.noMatches")}
           </p>
         ) : (
           hits.map((hit) => (
@@ -118,7 +117,7 @@ export function WikiRagTester({ compact = false }: { compact?: boolean }) {
               <div className="flex items-center justify-between gap-2 mb-1">
                 <WikiCategoryBadge category={hit.category} />
                 <span className="text-[10px] font-mono text-admin-primary">
-                  score {(hit.score * 100).toFixed(0)}%
+                  {t("wiki.rag.score", { value: (hit.score * 100).toFixed(0) })}
                 </span>
               </div>
               <p className="font-semibold text-admin-text text-sm">{hit.title}</p>

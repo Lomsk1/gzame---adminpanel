@@ -18,8 +18,11 @@ import { ButtonComponent } from "../../components/form/button";
 import { ConfirmDialog } from "../../components/ui/confirm-dialog";
 import axiosAuth, { axiosMultipartAuth } from "../../helper/axios";
 import type { AndroidApkReleasePayload } from "../../features/cloud/cloud.loaders";
+import { AdminPageHeader, AdminPageShell } from "../../components/admin";
+import { useAdminT } from "../../store/locale/locale";
 
 export default function CloudPage() {
+  const { t } = useAdminT();
   const { release } = useLoaderData() as { release: AndroidApkReleasePayload };
   const revalidator = useRevalidator();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -34,11 +37,11 @@ export default function CloudPage() {
     const input = fileInputRef.current;
     const file = input?.files?.[0];
     if (!file) {
-      toast.error("Choose an .apk file first.");
+      toast.error(t("cloud.chooseApk"));
       return;
     }
     setUploading(true);
-    const toastId = toast.loading("Uploading to Cloudinary…");
+    const toastId = toast.loading(t("cloud.uploading"));
     try {
       const fd = new FormData();
       fd.append("apk", file);
@@ -46,9 +49,9 @@ export default function CloudPage() {
         fd.append("versionLabel", versionLabel.trim());
       }
       await axiosMultipartAuth.post("/api/v1/android-apk/upload", fd);
-      toast.success("APK published", {
+      toast.success(t("cloud.uploadSuccess"), {
         id: toastId,
-        description: "Landing page will show the new direct download.",
+        description: t("cloud.uploadSuccessDesc"),
       });
       setVersionLabel("");
       setSelectedFileName(null);
@@ -58,8 +61,8 @@ export default function CloudPage() {
       const message =
         axios.isAxiosError(err) && err.response?.data?.message
           ? String((err.response.data as { message?: string }).message)
-          : "Upload failed.";
-      toast.error("Upload failed", { id: toastId, description: message });
+          : t("cloud.uploadFailed");
+      toast.error(t("cloud.uploadFailed"), { id: toastId, description: message });
     } finally {
       setUploading(false);
     }
@@ -67,14 +70,14 @@ export default function CloudPage() {
 
   const handleDelete = async () => {
     setDeleting(true);
-    const toastId = toast.loading("Removing release…");
+    const toastId = toast.loading(t("cloud.removingRelease"));
     try {
       await axiosAuth.delete("/api/v1/android-apk");
-      toast.success("Direct APK removed", { id: toastId });
+      toast.success(t("cloud.removedSuccess"), { id: toastId });
       setClearOpen(false);
       await revalidator.revalidate();
     } catch {
-      toast.error("Could not remove release", { id: toastId });
+      toast.error(t("cloud.removeFailed"), { id: toastId });
     } finally {
       setDeleting(false);
     }
@@ -84,53 +87,31 @@ export default function CloudPage() {
     if (!release?.downloadUrl) return;
     try {
       await navigator.clipboard.writeText(release.downloadUrl);
-      toast.success("URL copied to clipboard");
+      toast.success(t("cloud.urlCopied"));
     } catch {
-      toast.error("Could not copy");
+      toast.error(t("cloud.copyFailed"));
     }
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      {/* Hero */}
-      <div className="relative overflow-hidden rounded-2xl border border-admin-border/60 bg-admin-card/40">
-        <div
-          className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-admin-primary/20 blur-3xl"
-          aria-hidden
-        />
-        <div
-          className="pointer-events-none absolute -bottom-16 -left-16 h-48 w-48 rounded-full bg-admin-accent/15 blur-3xl"
-          aria-hidden
-        />
-        <div className="relative z-10 flex flex-col gap-4 px-6 py-8 sm:flex-row sm:items-end sm:justify-between sm:px-8">
-          <div className="space-y-3 max-w-2xl">
-            <div className="inline-flex items-center gap-2 rounded-full border border-admin-primary/30 bg-admin-primary/10 px-3 py-1">
-              <Cloud className="h-3.5 w-3.5 text-admin-primary" aria-hidden />
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-admin-primary">
-                Cloudinary · Landing
-              </span>
-            </div>
-            <h1 className="text-3xl font-black uppercase italic tracking-tighter text-admin-text sm:text-4xl">
-              Cloud
-            </h1>
-            <p className="text-sm leading-relaxed text-admin-text-dim">
-              Host the Android APK on Cloudinary. The public site pulls the signed URL automatically —
-              no redeploy needed when you publish a new build.
-            </p>
-          </div>
+    <AdminPageShell className="space-y-8">
+      <AdminPageHeader
+        title={t("pages.cloud.title")}
+        icon={<Cloud className="h-5 w-5 text-admin-primary" />}
+        actions={
           <div className="flex shrink-0 items-center gap-2 rounded-xl border border-admin-border/80 bg-admin-panel/80 px-4 py-3 backdrop-blur-sm">
             <Package className="h-5 w-5 text-admin-accent" aria-hidden />
             <div className="text-left">
               <p className="text-[10px] font-black uppercase tracking-wider text-admin-text-dim">
-                Endpoint
+                {t("cloud.endpoint")}
               </p>
               <p className="font-mono text-xs text-admin-text">GET /api/v1/android-apk</p>
             </div>
           </div>
-        </div>
-      </div>
+        }
+      />
 
-      <div className="grid gap-6 lg:grid-cols-12 lg:items-start">
+      <div className="grid gap-6 lg:grid-cols-12 lg:items-start admin-fade-up" style={{ animationDelay: "80ms" }}>
         {/* Live release */}
         <GlassCard
           glow={!!release}
@@ -140,10 +121,10 @@ export default function CloudPage() {
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
                 <p className="text-[10px] font-black uppercase tracking-[0.2em] text-admin-text-dim">
-                  Live release
+                  {t("cloud.liveRelease")}
                 </p>
                 <h2 className="mt-2 text-xl font-bold tracking-tight text-admin-text">
-                  Android direct download
+                  {t("cloud.androidDownload")}
                 </h2>
               </div>
               {release ? (
@@ -152,12 +133,12 @@ export default function CloudPage() {
                     <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-admin-success opacity-40" />
                     <span className="relative inline-flex h-2 w-2 rounded-full bg-admin-success" />
                   </span>
-                  Live
+                  {t("cloud.live")}
                 </span>
               ) : (
                 <span className="inline-flex items-center gap-2 rounded-full border border-admin-warning/40 bg-admin-warning/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-admin-warning">
                   <Radio className="h-3.5 w-3.5" aria-hidden />
-                  Not published
+                  {t("cloud.notPublished")}
                 </span>
               )}
             </div>
@@ -167,7 +148,7 @@ export default function CloudPage() {
                 <dl className="grid gap-4 sm:grid-cols-3">
                   <div className="rounded-xl border border-admin-border/60 bg-admin-bg/50 p-4">
                     <dt className="text-[10px] font-black uppercase tracking-wider text-admin-text-dim">
-                      Version
+                      {t("cloud.version")}
                     </dt>
                     <dd className="mt-2 font-mono text-sm font-semibold text-admin-text">
                       {release.versionLabel?.trim() || "—"}
@@ -175,7 +156,7 @@ export default function CloudPage() {
                   </div>
                   <div className="rounded-xl border border-admin-border/60 bg-admin-bg/50 p-4 sm:col-span-2">
                     <dt className="text-[10px] font-black uppercase tracking-wider text-admin-text-dim">
-                      Package file
+                      {t("cloud.packageFile")}
                     </dt>
                     <dd className="mt-2 truncate font-mono text-sm text-admin-text" title={release.fileName}>
                       {release.fileName || "—"}
@@ -183,7 +164,7 @@ export default function CloudPage() {
                   </div>
                   <div className="rounded-xl border border-admin-border/60 bg-admin-bg/50 p-4 sm:col-span-3">
                     <dt className="text-[10px] font-black uppercase tracking-wider text-admin-text-dim">
-                      Last updated
+                      {t("cloud.lastUpdated")}
                     </dt>
                     <dd className="mt-2 text-sm font-medium text-admin-text">
                       {release.updatedAt
@@ -195,7 +176,7 @@ export default function CloudPage() {
 
                 <div className="rounded-xl border border-admin-border bg-admin-bg/60 p-3">
                   <p className="text-[10px] font-black uppercase tracking-wider text-admin-text-dim mb-2">
-                    Hosted URL
+                    {t("cloud.hostedUrl")}
                   </p>
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <code className="block max-w-full truncate rounded-lg bg-admin-panel px-3 py-2 text-[11px] leading-relaxed text-admin-accent">
@@ -208,7 +189,7 @@ export default function CloudPage() {
                         className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-admin-border bg-admin-card px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-admin-text transition hover:border-admin-primary hover:text-admin-primary"
                       >
                         <Copy className="h-3.5 w-3.5" aria-hidden />
-                        Copy
+                        {t("cloud.copy")}
                       </button>
                       <a
                         href={release.downloadUrl}
@@ -216,7 +197,7 @@ export default function CloudPage() {
                         rel="noopener noreferrer"
                         className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-admin-primary px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-white shadow-lg shadow-admin-primary/25 transition hover:bg-admin-accent"
                       >
-                        Open
+                        {t("cloud.open")}
                         <ExternalLink className="h-3.5 w-3.5" aria-hidden />
                       </a>
                     </div>
@@ -229,10 +210,10 @@ export default function CloudPage() {
                   <Package className="h-7 w-7" aria-hidden />
                 </div>
                 <p className="max-w-sm text-sm font-medium text-admin-text">
-                  No APK on the edge yet
+                  {t("cloud.noApkTitle")}
                 </p>
                 <p className="mt-2 max-w-md text-xs leading-relaxed text-admin-text-dim">
-                  Upload a build on the right → your landing page will show the emerald “Direct APK” card and footer link automatically.
+                  {t("cloud.noApkDesc")}
                 </p>
               </div>
             )}
@@ -244,25 +225,25 @@ export default function CloudPage() {
           <div className="flex flex-col gap-6">
             <div>
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-admin-text-dim">
-                Publish
+                {t("cloud.publish")}
               </p>
               <h2 className="mt-2 text-xl font-bold tracking-tight text-admin-text">
-                New build
+                {t("cloud.newBuild")}
               </h2>
               <p className="mt-2 text-xs leading-relaxed text-admin-text-dim">
-                Upload replaces the previous file on Cloudinary and updates the public URL in one step.
+                {t("cloud.publishDesc")}
               </p>
             </div>
 
             <label className="space-y-2">
               <span className="text-[10px] font-black uppercase tracking-wider text-admin-text-dim">
-                Version label <span className="font-normal text-admin-text-muted">(optional)</span>
+                {t("cloud.versionLabel")} <span className="font-normal text-admin-text-muted">{t("cloud.optional")}</span>
               </span>
               <input
                 id="apk-version"
                 value={versionLabel}
                 onChange={(e) => setVersionLabel(e.target.value)}
-                placeholder="e.g. 1.4.2"
+                placeholder={t("cloud.versionPlaceholder")}
                 maxLength={64}
                 className="w-full rounded-xl border border-admin-border bg-admin-bg/80 px-4 py-3 text-sm text-admin-text outline-none transition focus:border-admin-primary focus:ring-1 focus:ring-admin-primary/40"
               />
@@ -270,7 +251,7 @@ export default function CloudPage() {
 
             <div className="space-y-2">
               <span className="text-[10px] font-black uppercase tracking-wider text-admin-text-dim">
-                APK package
+                {t("cloud.apkPackage")}
               </span>
               <label
                 htmlFor="apk-file"
@@ -292,10 +273,10 @@ export default function CloudPage() {
                   <Upload className="h-6 w-6" aria-hidden />
                 </div>
                 <p className="text-center text-sm font-semibold text-admin-text">
-                  {selectedFileName ? selectedFileName : "Drop or click to select .apk"}
+                  {selectedFileName ? selectedFileName : t("cloud.dropOrClick")}
                 </p>
                 <p className="mt-1 text-center text-[11px] text-admin-text-dim">
-                  Max 200 MB · raw storage on Cloudinary
+                  {t("cloud.maxSize")}
                 </p>
               </label>
             </div>
@@ -308,7 +289,7 @@ export default function CloudPage() {
                 onClick={handleUpload}
                 className="w-full"
               >
-                Upload & publish
+                {t("cloud.uploadPublish")}
               </ButtonComponent>
               {release ? (
                 <button
@@ -318,7 +299,7 @@ export default function CloudPage() {
                   className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-admin-error/40 bg-admin-error/10 py-3.5 text-[10px] font-bold uppercase tracking-widest text-admin-error transition hover:bg-admin-error/20 disabled:opacity-50"
                 >
                   <Trash2 className="h-4 w-4" aria-hidden />
-                  Remove from cloud
+                  {t("cloud.removeFromCloud")}
                 </button>
               ) : null}
             </div>
@@ -326,7 +307,7 @@ export default function CloudPage() {
             <div className="flex gap-3 rounded-xl border border-admin-border/50 bg-admin-bg/40 px-4 py-3">
               <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-admin-success" aria-hidden />
               <p className="text-[11px] leading-relaxed text-admin-text-dim">
-                Store listings (Play / App Store) are unchanged. Only the optional sideload link on the marketing site is affected.
+                {t("cloud.storeNote")}
               </p>
             </div>
           </div>
@@ -335,13 +316,13 @@ export default function CloudPage() {
 
       <ConfirmDialog
         open={clearOpen}
-        title="Remove Android APK?"
-        message="This deletes the file from Cloudinary and hides the direct download on the landing page. Store listings are unaffected."
-        confirmLabel={deleting ? "Removing…" : "Remove"}
+        title={t("cloud.removeTitle")}
+        message={t("cloud.removeMessage")}
+        confirmLabel={deleting ? t("cloud.removing") : t("cloud.remove")}
         variant="danger"
         onCancel={() => setClearOpen(false)}
         onConfirm={handleDelete}
       />
-    </div>
+    </AdminPageShell>
   );
 }

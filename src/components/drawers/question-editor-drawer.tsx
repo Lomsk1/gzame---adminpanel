@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { AdminDrawerShell } from "./admin-drawer-shell";
-import { AdminInput } from "../ui/input-form"; // Adjust path as needed
+import { AdminInput } from "../ui/input-form";
 import { AdminConfirmWrapper } from "../wrapper/wrapper";
+import { useAdminT } from "../../store/locale/locale";
 
 // --- Types ---
 
@@ -38,6 +39,7 @@ const createNewOption = (sequence: number): Option => ({
 });
 
 export const QuestionEditorDrawer = ({ config, onClose, onSave, isSubmitting }: Props) => {
+    const { t } = useAdminT();
     const [form, setForm] = useState<Question>({
         title: config?.title
             ? { ka: config.title.ka, en: config.title.en, ru: config.title.ru ?? "", ja: config.title.ja ?? "" }
@@ -58,7 +60,7 @@ export const QuestionEditorDrawer = ({ config, onClose, onSave, isSubmitting }: 
 
     const removeOption = (idx: number) => {
         if (form.options.length <= 1) return;
-        if (confirm("DESTRUCTIVE_ACTION: PURGE_OPTION_DATA?")) {
+        if (confirm(t("questions.editor.purgeOptionConfirm"))) {
             setForm(prev => ({
                 ...prev,
                 options: prev.options
@@ -91,7 +93,7 @@ export const QuestionEditorDrawer = ({ config, onClose, onSave, isSubmitting }: 
                 onClick={handleSave}
                 className="group relative w-full py-4 bg-admin-primary font-black uppercase tracking-widest text-xs overflow-hidden transition-all hover:brightness-110 active:scale-95 disabled:opacity-50 text-admin-bg cursor-pointer"
             >
-                <span className="relative z-10">{isSubmitting ? "COMMIT_IN_PROGRESS..." : "COMMIT_DATA_STREAM"}</span>
+                <span className="relative z-10">{isSubmitting ? t("drawer.commitInProgress") : t("drawer.commitData")}</span>
                 <div className="absolute inset-0 bg-linear-to-b from-white/20 to-transparent -translate-y-full group-hover:translate-y-full transition-transform duration-1000" />
             </button>
         </div>
@@ -100,7 +102,7 @@ export const QuestionEditorDrawer = ({ config, onClose, onSave, isSubmitting }: 
     return (
         <AdminDrawerShell
             isOpen={true}
-            title={config ? "RECONFIGURING_NODE" : "INITIALIZING_NODE"}
+            title={config ? t("questions.editor.reconfiguring") : t("questions.editor.initializing")}
             onClose={onClose}
             isSubmitting={isSubmitting}
             footer={footer}
@@ -109,44 +111,44 @@ export const QuestionEditorDrawer = ({ config, onClose, onSave, isSubmitting }: 
                 {/* Global Settings */}
                 <div className="grid grid-cols-2 gap-4 items-end">
                     <AdminInput
-                        label="Node_Sequence"
+                        label={t("questions.editor.nodeSequence")}
                         type="number"
                         value={form.sequence}
                         onChange={(val) => setForm({ ...form, sequence: val })}
                     />
                     <div className="flex flex-col">
-                        <label className="text-[10px] font-black text-admin-primary uppercase mb-1">Status</label>
+                        <label className="text-[10px] font-black text-admin-primary uppercase mb-1">{t("common.status")}</label>
                         <button
                             type="button"
                             onClick={() => setForm({ ...form, isActive: !form.isActive })}
                             className={`py-2 border text-[10px] font-black transition-all ${form.isActive ? 'border-admin-primary text-admin-primary bg-admin-primary/5' : 'border-admin-error text-admin-error bg-admin-error/5'
                                 }`}
                         >
-                            {form.isActive ? "NODE_ACTIVE" : "NODE_OFFLINE"}
+                            {form.isActive ? t("questions.editor.nodeActive") : t("questions.editor.nodeOffline")}
                         </button>
                     </div>
                 </div>
 
                 {/* Question Titles */}
                 <div className="space-y-4">
-                    <h4 className="text-[10px] font-black text-admin-primary uppercase tracking-widest border-l-2 border-admin-primary pl-2">Question_Payload</h4>
+                    <h4 className="text-[10px] font-black text-admin-primary uppercase tracking-widest border-l-2 border-admin-primary pl-2">{t("questions.editor.questionPayload")}</h4>
                     <AdminInput
-                        label="EN_Title"
+                        label={t("questions.editor.enTitle")}
                         value={form.title.en}
                         onChange={(val) => setForm({ ...form, title: { ...form.title, en: val as string } })}
                     />
                     <AdminInput
-                        label="KA_Title"
+                        label={t("questions.editor.kaTitle")}
                         value={form.title.ka}
                         onChange={(val) => setForm({ ...form, title: { ...form.title, ka: val as string } })}
                     />
                     <AdminInput
-                        label="RU_Title"
+                        label={t("questions.editor.ruTitle")}
                         value={form.title.ru ?? ""}
                         onChange={(val) => setForm({ ...form, title: { ...form.title, ru: (val as string) || undefined } })}
                     />
                     <AdminInput
-                        label="JA_Title"
+                        label={t("questions.editor.jaTitle")}
                         value={form.title.ja ?? ""}
                         onChange={(val) => setForm({ ...form, title: { ...form.title, ja: (val as string) || undefined } })}
                     />
@@ -155,13 +157,13 @@ export const QuestionEditorDrawer = ({ config, onClose, onSave, isSubmitting }: 
                 {/* Response Matrix */}
                 <div className="space-y-6">
                     <div className="flex justify-between items-center">
-                        <h4 className="text-[10px] font-black text-admin-primary uppercase tracking-widest border-l-2 border-admin-primary pl-2">Response_Matrix</h4>
+                        <h4 className="text-[10px] font-black text-admin-primary uppercase tracking-widest border-l-2 border-admin-primary pl-2">{t("questions.editor.responseMatrix")}</h4>
                         <button
                             type="button"
                             onClick={addOption}
                             className="text-[10px] font-bold text-admin-primary hover:text-white transition-colors uppercase"
                         >
-                            [+ Initialize_Option]
+                            + {t("questions.editor.addOption")}
                         </button>
                     </div>
 
@@ -184,8 +186,8 @@ export const QuestionEditorDrawer = ({ config, onClose, onSave, isSubmitting }: 
                                     </div>
                                 </div>
                                 <AdminConfirmWrapper
-                                    title={`TERMINATE_OPTION::0x${idx + 1}`}
-                                    description="CRITICAL_ACTION: This will permanently purge this option and its psychotype matrix from the central node. Re-indexing will occur automatically."
+                                    title={t("questions.editor.purgeOptionTitle", { num: idx + 1 })}
+                                    description={t("questions.editor.purgeOptionDesc")}
                                     onConfirm={() => removeOption(idx)}
                                     variant="warning"
                                     className="w-fit!"
@@ -194,14 +196,14 @@ export const QuestionEditorDrawer = ({ config, onClose, onSave, isSubmitting }: 
                                         type="button"
                                         className="text-[9px] font-black text-admin-error hover:bg-admin-error hover:text-white px-2 py-0.5 transition-all uppercase border border-transparent hover:border-admin-error/50"
                                     >
-                                        [Purge_Data]
+                                        {t("questions.editor.purgeData")}
                                     </button>
                                 </AdminConfirmWrapper>
                             </div>
 
                             <div className="grid grid-cols-1 gap-3">
                                 <AdminInput
-                                    label="English Text"
+                                    label={t("questions.editor.enText")}
                                     value={opt.title.en}
                                     onChange={(val) => {
                                         const next = [...form.options];
@@ -210,7 +212,7 @@ export const QuestionEditorDrawer = ({ config, onClose, onSave, isSubmitting }: 
                                     }}
                                 />
                                 <AdminInput
-                                    label="ქართული ტექსტი"
+                                    label={t("questions.editor.kaText")}
                                     value={opt.title.ka}
                                     onChange={(val) => {
                                         const next = [...form.options];
@@ -219,7 +221,7 @@ export const QuestionEditorDrawer = ({ config, onClose, onSave, isSubmitting }: 
                                     }}
                                 />
                                 <AdminInput
-                                    label="Русский текст"
+                                    label={t("questions.editor.ruText")}
                                     value={opt.title.ru ?? ""}
                                     onChange={(val) => {
                                         const next = [...form.options];
@@ -228,7 +230,7 @@ export const QuestionEditorDrawer = ({ config, onClose, onSave, isSubmitting }: 
                                     }}
                                 />
                                 <AdminInput
-                                    label="日本語"
+                                    label={t("questions.editor.jaText")}
                                     value={opt.title.ja ?? ""}
                                     onChange={(val) => {
                                         const next = [...form.options];

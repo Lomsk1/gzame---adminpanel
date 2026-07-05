@@ -17,84 +17,77 @@ import { GlassCard } from "../../../components/cards/card-glass";
 import { ButtonComponent } from "../../../components/form/button";
 import { WikiRagTester } from "../../../components/ai/wiki-rag-tester";
 import type { aiOverviewLoader } from "../../../features/ai-overview/ai-overview.loaders";
-import { MEMORY_KIND_LABELS } from "../../../features/ai-memory/ai-memory.types";
+import { memoryKindLabel } from "../../../i18n/domain-labels";
+import { AdminPageHeader, AdminPageShell } from "../../../components/admin";
+import { useAdminT } from "../../../store/locale/locale";
 
-const QUICK_LINKS = [
-  { to: "/wiki", label: "LLM Wiki", icon: BookOpen, desc: "Curate shared knowledge" },
-  { to: "/ai/memory", label: "AI Memory", icon: Brain, desc: "Browse indexed memories" },
-  { to: "/ai", label: "Gemini Oracle", icon: Sparkles, desc: "Quest psychotype instruction" },
-  { to: "/ai/logs", label: "AI Logs", icon: ScrollText, desc: "Oracle decision stream" },
-];
+const QUICK_LINK_KEYS = [
+  { to: "/wiki", titleKey: "aiOverview.quickLinks.wiki", descKey: "aiOverview.quickLinks.wikiDesc", icon: BookOpen },
+  { to: "/ai/memory", titleKey: "aiOverview.quickLinks.memory", descKey: "aiOverview.quickLinks.memoryDesc", icon: Brain },
+  { to: "/ai", titleKey: "aiOverview.quickLinks.oracle", descKey: "aiOverview.quickLinks.oracleDesc", icon: Sparkles },
+  { to: "/ai/logs", titleKey: "aiOverview.quickLinks.logs", descKey: "aiOverview.quickLinks.logsDesc", icon: ScrollText },
+] as const;
 
 export default function AiOverviewPage() {
+  const { t } = useAdminT();
   const { overview, error } = useLoaderData<typeof aiOverviewLoader>();
   const cfg = overview?.config;
   const counts = overview?.counts;
 
   return (
-    <div className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto animate-in fade-in duration-500">
-      <header className="border-b border-admin-primary/20 pb-6">
-        <div className="flex items-center gap-2 mb-2">
-          <Brain className="w-5 h-5 text-admin-primary" />
-          <span className="text-[10px] font-bold text-admin-text-dim uppercase tracking-widest">
-            DEVI · RAG · Memory · Wiki
-          </span>
-        </div>
-        <h1 className="text-3xl md:text-4xl font-black text-admin-text uppercase italic tracking-tighter">
-          AI <span className="text-admin-primary">Command Center</span>
-        </h1>
-        <p className="text-sm text-admin-text-dim mt-2 max-w-3xl">
-          Full visibility into how DEVI remembers users, retrieves wiki knowledge, and runs background
-          intelligence. Configure indexes in Atlas — see{" "}
-          <code className="text-admin-primary text-xs">gzame-server/src/model/ai/README.md</code>.
-        </p>
-      </header>
+    <AdminPageShell maxWidthClass="max-w-7xl" className="space-y-8">
+      <AdminPageHeader
+        title={t("pages.aiOverview.title")}
+        icon={<Brain className="w-5 h-5 text-admin-primary" />}
+      />
 
-      {error && (
-        <GlassCard className="p-4 border-admin-error/30 bg-admin-error/10 text-admin-error text-sm">
+      {error ? (
+        <GlassCard className="p-4 border-admin-error/30 bg-admin-error/10 text-admin-error text-sm admin-fade-up">
           {error}
         </GlassCard>
-      )}
+      ) : null}
 
-      {/* Vital stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 admin-stagger">
         <StatCard
-          title="Wiki entries"
+          title={t("aiOverview.stats.wikiEntries")}
           value={String(counts?.wikiActive ?? "—")}
-          trend={counts ? `/${counts.wikiTotal} total` : undefined}
+          trend={counts ? t("aiOverview.stats.wikiTotal", { total: counts.wikiTotal }) : undefined}
           color="bg-admin-primary"
         />
         <StatCard
-          title="User memories"
+          title={t("aiOverview.stats.userMemories")}
           value={String(counts?.totalMemories ?? "—")}
-          trend={counts ? `${counts.usersWithMemories} users` : undefined}
+          trend={
+            counts
+              ? t("aiOverview.stats.usersCount", { count: counts.usersWithMemories })
+              : undefined
+          }
           color="bg-admin-success"
         />
         <StatCard
-          title="Knowledge edges"
+          title={t("aiOverview.stats.knowledgeEdges")}
           value={String(counts?.knowledgeEdges ?? "—")}
           color="bg-admin-accent"
         />
         <StatCard
-          title="Biometric snapshots"
+          title={t("aiOverview.stats.biometricSnapshots")}
           value={String(counts?.biometricSnapshots ?? "—")}
           color="bg-admin-warning"
         />
       </div>
 
-      {/* Quick nav */}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        {QUICK_LINKS.map((link) => {
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 admin-stagger">
+        {QUICK_LINK_KEYS.map((link) => {
           const Icon = link.icon;
           return (
             <Link
               key={link.to}
               to={link.to}
-              className="group p-4 rounded-xl border border-admin-border bg-admin-panel/40 hover:border-admin-primary/40 transition-all"
+              className="group p-4 rounded-xl border border-admin-border bg-admin-panel/40 hover:border-admin-primary/40 transition-all admin-nav-link"
             >
               <Icon className="w-5 h-5 text-admin-primary mb-2" />
-              <p className="font-bold text-admin-text text-sm">{link.label}</p>
-              <p className="text-xs text-admin-text-dim mt-1">{link.desc}</p>
+              <p className="font-bold text-admin-text text-sm">{t(link.titleKey)}</p>
+              <p className="text-xs text-admin-text-dim mt-1">{t(link.descKey)}</p>
               <ArrowRight className="w-4 h-4 text-admin-primary mt-2 opacity-0 group-hover:opacity-100 transition-opacity" />
             </Link>
           );
@@ -102,11 +95,10 @@ export default function AiOverviewPage() {
       </div>
 
       <div className="grid lg:grid-cols-2 gap-6">
-        {/* Pipelines */}
-        <GlassCard className="p-6">
+        <GlassCard className="p-6 admin-fade-up">
           <div className="flex items-center gap-2 mb-4">
             <GitBranch className="w-4 h-4 text-admin-primary" />
-            <h2 className="text-sm font-black text-admin-text uppercase italic">Data pipelines</h2>
+            <h2 className="text-sm font-black text-admin-text uppercase italic">{t("aiOverview.pipelines")}</h2>
           </div>
           <div className="space-y-4">
             {(overview?.pipelines ?? []).map((pipe) => (
@@ -127,50 +119,53 @@ export default function AiOverviewPage() {
           </div>
         </GlassCard>
 
-        {/* Config + crons */}
         <div className="space-y-6">
-          <GlassCard className="p-6">
+          <GlassCard className="p-6 admin-fade-up">
             <div className="flex items-center gap-2 mb-4">
               <Settings2 className="w-4 h-4 text-admin-primary" />
-              <h2 className="text-sm font-black text-admin-text uppercase italic">Runtime config</h2>
+              <h2 className="text-sm font-black text-admin-text uppercase italic">
+                {t("aiOverview.runtimeConfig")}
+              </h2>
             </div>
             {cfg ? (
               <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 text-sm">
-                <dt className="text-admin-text-dim">Chat models</dt>
+                <dt className="text-admin-text-dim">{t("aiOverview.config.chatModels")}</dt>
                 <dd className="text-admin-text font-mono text-xs">{cfg.geminiModelChain.join(", ")}</dd>
-                <dt className="text-admin-text-dim">Embedding model</dt>
+                <dt className="text-admin-text-dim">{t("aiOverview.config.embeddingModel")}</dt>
                 <dd className="text-admin-text font-mono text-xs">{cfg.embeddingModel}</dd>
-                <dt className="text-admin-text-dim">Vector dimensions</dt>
+                <dt className="text-admin-text-dim">{t("aiOverview.config.vectorDim")}</dt>
                 <dd className="text-admin-text">{cfg.vectorDim}</dd>
-                <dt className="text-admin-text-dim">Memory index</dt>
+                <dt className="text-admin-text-dim">{t("aiOverview.config.memoryIndex")}</dt>
                 <dd className="text-admin-text font-mono text-xs">{cfg.memoryVectorIndex}</dd>
-                <dt className="text-admin-text-dim">Wiki index</dt>
+                <dt className="text-admin-text-dim">{t("aiOverview.config.wikiIndex")}</dt>
                 <dd className="text-admin-text font-mono text-xs">{cfg.wikiVectorIndex}</dd>
-                <dt className="text-admin-text-dim">Top-K / min score</dt>
+                <dt className="text-admin-text-dim">{t("aiOverview.config.topK")}</dt>
                 <dd className="text-admin-text">
                   {cfg.memoryTopK} / {cfg.memoryMinScore}
                 </dd>
-                <dt className="text-admin-text-dim">RAG cache TTL</dt>
+                <dt className="text-admin-text-dim">{t("aiOverview.config.ragCache")}</dt>
                 <dd className="text-admin-text">{cfg.memoryRagCacheTtl}s</dd>
-                <dt className="text-admin-text-dim">Embedding queue</dt>
+                <dt className="text-admin-text-dim">{t("aiOverview.config.embeddingQueue")}</dt>
                 <dd className={cfg.embeddingQueueEnabled ? "text-admin-success" : "text-admin-text-dim"}>
-                  {cfg.embeddingQueueEnabled ? "BullMQ enabled" : "Inline (sync)"}
+                  {cfg.embeddingQueueEnabled ? t("aiOverview.config.bullmq") : t("aiOverview.config.inline")}
                 </dd>
               </dl>
             ) : (
-              <p className="text-sm text-admin-text-dim">Config unavailable</p>
+              <p className="text-sm text-admin-text-dim">{t("aiOverview.config.unavailable")}</p>
             )}
-            {counts && counts.wikiNeedsEmbed > 0 && (
+            {counts && counts.wikiNeedsEmbed > 0 ? (
               <div className="mt-4 p-3 rounded-lg bg-admin-warning/10 border border-admin-warning/30 text-sm text-admin-warning">
-                {counts.wikiNeedsEmbed} wiki entries need embedding — open Wiki and use Re-embed.
+                {t("aiOverview.wikiNeedsEmbed", { count: counts.wikiNeedsEmbed })}
               </div>
-            )}
+            ) : null}
           </GlassCard>
 
-          <GlassCard className="p-6">
+          <GlassCard className="p-6 admin-fade-up">
             <div className="flex items-center gap-2 mb-4">
               <Clock className="w-4 h-4 text-admin-primary" />
-              <h2 className="text-sm font-black text-admin-text uppercase italic">Background jobs</h2>
+              <h2 className="text-sm font-black text-admin-text uppercase italic">
+                {t("aiOverview.backgroundJobs")}
+              </h2>
             </div>
             <ul className="space-y-2">
               {(overview?.crons ?? []).map((cron) => (
@@ -187,12 +182,13 @@ export default function AiOverviewPage() {
         </div>
       </div>
 
-      {/* Memory breakdown */}
-      {counts && counts.memoriesByKind.length > 0 && (
-        <GlassCard className="p-6">
+      {counts && counts.memoriesByKind.length > 0 ? (
+        <GlassCard className="p-6 admin-fade-up">
           <div className="flex items-center gap-2 mb-4">
             <Activity className="w-4 h-4 text-admin-primary" />
-            <h2 className="text-sm font-black text-admin-text uppercase italic">Memories by kind</h2>
+            <h2 className="text-sm font-black text-admin-text uppercase italic">
+              {t("aiOverview.memoriesByKind")}
+            </h2>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
             {counts.memoriesByKind.map((row) => (
@@ -201,7 +197,7 @@ export default function AiOverviewPage() {
                 className="p-3 rounded-xl bg-admin-bg border border-admin-border text-center"
               >
                 <p className="text-[10px] uppercase text-admin-text-dim tracking-wider">
-                  {MEMORY_KIND_LABELS[row._id] ?? row._id}
+                  {memoryKindLabel(t, row._id)}
                 </p>
                 <p className="text-xl font-black text-admin-text mt-1">{row.count}</p>
               </div>
@@ -209,14 +205,14 @@ export default function AiOverviewPage() {
           </div>
           <Link to="/ai/memory" className="inline-block mt-4">
             <ButtonComponent variant="secondary" size="sm" className="w-auto!">
-              Browse all memories
+              {t("aiOverview.browseMemories")}
               <ArrowRight className="w-4 h-4 ml-2 inline" />
             </ButtonComponent>
           </Link>
         </GlassCard>
-      )}
+      ) : null}
 
       <WikiRagTester />
-    </div>
+    </AdminPageShell>
   );
 }

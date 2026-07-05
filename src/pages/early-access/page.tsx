@@ -9,6 +9,8 @@ import { ConfirmDialog } from "../../components/ui/confirm-dialog";
 import { StatCard } from "../../components/stats/stat-card";
 import axiosAuth from "../../helper/axios";
 import type { EarlyAccessListResponse, EarlyAccessRecord, EarlyAccessStatus } from "../../types/early-access/early-access";
+import { AdminPageHeader, AdminPageShell, ADMIN_PANEL_CLASS } from "../../components/admin";
+import { useAdminT } from "../../store/locale/locale";
 
 function buildCsv(rows: EarlyAccessRecord[]): string {
   const header = "Signed up (UTC),Full name,Email,Status,Admin notes,ID\n";
@@ -37,17 +39,17 @@ function downloadBlob(content: string, filename: string) {
   URL.revokeObjectURL(url);
 }
 
-const STATUS_CHIPS: { value: EarlyAccessStatus | ""; label: string }[] = [
-  { value: "", label: "All" },
-  { value: "pending", label: "Pending" },
-  { value: "contacted", label: "Contacted" },
-  { value: "invited", label: "Invited" },
+const STATUS_CHIP_VALUES: { value: EarlyAccessStatus | "" }[] = [
+  { value: "" },
+  { value: "pending" },
+  { value: "contacted" },
+  { value: "invited" },
 ];
 
-const panelClass =
-  "rounded-2xl border border-admin-border/50 bg-admin-panel/60 backdrop-blur-md shadow-[0_4px_24px_-8px_rgba(0,0,0,0.4)]";
+const panelClass = ADMIN_PANEL_CLASS;
 
 export default function EarlyAccessPage() {
+  const { t } = useAdminT();
   const { earlyAccessData } = useLoaderData() as { earlyAccessData: EarlyAccessListResponse };
   const [searchParams, setSearchParams] = useSearchParams();
   const revalidator = useRevalidator();
@@ -135,7 +137,7 @@ export default function EarlyAccessPage() {
       const csv = buildCsv(rows);
       downloadBlob(csv, `early-access-export-${format(new Date(), "yyyy-MM-dd-HHmm")}.csv`);
     } catch {
-      toast.error("Export failed");
+      toast.error(t("earlyAccess.exportFailed"));
     } finally {
       setDownloadingAll(false);
     }
@@ -145,13 +147,13 @@ export default function EarlyAccessPage() {
     setUpdatingId(id);
     try {
       await axiosAuth.patch(`/api/v1/early-access/${id}`, body);
-      toast.success("Saved");
+      toast.success(t("earlyAccess.saved"));
       await revalidator.revalidate();
     } catch (e: unknown) {
       const msg =
         axios.isAxiosError(e) && e.response?.data?.message
           ? String((e.response.data as { message?: string }).message)
-          : "Update failed";
+          : t("earlyAccess.updateFailed");
       toast.error(msg);
     } finally {
       setUpdatingId(null);
@@ -163,60 +165,65 @@ export default function EarlyAccessPage() {
     setDeleting(true);
     try {
       await axiosAuth.delete(`/api/v1/early-access/${deleteId}`);
-      toast.success("Removed");
+      toast.success(t("earlyAccess.removed"));
       setDeleteId(null);
       await revalidator.revalidate();
     } catch {
-      toast.error("Delete failed");
+      toast.error(t("earlyAccess.deleteFailed"));
     } finally {
       setDeleting(false);
     }
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
-      <header className="flex flex-col gap-4 border-b border-admin-border/60 pb-6 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <h1 className="text-2xl font-black uppercase italic tracking-tighter text-admin-text">Early access</h1>
-          <p className="mt-1 max-w-lg text-sm leading-relaxed text-admin-text-dim">
-            Landing waitlist signups — filter, update status, notes, or export.
-          </p>
-        </div>
-        <div className="flex flex-shrink-0 flex-wrap gap-2">
-          <ButtonComponent
-            variant="oracle"
-            size="sm"
-            onClick={handleDownloadCurrent}
-            disabled={data.length === 0}
-            className="flex items-center gap-2 px-4 py-2"
-          >
-            <Download className="h-4 w-4" />
-            Download page
-          </ButtonComponent>
-          <ButtonComponent
-            variant="oracle"
-            size="sm"
-            onClick={handleDownloadAllFiltered}
-            disabled={downloadingAll}
-            className="flex items-center gap-2 px-4 py-2"
-          >
-            <Download className="h-4 w-4" />
-            {downloadingAll ? "Preparing…" : "Download all"}
-          </ButtonComponent>
-        </div>
-      </header>
+    <AdminPageShell className="space-y-6">
+      <AdminPageHeader
+        title={t("pages.earlyAccess.title")}
+        actions={
+          <div className="flex flex-shrink-0 flex-wrap gap-2">
+            <ButtonComponent
+              variant="oracle"
+              size="sm"
+              onClick={handleDownloadCurrent}
+              disabled={data.length === 0}
+              className="flex items-center gap-2 px-4 py-2"
+            >
+              <Download className="h-4 w-4" />
+              {t("earlyAccess.downloadPage")}
+            </ButtonComponent>
+            <ButtonComponent
+              variant="oracle"
+              size="sm"
+              onClick={handleDownloadAllFiltered}
+              disabled={downloadingAll}
+              className="flex items-center gap-2 px-4 py-2"
+            >
+              <Download className="h-4 w-4" />
+              {downloadingAll ? t("earlyAccess.preparing") : t("earlyAccess.downloadAll")}
+            </ButtonComponent>
+          </div>
+        }
+      />
 
       {/* Toolbar: status + search — single calm panel (no GlassCard double-padding) */}
       <div className={`${panelClass} p-5`}>
         <div className="flex flex-col gap-5 lg:flex-row lg:items-stretch lg:gap-6">
           <div className="lg:w-auto lg:shrink-0">
-            <p className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-admin-text-dim">Status</p>
+            <p className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-admin-text-dim">{t("earlyAccess.status")}</p>
             <div className="flex flex-wrap gap-1.5">
-              {STATUS_CHIPS.map((chip) => {
+              {STATUS_CHIP_VALUES.map((chip) => {
                 const active =
                   chip.value === ""
                     ? !searchParams.get("status")
                     : searchParams.get("status") === chip.value;
+                const chipLabel =
+                  chip.value === ""
+                    ? t("common.all")
+                    : chip.value === "pending"
+                      ? t("earlyAccess.statusPending")
+                      : chip.value === "contacted"
+                        ? t("earlyAccess.statusContacted")
+                        : t("earlyAccess.statusInvited");
                 return (
                   <button
                     key={chip.value || "all"}
@@ -228,7 +235,7 @@ export default function EarlyAccessPage() {
                         : "border border-admin-border/80 bg-admin-bg/50 text-admin-text-dim hover:border-admin-primary/40 hover:text-admin-text"
                     }`}
                   >
-                    {chip.label}
+                    {chipLabel}
                   </button>
                 );
               })}
@@ -238,7 +245,7 @@ export default function EarlyAccessPage() {
           <div className="hidden w-px shrink-0 bg-admin-border/50 lg:block" aria-hidden />
 
           <div className="min-w-0 flex-1">
-            <p className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-admin-text-dim">Search</p>
+            <p className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-admin-text-dim">{t("common.search")}</p>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
               <div className="relative min-w-0 flex-1">
                 <Search
@@ -251,14 +258,14 @@ export default function EarlyAccessPage() {
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && applyFilters()}
-                  placeholder="Name or email…"
+                  placeholder={t("earlyAccess.searchPlaceholder")}
                   autoComplete="off"
                   className="w-full rounded-xl border border-admin-border bg-admin-bg/80 py-2.5 pl-10 pr-3 text-sm text-admin-text placeholder:text-admin-text-dim/60 focus:border-admin-primary focus:outline-none focus:ring-1 focus:ring-admin-primary/30"
                 />
               </div>
               <div className="flex shrink-0 gap-2">
                 <ButtonComponent variant="oracle" size="sm" onClick={applyFilters} className="px-5 py-2.5">
-                  Apply
+                  {t("common.apply")}
                 </ButtonComponent>
                 {hasActiveFilters ? (
                   <button
@@ -267,7 +274,7 @@ export default function EarlyAccessPage() {
                     className="inline-flex items-center gap-1.5 rounded-xl border border-admin-border px-3 py-2.5 text-xs font-bold uppercase tracking-wide text-admin-text-dim transition hover:border-admin-error/50 hover:text-admin-error"
                   >
                     <X className="h-3.5 w-3.5" />
-                    Clear
+                    {t("common.clear")}
                   </button>
                 ) : null}
               </div>
@@ -277,9 +284,9 @@ export default function EarlyAccessPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <StatCard title="Total matching" value={total.toLocaleString()} color="bg-admin-primary" />
-        <StatCard title="Rows this page" value={String(data.length)} color="bg-admin-accent" />
-        <StatCard title="Page" value={`${page} / ${totalPages}`} color="bg-admin-success" />
+        <StatCard title={t("earlyAccess.stats.totalMatching")} value={total.toLocaleString()} color="bg-admin-primary" />
+        <StatCard title={t("earlyAccess.stats.rowsThisPage")} value={String(data.length)} color="bg-admin-accent" />
+        <StatCard title={t("earlyAccess.stats.page")} value={`${page} / ${totalPages}`} color="bg-admin-success" />
       </div>
 
       {/* Table: full-bleed inside panel */}
@@ -289,13 +296,13 @@ export default function EarlyAccessPage() {
             <thead>
               <tr className="border-b border-admin-border bg-admin-bg/40">
                 <th className="whitespace-nowrap px-4 py-3 text-[10px] font-black uppercase tracking-wider text-admin-text-dim">
-                  Signed up (UTC)
+                  {t("earlyAccess.table.signedUp")}
                 </th>
-                <th className="px-4 py-3 text-[10px] font-black uppercase tracking-wider text-admin-text-dim">Name</th>
-                <th className="px-4 py-3 text-[10px] font-black uppercase tracking-wider text-admin-text-dim">Email</th>
-                <th className="px-4 py-3 text-[10px] font-black uppercase tracking-wider text-admin-text-dim">Status</th>
+                <th className="px-4 py-3 text-[10px] font-black uppercase tracking-wider text-admin-text-dim">{t("common.name")}</th>
+                <th className="px-4 py-3 text-[10px] font-black uppercase tracking-wider text-admin-text-dim">{t("common.email")}</th>
+                <th className="px-4 py-3 text-[10px] font-black uppercase tracking-wider text-admin-text-dim">{t("common.status")}</th>
                 <th className="min-w-[180px] px-4 py-3 text-[10px] font-black uppercase tracking-wider text-admin-text-dim">
-                  Notes
+                  {t("earlyAccess.table.notes")}
                 </th>
                 <th className="w-16 px-4 py-3 text-[10px] font-black uppercase tracking-wider text-admin-text-dim" />
               </tr>
@@ -304,7 +311,7 @@ export default function EarlyAccessPage() {
               {data.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-4 py-16 text-center text-sm text-admin-text-dim">
-                    No signups match the current filters.
+                    {t("earlyAccess.empty")}
                   </td>
                 </tr>
               ) : (
@@ -331,10 +338,10 @@ export default function EarlyAccessPage() {
             onClick={() => handlePageChange(page - 1)}
             className="flex items-center gap-2 rounded-xl border border-admin-border bg-admin-panel px-4 py-2 text-xs font-bold uppercase tracking-wide text-admin-text transition hover:border-admin-primary disabled:pointer-events-none disabled:opacity-40"
           >
-            <ChevronLeft className="h-4 w-4" /> Previous
+            <ChevronLeft className="h-4 w-4" /> {t("common.previous")}
           </button>
           <span className="text-xs font-mono text-admin-text-dim">
-            Page {page} of {totalPages}
+            {t("common.page", { current: page, total: totalPages })}
           </span>
           <button
             type="button"
@@ -342,22 +349,22 @@ export default function EarlyAccessPage() {
             onClick={() => handlePageChange(page + 1)}
             className="flex items-center gap-2 rounded-xl border border-admin-border bg-admin-panel px-4 py-2 text-xs font-bold uppercase tracking-wide text-admin-text transition hover:border-admin-primary disabled:pointer-events-none disabled:opacity-40"
           >
-            Next <ChevronRight className="h-4 w-4" />
+            {t("common.next")} <ChevronRight className="h-4 w-4" />
           </button>
         </div>
       ) : null}
 
       <ConfirmDialog
         open={deleteId !== null}
-        title="Delete signup?"
-        message="This removes the row from the early access list. The user can sign up again from the landing page."
-        confirmLabel="Delete"
+        title={t("earlyAccess.deleteTitle")}
+        message={t("earlyAccess.deleteMessage")}
+        confirmLabel={t("common.delete")}
         variant="danger"
         onCancel={() => setDeleteId(null)}
         onConfirm={handleDelete}
       />
-      {deleting ? <span className="sr-only" aria-live="polite">Deleting…</span> : null}
-    </div>
+      {deleting ? <span className="sr-only" aria-live="polite">{t("earlyAccess.deleting")}</span> : null}
+    </AdminPageShell>
   );
 }
 
@@ -372,6 +379,7 @@ function EarlyAccessRow({
   onPatch: (id: string, body: { status?: EarlyAccessStatus; adminNotes?: string }) => Promise<void>;
   onDelete: () => void;
 }) {
+  const { t } = useAdminT();
   return (
     <tr className="border-b border-admin-border/40 transition-colors hover:bg-admin-primary/[0.04]">
       <td className="whitespace-nowrap px-4 py-3 font-mono text-xs text-admin-text">
@@ -389,9 +397,9 @@ function EarlyAccessRow({
           }}
           className="max-w-full rounded-lg border border-admin-border bg-admin-bg px-2 py-1.5 text-xs font-bold uppercase text-admin-text focus:border-admin-primary focus:outline-none disabled:opacity-50"
         >
-          <option value="pending">Pending</option>
-          <option value="contacted">Contacted</option>
-          <option value="invited">Invited</option>
+          <option value="pending">{t("earlyAccess.statusPending")}</option>
+          <option value="contacted">{t("earlyAccess.statusContacted")}</option>
+          <option value="invited">{t("earlyAccess.statusInvited")}</option>
         </select>
       </td>
       <td className="px-4 py-3">
@@ -405,7 +413,7 @@ function EarlyAccessRow({
             if (trimmed === (row.adminNotes ?? "").trim()) return;
             void onPatch(row._id, { adminNotes: trimmed });
           }}
-          placeholder="Notes…"
+          placeholder={t("earlyAccess.notesPlaceholder")}
           className="w-full min-w-[160px] max-w-[280px] rounded-lg border border-admin-border bg-admin-bg px-2 py-1.5 text-xs text-admin-text focus:border-admin-primary focus:outline-none disabled:opacity-50"
         />
       </td>
@@ -415,7 +423,7 @@ function EarlyAccessRow({
           onClick={onDelete}
           disabled={busy}
           className="rounded-lg border border-admin-border p-2 text-admin-error transition hover:bg-admin-error/10 disabled:opacity-40"
-          aria-label="Delete"
+          aria-label={t("common.delete")}
         >
           <Trash2 className="h-4 w-4" />
         </button>

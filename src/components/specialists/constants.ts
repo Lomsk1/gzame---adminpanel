@@ -1,4 +1,49 @@
+import { COUNTRIES, getCountryName as lookupCountryName } from "../../lib/countries";
+
 export const DEFAULT_AVATAR = "https://api.dicebear.com/7.x/identicon/svg?seed=spec";
+
+/** Baltic states — shown first in admin picker. */
+const BALTIC_CODES = ["EE", "LV", "LT"] as const;
+
+/** EU member states (ISO 3166-1 alpha-2). */
+const EU_CODES = [
+  "AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR", "DE", "GR", "HU",
+  "IE", "IT", "LV", "LT", "LU", "MT", "NL", "PL", "PT", "RO", "SK", "SI", "ES", "SE",
+] as const;
+
+/** Other priority markets for GzaMe reach. */
+const KEY_MARKET_CODES = [
+  "GE", "US", "GB", "CH", "NO", "IS", "UA", "TR", "AE", "IL", "IN", "JP", "KR",
+  "AU", "CA", "BR", "MX", "SG", "HK", "NZ", "KZ", "AZ", "AM", "MD", "RS", "ME",
+  "MK", "AL", "BA", "BY", "RU",
+] as const;
+
+function buildCountryOptions() {
+  const pinnedOrder = [
+    ...BALTIC_CODES,
+    ...EU_CODES.filter((c) => !BALTIC_CODES.includes(c as (typeof BALTIC_CODES)[number])),
+    ...KEY_MARKET_CODES.filter(
+      (c) =>
+        !BALTIC_CODES.includes(c as (typeof BALTIC_CODES)[number]) &&
+        !EU_CODES.includes(c as (typeof EU_CODES)[number]),
+    ),
+  ];
+  const pinnedSet = new Set<string>(pinnedOrder);
+  const nameByCode = new Map(COUNTRIES.map((c) => [c.code, c.name]));
+
+  const pinned = pinnedOrder
+    .filter((code) => nameByCode.has(code))
+    .map((code) => ({ code, name: nameByCode.get(code)! }));
+
+  const rest = COUNTRIES.filter((c) => !pinnedSet.has(c.code)).map((c) => ({
+    code: c.code,
+    name: c.name,
+  }));
+
+  return [...pinned, ...rest];
+}
+
+export const COUNTRY_OPTIONS = buildCountryOptions();
 
 export const LIFE_SPHERES = [
   { id: "finance", label: "Finance" },
@@ -10,47 +55,42 @@ export const LIFE_SPHERES = [
   { id: "skills", label: "Skills" },
 ] as const;
 
-export const COUNTRY_OPTIONS = [
-  { code: "GE", name: "Georgia" },
-  { code: "US", name: "United States" },
-  { code: "GB", name: "United Kingdom" },
-  { code: "DE", name: "Germany" },
-  { code: "FR", name: "France" },
-  { code: "IT", name: "Italy" },
-  { code: "ES", name: "Spain" },
-  { code: "PL", name: "Poland" },
-  { code: "UA", name: "Ukraine" },
-  { code: "TR", name: "Turkey" },
-  { code: "AE", name: "UAE" },
-  { code: "IL", name: "Israel" },
-  { code: "IN", name: "India" },
-  { code: "JP", name: "Japan" },
-  { code: "KR", name: "South Korea" },
-  { code: "AU", name: "Australia" },
-  { code: "CA", name: "Canada" },
-  { code: "BR", name: "Brazil" },
-  { code: "MX", name: "Mexico" },
-  { code: "NL", name: "Netherlands" },
-  { code: "SE", name: "Sweden" },
-  { code: "CH", name: "Switzerland" },
-  { code: "AT", name: "Austria" },
-  { code: "BE", name: "Belgium" },
-  { code: "PT", name: "Portugal" },
-  { code: "GR", name: "Greece" },
-  { code: "RO", name: "Romania" },
-  { code: "CZ", name: "Czech Republic" },
-  { code: "HU", name: "Hungary" },
-  { code: "KZ", name: "Kazakhstan" },
-  { code: "AZ", name: "Azerbaijan" },
-  { code: "AM", name: "Armenia" },
-] as const;
-
 export const LANGUAGE_OPTIONS = [
   { code: "en", label: "English", short: "EN" },
   { code: "ka", label: "Georgian", short: "KA" },
   { code: "ru", label: "Russian", short: "RU" },
   { code: "ja", label: "Japanese", short: "JA" },
 ] as const;
+
+export const TRUST_TIER_OPTIONS = [
+  {
+    value: "T0",
+    label: "T0 — New",
+    reservePct: 10,
+    clearanceDays: 5,
+    hint: "10% rolling reserve · 5-day bank payout clearance",
+  },
+  {
+    value: "T1",
+    label: "T1 — Established",
+    reservePct: 5,
+    clearanceDays: 1,
+    hint: "5% rolling reserve · 1-day clearance",
+  },
+  {
+    value: "T2",
+    label: "T2 — Trusted",
+    reservePct: 2,
+    clearanceDays: 0,
+    hint: "2% rolling reserve · same-day clearance",
+  },
+] as const;
+
+export type TrustTierValue = (typeof TRUST_TIER_OPTIONS)[number]["value"];
+
+export function trustTierLabel(tier?: string): string {
+  return TRUST_TIER_OPTIONS.find((t) => t.value === tier)?.label ?? tier ?? "T0";
+}
 
 export const KYC_OPTIONS = [
   { value: "none", label: "None", tone: "muted" },
@@ -78,7 +118,7 @@ export function countryToFlag(code: string): string {
 }
 
 export function getCountryName(code: string): string {
-  return COUNTRY_OPTIONS.find((c) => c.code === code)?.name ?? code;
+  return lookupCountryName(code);
 }
 
 export function formatPrice(cents?: number, currency = "EUR"): string {

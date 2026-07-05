@@ -9,8 +9,11 @@ import type { StatsUserTypes } from "../../types/stats/user";
 import type { UsersDataType } from "../../types/user/user";
 import { useDebounceCallback } from "usehooks-ts";
 import axiosAuth from "../../helper/axios";
+import { AdminPageShell } from "../../components/admin";
+import { useAdminT } from "../../store/locale/locale";
 
 export default function UsersPage() {
+    const { t } = useAdminT();
     const { userStatsData, usersData, initialEmail } = useLoaderData() as {
         userStatsData: Promise<StatsUserTypes['data']>,
         usersData: Promise<UsersDataType>,
@@ -45,7 +48,7 @@ export default function UsersPage() {
     const isSearching = navigation.location && new URLSearchParams(navigation.location.search).has("email");
 
     return (
-        <div className="p-6 space-y-6 animate-in fade-in duration-700 bg-admin-bg/50">
+        <AdminPageShell className="space-y-6 bg-admin-bg/50">
 
             {/* 1. INDEPENDENT STATS SECTION */}
             <Suspense fallback={<StatsLoadingSkeleton />}>
@@ -54,14 +57,14 @@ export default function UsersPage() {
                         const { stats } = resolvedData;
                         return (
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                                <MetricCard label="Population" value={stats.totals.totalUsers} subValue={`+${stats.growth.newThisWeek}`} variant="primary" />
-                                <MetricCard label="Active" value={stats.totals.activeUsers} variant="primary" />
-                                <MetricCard label="Blocked" value={stats.totals.blockedUsers} variant="error" />
-                                <MetricCard label="Avg Intel" value={`L${stats.totals.avgLevel}`} variant="accent" />
-                                <MetricCard label="Onboarding" value={`${stats.onboardingCompletionRate}%`} variant="warning" />
-                                <MetricCard label="Streak" value={`${stats.totals.avgStreak}d`} variant="primary" />
-                                <MetricCard label="Subscribers" value={stats.totals.subscribers} variant="accent" />
-                                <MetricCard label="Sub Rate" value={`${stats.subscriptionRate}%`} variant="primary" />
+                                <MetricCard label={t("pages.users.population")} value={stats.totals.totalUsers} subValue={`+${stats.growth.newThisWeek}`} variant="primary" />
+                                <MetricCard label={t("pages.users.active")} value={stats.totals.activeUsers} variant="primary" />
+                                <MetricCard label={t("pages.users.blocked")} value={stats.totals.blockedUsers} variant="error" />
+                                <MetricCard label={t("pages.users.avgIntel")} value={`L${stats.totals.avgLevel}`} variant="accent" />
+                                <MetricCard label={t("pages.users.onboarding")} value={`${stats.onboardingCompletionRate}%`} variant="warning" />
+                                <MetricCard label={t("pages.users.streak")} value={`${stats.totals.avgStreak}d`} variant="primary" />
+                                <MetricCard label={t("pages.users.subscribers")} value={stats.totals.subscribers} variant="accent" />
+                                <MetricCard label={t("pages.users.subRate")} value={`${stats.subscriptionRate}%`} variant="primary" />
                             </div>
                         );
                     }}
@@ -73,7 +76,7 @@ export default function UsersPage() {
                 <div className="xl:col-span-8 space-y-4">
                     <GlassCard className="p-0 overflow-hidden border-admin-border/50 shadow-2xl">
                         <div className="p-4 border-b border-admin-border/50 flex justify-between items-center bg-admin-panel/40">
-                            <h2 className="text-sm font-black text-admin-primary uppercase tracking-tighter italic">Directory_v1.0.0</h2>
+                            <h2 className="text-sm font-black text-admin-primary uppercase tracking-tighter italic">{t("pages.users.directory")}</h2>
 
                             {/* Refetch Trigger: Form auto-submits on change with debounce */}
                             <Form
@@ -86,7 +89,7 @@ export default function UsersPage() {
                                         name="email"
                                         defaultValue={initialEmail}
                                         className="bg-admin-bg border border-admin-border rounded-lg px-3 py-1.5 text-[11px] w-64 outline-none focus:ring-1 ring-admin-primary/50 transition-all"
-                                        placeholder="Filter by email address..."
+                                        placeholder={t("pages.users.searchPlaceholder")}
                                     />
                                     {isSearching && (
                                         <div className="absolute right-2 top-2">
@@ -105,11 +108,11 @@ export default function UsersPage() {
                                         <table className="w-full text-left">
                                             <thead className="sticky top-0 z-10 bg-admin-panel/95 backdrop-blur-md text-[9px] font-black text-admin-text-dim uppercase tracking-[0.2em] border-b border-admin-border/30">
                                                 <tr>
-                                                    <th className="px-6 py-4">Users</th>
-                                                    <th className="px-6 py-4">Psychotype</th>
-                                                    <th className="px-6 py-4">Status</th>
-                                                    <th className="px-6 py-4">Streak</th>
-                                                    <th className="px-6 py-4 text-right">Ops</th>
+                                                    <th className="px-6 py-4">{t("pages.users.tableUsers")}</th>
+                                                    <th className="px-6 py-4">{t("pages.users.tablePsychotype")}</th>
+                                                    <th className="px-6 py-4">{t("pages.users.tableStatus")}</th>
+                                                    <th className="px-6 py-4">{t("pages.users.tableStreak")}</th>
+                                                    <th className="px-6 py-4 text-right">{t("pages.users.tableOps")}</th>
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-admin-border/10">
@@ -134,7 +137,7 @@ export default function UsersPage() {
                                                         <td className="px-6 py-3"><StatusBadge status={user.status} /></td>
                                                         <td className="px-6 py-3 text-xs font-mono text-admin-warning">{user.currentStreakDays}d</td>
                                                         <td className="px-6 py-3 text-right">
-                                                            <button className="text-[10px] font-black text-admin-primary opacity-0 group-hover:opacity-100 uppercase transition-all">Inspect_&gt;</button>
+                                                            <button className="text-[10px] font-black text-admin-primary opacity-0 group-hover:opacity-100 uppercase transition-all">{t("pages.users.inspect")} &gt;</button>
                                                         </td>
                                                     </tr>
                                                 ))}
@@ -173,7 +176,7 @@ export default function UsersPage() {
                     onClose={() => setSelectedUser(null)}
                 />
             )}
-        </div>
+        </AdminPageShell>
     );
 }
 
@@ -181,12 +184,21 @@ export default function UsersPage() {
  */
 
 const StatusBadge = ({ status }: { status: string }) => {
+    const { t } = useAdminT();
     const styles: Record<string, string> = {
         active: "border-admin-success/30 text-admin-success bg-admin-success/5",
         blocked: "border-admin-error/30 text-admin-error bg-admin-error/5",
         inactive: "border-admin-text-dim/30 text-admin-text-dim bg-admin-text-dim/5",
     };
-    return <span className={`text-[9px] font-bold px-2 py-0.5 rounded border ${styles[status] || styles.inactive}`}>{status.toUpperCase()}</span>;
+    const labelKey = `common.status.${status}` as "common.status.active" | "common.status.blocked" | "common.status.inactive";
+    const label = ["active", "blocked", "inactive"].includes(status)
+        ? t(labelKey)
+        : status;
+    return (
+        <span className={`text-[9px] font-bold px-2 py-0.5 rounded border ${styles[status] || styles.inactive}`}>
+            {label.toUpperCase()}
+        </span>
+    );
 };
 
 const StatsLoadingSkeleton = () => (

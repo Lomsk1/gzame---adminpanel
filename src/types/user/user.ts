@@ -88,7 +88,7 @@ export interface UserDataType {
   lastCompletionDate: Date;
   lastStreakCheckDate: Date;
 
-  role: "admin" | "user";
+  role: "admin" | "user" | "specialist";
   signup_ip?: string;
 
   password: string;

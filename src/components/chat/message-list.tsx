@@ -3,6 +3,7 @@ import { format } from "date-fns";
 import { Zap } from "lucide-react";
 import type { ChatMessage } from "../../types/chat/chat";
 import { ConfirmDialog } from "../ui/confirm-dialog";
+import { useAdminT } from "../../store/locale/locale";
 
 const DEFAULT_AVATAR = "https://api.dicebear.com/7.x/identicon/svg?seed=user";
 const SCROLL_LOAD_THRESHOLD = 100;
@@ -33,6 +34,7 @@ export const MessageList: React.FC<MessageListProps> = ({
     loadingOlder = false,
     className = "",
 }) => {
+    const { t } = useAdminT();
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const [messageIdToDelete, setMessageIdToDelete] = useState<string | null>(null);
@@ -108,9 +110,9 @@ export const MessageList: React.FC<MessageListProps> = ({
             {onLoadOlder && hasMoreOlder && (
                 <div className="flex justify-center py-2">
                     {loadingOlder ? (
-                        <span className="text-xs text-admin-text-dim">Loading older messages…</span>
+                        <span className="text-xs text-admin-text-dim">{t("chat.messages.loadingOlder")}</span>
                     ) : (
-                        <span className="text-xs text-admin-text-dim">Scroll up for more</span>
+                        <span className="text-xs text-admin-text-dim">{t("chat.messages.scrollUp")}</span>
                     )}
                 </div>
             )}
@@ -158,7 +160,7 @@ export const MessageList: React.FC<MessageListProps> = ({
                                         )}
                                         <span className="inline-flex items-center gap-1 rounded-full border border-admin-accent/35 bg-admin-accent/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-admin-accent">
                                             <Zap className="h-3 w-3" strokeWidth={2.5} aria-hidden />
-                                            Impulse
+                                            {t("chat.messages.impulse")}
                                         </span>
                                         {author?.psychotype && (
                                             <span className="rounded border border-admin-primary/25 bg-admin-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-admin-primary">
@@ -192,8 +194,8 @@ export const MessageList: React.FC<MessageListProps> = ({
                                                 type="button"
                                                 onClick={() => setMessageIdToDelete(message._id)}
                                                 className="absolute right-2 top-2 text-sm text-admin-text-muted opacity-0 transition-opacity hover:text-admin-error group-hover:opacity-100"
-                                                title={canDeleteAnyMessage && !isCurrentUser ? "Delete message (admin)" : "Delete message"}
-                                                aria-label={canDeleteAnyMessage && !isCurrentUser ? "Delete message (admin)" : "Delete message"}
+                                                title={canDeleteAnyMessage && !isCurrentUser ? t("chat.messages.deleteAdmin") : t("chat.messages.delete")}
+                                                aria-label={canDeleteAnyMessage && !isCurrentUser ? t("chat.messages.deleteAdmin") : t("chat.messages.delete")}
                                             >
                                                 ✕
                                             </button>
@@ -270,7 +272,7 @@ export const MessageList: React.FC<MessageListProps> = ({
 
                             <div className={`absolute top-0 ${isCurrentUser ? '-left-8' : '-right-8'} opacity-0 group-hover:opacity-100 transition-opacity flex flex-col gap-1`}>
                                 {(isCurrentUser || canDeleteAnyMessage) && (
-                                    <button type="button" onClick={() => setMessageIdToDelete(message._id)} className="text-admin-text-muted hover:text-admin-error text-sm" title={canDeleteAnyMessage && !isCurrentUser ? "Delete message (admin)" : "Delete message"}>✕</button>
+                                    <button type="button" onClick={() => setMessageIdToDelete(message._id)} className="text-admin-text-muted hover:text-admin-error text-sm" title={canDeleteAnyMessage && !isCurrentUser ? t("chat.messages.deleteAdmin") : t("chat.messages.delete")}>✕</button>
                                 )}
                             </div>
                         </div>
@@ -282,10 +284,10 @@ export const MessageList: React.FC<MessageListProps> = ({
 
             <ConfirmDialog
                 open={messageIdToDelete !== null}
-                title="Delete message?"
-                message="This message will be permanently removed from the database. This action cannot be undone."
-                confirmLabel="Delete"
-                cancelLabel="Cancel"
+                title={t("chat.messages.delete")}
+                message={t("chat.messages.deleteConfirm")}
+                confirmLabel={t("common.delete")}
+                cancelLabel={t("common.cancel")}
                 variant="danger"
                 onConfirm={() => {
                     if (messageIdToDelete) {

@@ -10,6 +10,7 @@ interface Props {
   searchPlaceholder?: string;
   emptyLabel?: string;
   columns?: 1 | 2;
+  listClassName?: string;
 }
 
 export function ChipToggleGroup({
@@ -20,6 +21,7 @@ export function ChipToggleGroup({
   searchPlaceholder = "Search…",
   emptyLabel = "No options",
   columns = 2,
+  listClassName,
 }: Props) {
   const [query, setQuery] = useState("");
 
@@ -55,7 +57,7 @@ export function ChipToggleGroup({
       ) : null}
 
       <div
-        className={`max-h-48 overflow-y-auto custom-scrollbar rounded-xl border border-admin-border/70 bg-admin-bg/30 p-2 ${
+        className={`${listClassName ?? "max-h-48"} overflow-y-auto custom-scrollbar rounded-xl border border-admin-border/70 bg-admin-bg/30 p-2 ${
           columns === 2 ? "grid grid-cols-1 sm:grid-cols-2 gap-2" : "flex flex-col gap-2"
         }`}
       >

@@ -7,10 +7,13 @@ import { GlassCard } from "../../components/cards/card-glass";
 import type { ActionResponse } from "../../features/level/level.actions";
 import { toast } from "sonner";
 import ButtonInitialization from "../../components/ui/button-initialize";
+import { AdminPageHeader, AdminPageShell } from "../../components/admin";
+import { useAdminT } from "../../store/locale/locale";
 
 type LevelData = LevelConfigTypes['data'][number];
 
 export default function LevelConfigPage() {
+    const { t } = useAdminT();
     const { levelConfigData } = useLoaderData() as { levelConfigData: Promise<LevelData[]> };
     const fetcher = useFetcher<ActionResponse>();
 
@@ -32,9 +35,9 @@ export default function LevelConfigPage() {
         const toastId = `toast-${intent}-${id}`;
 
         if (success) {
-            toast.success(message || "PROTOCOL_COMPLETE", { id: toastId });
+            toast.success(message || t("levels.toast.success"), { id: toastId });
         } else {
-            toast.error("PROTOCOL_FAILURE", {
+            toast.error(t("levels.toast.failure"), {
                 description: error,
                 id: toastId
             });
@@ -50,7 +53,7 @@ export default function LevelConfigPage() {
             fetcher.submit({ id, intent: "delete" }, { method: "post" });
             resolve(true);
         }), {
-            loading: 'EXECUTING_PURGE...',
+            loading: t("levels.purge.loading"),
         });
     };
 
@@ -82,23 +85,24 @@ export default function LevelConfigPage() {
     };
 
     return (
-        <Suspense fallback={<div className="p-10 text-admin-primary animate-pulse font-mono uppercase tracking-widest text-center">Initialising_System_Resources...</div>}>
+        <Suspense fallback={<div className="p-10 text-admin-primary animate-pulse font-mono uppercase tracking-widest text-center">{t("levels.loading")}</div>}>
             <Await resolve={levelConfigData}>
                 {(resolvedLevels: LevelData[]) => {
                     const sortedLevels = [...resolvedLevels].sort((a, b) => a.level - b.level);
                     const maxExp = Math.max(...sortedLevels.map(l => l.exp_required || 0), 1);
 
                     return (
-                        <div className="p-6 space-y-6 animate-in fade-in duration-500">
-                            <div className="flex justify-between items-center">
-                                <h1 className="text-2xl font-black text-admin-text uppercase italic tracking-tighter">
-                                    Progression_Editor<span className="text-admin-primary">.exe</span>
-                                </h1>
-                                <ButtonInitialization
-                                    onClick={() => { setEditingLevel(null); setDrawerOpen(true); }}
-                                />
-                            </div>
+                        <AdminPageShell className="space-y-6">
+                            <AdminPageHeader
+                                title={t("pages.levels.title")}
+                                actions={
+                                    <ButtonInitialization
+                                        onClick={() => { setEditingLevel(null); setDrawerOpen(true); }}
+                                    />
+                                }
+                            />
 
+                            <div className="admin-fade-up" style={{ animationDelay: "80ms" }}>
                             <GlassCard className="p-4 bg-admin-panel/10 border-admin-border/20">
                                 <div className="h-24 flex items-end gap-1 px-2 border-l border-b border-admin-border/20">
                                     {sortedLevels.map((l) => (
@@ -106,11 +110,12 @@ export default function LevelConfigPage() {
                                             key={l._id}
                                             className={`flex-1 transition-all duration-500 border-t ${l.is_active ? 'bg-admin-primary/30 border-admin-primary/60' : 'bg-admin-border/20 border-admin-border/40'} hover:scale-105`}
                                             style={{ height: `${((l.exp_required || 0) / maxExp) * 100}%` }}
-                                            title={`L.${l.level} (${l.exp_required} XP)`}
+                                            title={t("levels.chartTooltip", { level: l.level, exp: l.exp_required })}
                                         />
                                     ))}
                                 </div>
                             </GlassCard>
+                            </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pb-20">
                                 {sortedLevels.map((lvl) => (
@@ -135,7 +140,7 @@ export default function LevelConfigPage() {
                                     isSubmitting={fetcher.state !== "idle"}
                                 />
                             )}
-                        </div>
+                        </AdminPageShell>
                     );
                 }}
             </Await>

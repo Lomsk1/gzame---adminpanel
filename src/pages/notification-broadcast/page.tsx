@@ -4,6 +4,8 @@ import { toast } from "sonner";
 import { GlassCard } from "../../components/cards/card-glass";
 import { ButtonComponent } from "../../components/form/button";
 import axiosAuth from "../../helper/axios";
+import { AdminPageHeader, AdminPageShell } from "../../components/admin";
+import { useAdminT } from "../../store/locale/locale";
 
 type Scope = "all" | "psychotype";
 type Priority = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
@@ -43,9 +45,10 @@ const PSYCHOTYPES = [
 ] as const;
 
 export default function NotificationBroadcastPage() {
+  const { t } = useAdminT();
   const [scope, setScope] = useState<Scope>("all");
   const [psychotype, setPsychotype] = useState<(typeof PSYCHOTYPES)[number]>("STALKER");
-  const [title, setTitle] = useState("System update");
+  const [title, setTitle] = useState(() => t("broadcast.defaultTitle"));
   const [content, setContent] = useState("");
   const [priority, setPriority] = useState<Priority>("HIGH");
   const [type, setType] = useState<NotificationType>("SYSTEM_DIRECTIVE");
@@ -61,11 +64,11 @@ export default function NotificationBroadcastPage() {
 
   const sendBroadcast = async () => {
     if (!content.trim()) {
-      toast.error("Message content is required.");
+      toast.error(t("broadcast.contentRequired"));
       return;
     }
     setSending(true);
-    const toastId = toast.loading("Sending broadcast...");
+    const toastId = toast.loading(t("broadcast.sending"));
     try {
       const res = await axiosAuth.post<{
         status: string;
@@ -94,49 +97,46 @@ export default function NotificationBroadcastPage() {
         psychotype: data.psychotype,
       });
 
-      toast.success("Broadcast complete", {
+      toast.success(t("broadcast.complete"), {
         id: toastId,
-        description: `Users: ${data.totalUsers}, Push sent: ${data.push.sent}, No token: ${data.push.usersWithoutToken}`,
+        description: t("broadcast.completeDesc", {
+          users: data.totalUsers,
+          sent: data.push.sent,
+          noToken: data.push.usersWithoutToken,
+        }),
       });
     } catch (err: unknown) {
       const message =
         axios.isAxiosError(err) && err.response?.data?.message
           ? String((err.response.data as { message?: string }).message)
-          : "Broadcast failed.";
-      toast.error("Broadcast failed", { id: toastId, description: message });
+          : t("broadcast.failed");
+      toast.error(t("broadcast.failed"), { id: toastId, description: message });
     } finally {
       setSending(false);
     }
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
-      <header className="space-y-1 border-b border-admin-border/60 pb-6">
-        <h1 className="text-2xl font-black uppercase italic tracking-tighter text-admin-text">
-          Notification Broadcast
-        </h1>
-        <p className="text-sm text-admin-text-dim">
-          Send one notification to all active users or by psychotype.
-        </p>
-      </header>
+    <AdminPageShell className="space-y-6">
+      <AdminPageHeader title={t("pages.broadcast.title")} />
 
       <GlassCard>
         <div className="space-y-5">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <label className="space-y-1">
-              <span className="text-[10px] font-black uppercase tracking-wider text-admin-text-dim">Target scope</span>
+              <span className="text-[10px] font-black uppercase tracking-wider text-admin-text-dim">{t("broadcast.targetScope")}</span>
               <select
                 value={scope}
                 onChange={(e) => setScope(e.target.value as Scope)}
                 className="w-full rounded-lg border border-admin-border bg-admin-bg/80 p-3 text-sm text-admin-text outline-none focus:border-admin-primary"
               >
-                <option value="all">All active users</option>
-                <option value="psychotype">By psychotype</option>
+                <option value="all">{t("broadcast.scopeAll")}</option>
+                <option value="psychotype">{t("broadcast.scopePsychotype")}</option>
               </select>
             </label>
 
             <label className="space-y-1">
-              <span className="text-[10px] font-black uppercase tracking-wider text-admin-text-dim">Psychotype</span>
+              <span className="text-[10px] font-black uppercase tracking-wider text-admin-text-dim">{t("broadcast.psychotype")}</span>
               <select
                 value={psychotype}
                 onChange={(e) => setPsychotype(e.target.value as (typeof PSYCHOTYPES)[number])}
@@ -154,7 +154,7 @@ export default function NotificationBroadcastPage() {
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <label className="space-y-1">
-              <span className="text-[10px] font-black uppercase tracking-wider text-admin-text-dim">Type</span>
+              <span className="text-[10px] font-black uppercase tracking-wider text-admin-text-dim">{t("broadcast.type")}</span>
               <select
                 value={type}
                 onChange={(e) => {
@@ -176,7 +176,7 @@ export default function NotificationBroadcastPage() {
               </select>
             </label>
             <label className="space-y-1">
-              <span className="text-[10px] font-black uppercase tracking-wider text-admin-text-dim">Priority</span>
+              <span className="text-[10px] font-black uppercase tracking-wider text-admin-text-dim">{t("broadcast.priority")}</span>
               <select
                 value={priority}
                 onChange={(e) => setPriority(e.target.value as Priority)}
@@ -189,7 +189,7 @@ export default function NotificationBroadcastPage() {
               </select>
             </label>
             <label className="space-y-1">
-              <span className="text-[10px] font-black uppercase tracking-wider text-admin-text-dim">Action URL</span>
+              <span className="text-[10px] font-black uppercase tracking-wider text-admin-text-dim">{t("broadcast.actionUrl")}</span>
               <input
                 value={actionUrl}
                 onChange={(e) => setActionUrl(e.target.value)}
@@ -197,7 +197,7 @@ export default function NotificationBroadcastPage() {
                 className="w-full rounded-lg border border-admin-border bg-admin-bg/80 p-3 text-sm text-admin-text outline-none focus:border-admin-primary"
               />
               <p className="text-[10px] text-admin-text-dim">
-                Suggested for <span className="font-bold">{type}</span>:{" "}
+                {t("broadcast.suggestedFor")} <span className="font-bold">{type}</span>:{" "}
                 <button
                   type="button"
                   onClick={() => setActionUrl(SUGGESTED_ACTION_URL[type])}
@@ -210,7 +210,7 @@ export default function NotificationBroadcastPage() {
           </div>
 
           <label className="space-y-1">
-            <span className="text-[10px] font-black uppercase tracking-wider text-admin-text-dim">Title</span>
+            <span className="text-[10px] font-black uppercase tracking-wider text-admin-text-dim">{t("broadcast.titleLabel")}</span>
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -219,12 +219,12 @@ export default function NotificationBroadcastPage() {
           </label>
 
           <label className="space-y-1">
-            <span className="text-[10px] font-black uppercase tracking-wider text-admin-text-dim">Message content</span>
+            <span className="text-[10px] font-black uppercase tracking-wider text-admin-text-dim">{t("broadcast.messageContent")}</span>
             <textarea
               rows={5}
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="Enter broadcast message..."
+              placeholder={t("broadcast.messagePlaceholder")}
               className="w-full rounded-lg border border-admin-border bg-admin-bg/80 p-3 text-sm text-admin-text outline-none focus:border-admin-primary resize-none"
             />
           </label>
@@ -236,7 +236,7 @@ export default function NotificationBroadcastPage() {
               onClick={sendBroadcast}
               className="w-full md:w-auto md:px-10"
             >
-              Send broadcast
+              {t("broadcast.send")}
             </ButtonComponent>
           </div>
         </div>
@@ -246,22 +246,22 @@ export default function NotificationBroadcastPage() {
         <GlassCard>
           <div className="grid grid-cols-1 gap-4 text-sm md:grid-cols-3">
             <div>
-              <p className="text-[10px] font-black uppercase tracking-wider text-admin-text-dim">Targeted users</p>
+              <p className="text-[10px] font-black uppercase tracking-wider text-admin-text-dim">{t("broadcast.result.targeted")}</p>
               <p className="mt-1 text-2xl font-black text-admin-primary">{lastResult.totalUsers}</p>
             </div>
             <div>
-              <p className="text-[10px] font-black uppercase tracking-wider text-admin-text-dim">Push sent / failed</p>
+              <p className="text-[10px] font-black uppercase tracking-wider text-admin-text-dim">{t("broadcast.result.push")}</p>
               <p className="mt-1 text-2xl font-black text-admin-text">
                 {lastResult.push.sent} / {lastResult.push.failed}
               </p>
             </div>
             <div>
-              <p className="text-[10px] font-black uppercase tracking-wider text-admin-text-dim">Users without token</p>
+              <p className="text-[10px] font-black uppercase tracking-wider text-admin-text-dim">{t("broadcast.result.noToken")}</p>
               <p className="mt-1 text-2xl font-black text-admin-warning">{lastResult.push.usersWithoutToken}</p>
             </div>
           </div>
         </GlassCard>
       ) : null}
-    </div>
+    </AdminPageShell>
   );
 }

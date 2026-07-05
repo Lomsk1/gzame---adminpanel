@@ -1,7 +1,7 @@
 import { CategoryFilterSelect } from "./category-filter-select";
 
 export type SpecialistStatusFilter = "all" | "active" | "inactive" | "portal";
-export type SpecialistViewMode = "grid" | "list";
+export type SpecialistViewMode = "grid" | "list" | "table";
 
 interface Props {
   search: string;
@@ -52,6 +52,15 @@ function ListIcon({ active }: { active: boolean }) {
       <circle cx="4" cy="6" r="1" fill="currentColor" stroke="none" />
       <circle cx="4" cy="12" r="1" fill="currentColor" stroke="none" />
       <circle cx="4" cy="18" r="1" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+function TableIcon({ active }: { active: boolean }) {
+  return (
+    <svg className={`h-4 w-4 ${active ? "text-white" : "text-admin-text-dim"}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+      <rect x="3" y="4" width="18" height="16" rx="2" />
+      <path strokeLinecap="round" d="M3 10h18M9 4v16" />
     </svg>
   );
 }
@@ -110,6 +119,14 @@ export function SpecialistToolbar({
               className={`rounded-lg p-2 transition-colors ${viewMode === "list" ? "bg-admin-primary" : "hover:bg-admin-panel/60"}`}
             >
               <ListIcon active={viewMode === "list"} />
+            </button>
+            <button
+              type="button"
+              onClick={() => onViewModeChange("table")}
+              aria-label="Directory table"
+              className={`rounded-lg p-2 transition-colors ${viewMode === "table" ? "bg-admin-primary" : "hover:bg-admin-panel/60"}`}
+            >
+              <TableIcon active={viewMode === "table"} />
             </button>
           </div>
         </div>

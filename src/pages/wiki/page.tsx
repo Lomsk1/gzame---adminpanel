@@ -21,16 +21,17 @@ import { WikiRagTester } from "../../components/ai/wiki-rag-tester";
 import { WikiHowItWorks } from "../../components/wiki/wiki-how-it-works";
 import { AdminConfirmWrapper } from "../../components/wrapper/wrapper";
 import { toast } from "sonner";
-import {
-  WIKI_CATEGORIES,
-  WIKI_CATEGORY_META,
-} from "../../features/wiki/wiki.constants";
+import { WIKI_CATEGORIES } from "../../features/wiki/wiki.constants";
+import { wikiCategoryDesc, wikiCategoryLabel } from "../../i18n/domain-labels";
 import type { WikiEntry, WikiCategory } from "../../types/wiki/wiki";
 import type { WikiActionResponse } from "../../features/wiki/wiki.actions";
+import { AdminPageHeader, AdminPageShell } from "../../components/admin";
+import { useAdminT } from "../../store/locale/locale";
 
 type SortKey = "updated" | "title" | "category";
 
 export default function WikiPage() {
+  const { t } = useAdminT();
   const { entries } = useLoaderData() as { entries: WikiEntry[] };
   const fetcher = useFetcher<WikiActionResponse>();
   const revalidator = useRevalidator();
@@ -53,7 +54,7 @@ export default function WikiPage() {
         setDrawerOpen(false);
         setEditing(null);
       } else {
-        toast.error(fetcher.data.error || "Action failed");
+        toast.error(fetcher.data.error || t("common.actionFailed"));
       }
       fetcher.reset();
     }
@@ -143,55 +144,43 @@ export default function WikiPage() {
   };
 
   return (
-    <div className="p-6 md:p-8 space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500 max-w-[1600px] mx-auto">
-      {/* Header */}
-      <header className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 border-b border-admin-primary/20 pb-6">
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <BookOpen className="w-5 h-5 text-admin-primary" />
-            <span className="text-[10px] font-bold text-admin-text-dim uppercase tracking-widest">
-              AI Memory · Structured knowledge
-            </span>
+    <AdminPageShell className="space-y-8">
+      <AdminPageHeader
+        title={t("pages.wiki.title")}
+        icon={<BookOpen className="w-5 h-5 text-admin-primary" />}
+        actions={
+          <div className="flex flex-wrap gap-3">
+            <ButtonComponent
+              variant="secondary"
+              size="sm"
+              className="w-auto! px-4"
+              onClick={() => revalidator.revalidate()}
+              isLoading={revalidator.state === "loading"}
+            >
+              <RefreshCw className="w-4 h-4 mr-2 inline" />
+              {t("common.refresh")}
+            </ButtonComponent>
+            <ButtonComponent variant="oracle" size="sm" className="w-auto! px-5" onClick={openCreate}>
+              <Plus className="w-4 h-4 mr-2 inline" />
+              {t("wiki.newEntry")}
+            </ButtonComponent>
           </div>
-          <h1 className="text-3xl md:text-4xl font-black text-admin-text uppercase italic tracking-tighter">
-            LLM <span className="text-admin-primary">Wiki</span>
-          </h1>
-          <p className="text-sm text-admin-text-dim mt-2 max-w-2xl">
-            Curate psychotypes, frameworks, and rules. DEVI retrieves these via vector search alongside
-            per-user memory — keep entries clear and active.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-3">
-          <ButtonComponent
-            variant="secondary"
-            size="sm"
-            className="w-auto! px-4"
-            onClick={() => revalidator.revalidate()}
-            isLoading={revalidator.state === "loading"}
-          >
-            <RefreshCw className="w-4 h-4 mr-2 inline" />
-            Refresh
-          </ButtonComponent>
-          <ButtonComponent variant="oracle" size="sm" className="w-auto! px-5" onClick={openCreate}>
-            <Plus className="w-4 h-4 mr-2 inline" />
-            New entry
-          </ButtonComponent>
-        </div>
-      </header>
+        }
+      />
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        <StatCard title="Total entries" value={String(stats.total)} color="bg-admin-primary" />
-        <StatCard title="Active in RAG" value={String(stats.active)} color="bg-admin-success" />
+        <StatCard title={t("wiki.stats.total")} value={String(stats.total)} color="bg-admin-primary" />
+        <StatCard title={t("wiki.stats.activeRag")} value={String(stats.active)} color="bg-admin-success" />
         <StatCard
-          title="Needs embedding"
+          title={t("wiki.stats.needsEmbed")}
           value={String(stats.needsEmbed)}
           color={stats.needsEmbed > 0 ? "bg-admin-warning" : "bg-admin-success"}
         />
         <StatCard
-          title="Largest category"
+          title={t("wiki.stats.largestCategory")}
           value={
-            stats.total > 0 ? WIKI_CATEGORY_META[stats.topCategory].label : "—"
+            stats.total > 0 ? wikiCategoryLabel(t, stats.topCategory) : "—"
           }
           color="bg-admin-accent"
         />
@@ -204,13 +193,13 @@ export default function WikiPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-end">
           <div className="lg:col-span-5">
             <label className="block text-[10px] font-bold uppercase tracking-widest text-admin-text-dim mb-2">
-              Search
+              {t("common.search")}
             </label>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-admin-text-dim pointer-events-none" />
               <input
                 className="w-full pl-10 pr-4 py-2.5 bg-admin-panel/60 border border-admin-border rounded-xl text-sm text-admin-text outline-none focus:border-admin-primary focus:ring-1 focus:ring-admin-primary/30"
-                placeholder="Title, slug, body, tags..."
+                placeholder={t("wiki.searchPlaceholder")}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -219,7 +208,7 @@ export default function WikiPage() {
 
           <div className="lg:col-span-3">
             <label className="block text-[10px] font-bold uppercase tracking-widest text-admin-text-dim mb-2">
-              Category
+              {t("wiki.filter.category")}
             </label>
             <div className="relative">
               <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-admin-text-dim pointer-events-none" />
@@ -228,10 +217,10 @@ export default function WikiPage() {
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value as WikiCategory | "all")}
               >
-                <option value="all">All categories</option>
+                <option value="all">{t("wiki.filter.allCategories")}</option>
                 {WIKI_CATEGORIES.map((c) => (
                   <option key={c} value={c}>
-                    {WIKI_CATEGORY_META[c].label} ({stats.byCat[c] ?? 0})
+                    {wikiCategoryLabel(t, c)} ({stats.byCat[c] ?? 0})
                   </option>
                 ))}
               </select>
@@ -240,16 +229,16 @@ export default function WikiPage() {
 
           <div className="lg:col-span-2">
             <label className="block text-[10px] font-bold uppercase tracking-widest text-admin-text-dim mb-2">
-              Sort by
+              {t("wiki.filter.sortBy")}
             </label>
             <select
               className="w-full px-3 py-2.5 bg-admin-panel/60 border border-admin-border rounded-xl text-sm text-admin-text outline-none focus:border-admin-primary cursor-pointer"
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as SortKey)}
             >
-              <option value="updated">Last updated</option>
-              <option value="title">Title A–Z</option>
-              <option value="category">Category</option>
+              <option value="updated">{t("wiki.sort.updated")}</option>
+              <option value="title">{t("wiki.sort.title")}</option>
+              <option value="category">{t("wiki.sort.category")}</option>
             </select>
           </div>
 
@@ -261,15 +250,14 @@ export default function WikiPage() {
                 onChange={(e) => setActiveOnly(e.target.checked)}
                 className="accent-admin-primary w-4 h-4 shrink-0"
               />
-              <span className="text-sm text-admin-text">Active only</span>
+              <span className="text-sm text-admin-text">{t("wiki.filter.activeOnly")}</span>
             </label>
           </div>
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-2 mt-4 pt-4 border-t border-admin-border/60">
           <p className="text-xs text-admin-text-dim">
-            Showing <span className="text-admin-text font-semibold">{filtered.length}</span> of{" "}
-            {entries.length} entries
+            {t("wiki.showingEntries", { count: filtered.length, total: entries.length })}
           </p>
           {(search || categoryFilter !== "all" || activeOnly) && (
             <button
@@ -281,7 +269,7 @@ export default function WikiPage() {
               }}
               className="text-xs text-admin-primary hover:underline"
             >
-              Clear filters
+              {t("common.clearFilters")}
             </button>
           )}
         </div>
@@ -294,12 +282,12 @@ export default function WikiPage() {
           {filtered.length === 0 ? (
             <GlassCard className="p-10 text-center">
               <Sparkles className="w-10 h-10 text-admin-primary/40 mx-auto mb-4" />
-              <p className="text-admin-text font-semibold">No entries yet</p>
+              <p className="text-admin-text font-semibold">{t("wiki.empty.title")}</p>
               <p className="text-sm text-admin-text-dim mt-2 mb-6">
-                Start with psychotype docs and behavioral frameworks so DEVI has grounded knowledge.
+                {t("wiki.empty.hint")}
               </p>
               <ButtonComponent variant="oracle" size="sm" onClick={openCreate}>
-                Create first entry
+                {t("wiki.empty.create")}
               </ButtonComponent>
             </GlassCard>
           ) : (
@@ -318,7 +306,7 @@ export default function WikiPage() {
                   <WikiCategoryBadge category={entry.category} />
                   {!entry.embedded_at && (
                     <span className="text-[9px] font-bold uppercase text-admin-warning border border-admin-warning/40 px-1.5 py-0.5 rounded">
-                      No embed
+                      {t("wiki.noEmbed")}
                     </span>
                   )}
                 </div>
@@ -340,7 +328,7 @@ export default function WikiPage() {
                     <WikiCategoryBadge category={selected.category} />
                     {!selected.is_active && (
                       <span className="text-[10px] font-bold uppercase text-admin-error border border-admin-error/40 px-2 py-0.5 rounded">
-                        Inactive
+                        {t("common.inactive")}
                       </span>
                     )}
                   </div>
@@ -352,7 +340,7 @@ export default function WikiPage() {
                 <div className="flex flex-wrap gap-2 shrink-0">
                   <ButtonComponent variant="secondary" size="sm" onClick={() => openEdit(selected)}>
                     <Pencil className="w-3.5 h-3.5 mr-1 inline" />
-                    Edit
+                    {t("common.edit")}
                   </ButtonComponent>
                   <ButtonComponent
                     variant="secondary"
@@ -361,11 +349,11 @@ export default function WikiPage() {
                     isLoading={isBusy}
                   >
                     <RotateCw className="w-3.5 h-3.5 mr-1 inline" />
-                    Re-embed
+                    {t("wiki.reembed")}
                   </ButtonComponent>
                   <AdminConfirmWrapper
-                    title="Delete wiki entry?"
-                    description="This removes the entry from MongoDB and RAG. DEVI will no longer retrieve it."
+                    title={t("wiki.deleteTitle")}
+                    description={t("wiki.deleteDesc")}
                     confirmWord="DELETE"
                     variant="danger"
                     onConfirm={() => handleDelete(selected._id)}
@@ -373,7 +361,7 @@ export default function WikiPage() {
                   >
                     <ButtonComponent variant="danger" size="sm" type="button">
                       <Trash2 className="w-3.5 h-3.5 mr-1 inline" />
-                      Delete
+                      {t("common.delete")}
                     </ButtonComponent>
                   </AdminConfirmWrapper>
                 </div>
@@ -381,13 +369,14 @@ export default function WikiPage() {
 
               <div className="flex flex-wrap gap-4 text-[10px] text-admin-text-dim uppercase tracking-wider mb-4">
                 <span>
-                  Updated: {new Date(selected.updated_at).toLocaleString()}
+                  {t("wiki.updated", { date: new Date(selected.updated_at).toLocaleString() })}
                 </span>
                 <span>
-                  Embedded:{" "}
-                  {selected.embedded_at
-                    ? new Date(selected.embedded_at).toLocaleString()
-                    : "Never"}
+                  {t("wiki.embedded", {
+                    value: selected.embedded_at
+                      ? new Date(selected.embedded_at).toLocaleString()
+                      : t("common.never"),
+                  })}
                 </span>
               </div>
 
@@ -408,7 +397,7 @@ export default function WikiPage() {
                 <div className="flex items-center gap-2 mb-2">
                   <Eye className="w-4 h-4 text-admin-primary" />
                   <span className="text-[10px] font-black text-admin-primary uppercase tracking-widest">
-                    Preview (markdown body)
+                    {t("wiki.preview")}
                   </span>
                 </div>
                 <pre className="flex-1 overflow-auto max-h-[360px] p-4 rounded-xl bg-admin-bg/50 border border-admin-border text-sm text-admin-text font-mono leading-relaxed whitespace-pre-wrap custom-scrollbar">
@@ -417,12 +406,12 @@ export default function WikiPage() {
               </div>
 
               <p className="text-[10px] text-admin-text-dim mt-4 border-t border-admin-border pt-3">
-                {WIKI_CATEGORY_META[selected.category].description}
+                {wikiCategoryDesc(t, selected.category)}
               </p>
             </GlassCard>
           ) : (
             <GlassCard className="p-10 h-full flex items-center justify-center text-admin-text-dim text-sm italic">
-              Select an entry to preview
+              {t("wiki.selectPreview")}
             </GlassCard>
           )}
         </div>
@@ -434,13 +423,13 @@ export default function WikiPage() {
       {/* Help panel */}
       <GlassCard className="p-5 border-admin-primary/20 bg-admin-primary/5">
         <h3 className="text-xs font-black text-admin-primary uppercase tracking-widest mb-3">
-          Recommended seed order
+          {t("wiki.seedTitle")}
         </h3>
         <ol className="grid md:grid-cols-2 gap-2 text-sm text-admin-text-dim list-decimal list-inside">
-          <li>Psychotype summaries (all main types)</li>
-          <li>Emotional regulation & stress frameworks</li>
-          <li>Quest / specialist recommendation rules</li>
-          <li>GPS Life & growth progression notes</li>
+          <li>{t("wiki.seed1")}</li>
+          <li>{t("wiki.seed2")}</li>
+          <li>{t("wiki.seed3")}</li>
+          <li>{t("wiki.seed4")}</li>
         </ol>
       </GlassCard>
 
@@ -455,6 +444,6 @@ export default function WikiPage() {
           isSubmitting={isBusy}
         />
       )}
-    </div>
+    </AdminPageShell>
   );
 }

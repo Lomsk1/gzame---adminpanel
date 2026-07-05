@@ -10,16 +10,27 @@ import { useRevalidator } from "react-router";
 import type { UserActivityLogsType } from "../../types/logss/log";
 import useUserStore from "../../store/user/user";
 import ButtonCloseDrawer from "../ui/button-close-drawer";
+import { useAdminT } from "../../store/locale/locale";
 
 
 interface UserDetailDrawerProps {
     user: UsersDataType['data'][0]
     onClose: () => void;
+    /** Render dossier body only (no overlay shell) for embedding in specialist drawer */
+    embedded?: boolean;
 }
 
 const fetcher = (url: string) => axiosAuth.get(url).then(res => res.data);
 
-export const UserDetailDrawer = ({ user, onClose }: UserDetailDrawerProps) => {
+const PRIORITY_KEYS = {
+    LOW: "common.priority.low",
+    MEDIUM: "common.priority.medium",
+    HIGH: "common.priority.high",
+    CRITICAL: "common.priority.critical",
+} as const;
+
+export const UserDetailDrawer = ({ user, onClose, embedded = false }: UserDetailDrawerProps) => {
+    const { t } = useAdminT();
     const revalidator = useRevalidator();
 
     /* Store */
@@ -43,9 +54,7 @@ export const UserDetailDrawer = ({ user, onClose }: UserDetailDrawerProps) => {
             dedupingInterval: 300000,
             revalidateOnReconnect: true,
             onError: () => {
-                toast.error("NEURAL_LINK_FAILURE", {
-                    description: "Could not retrieve psychotype matrix."
-                });
+                toast.error(t("users.toast.neuralFailure"));
             }
         }
     );
@@ -77,27 +86,25 @@ export const UserDetailDrawer = ({ user, onClose }: UserDetailDrawerProps) => {
             color: config.bg
         }));
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const handleAction = async (apiEndpoint: string, body: any, successMsg: string) => {
+    const handleAction = async (apiEndpoint: string, body: unknown, successMsg: string) => {
         setIsProcessing(true);
 
-        // Create a unique ID for the toast so we can update it
-        const toastId = toast.loading("INITIALIZING_COMMAND...");
+        const toastId = toast.loading(t("users.toast.initializing"));
 
         try {
             await axiosAuth.patch(apiEndpoint, body);
             revalidator.revalidate();
 
-            toast.success(successMsg.toUpperCase(), {
+            toast.success(successMsg, {
                 id: toastId,
-                description: `Neural parameters updated for ${user.nickname}`,
+                description: t("users.toast.paramsUpdated", { nickname: user.nickname }),
             });
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (err: any) {
             console.error("Operation Failed:", err);
-            toast.error("COMMAND_REJECTED", {
+            toast.error(t("users.toast.commandRejected"), {
                 id: toastId,
-                description: err.response?.data?.message || "System uplink failure.",
+                description: err.response?.data?.message || t("users.toast.uplinkFailure"),
             });
         } finally {
             setIsProcessing(false);
@@ -106,13 +113,13 @@ export const UserDetailDrawer = ({ user, onClose }: UserDetailDrawerProps) => {
 
     const handleDeleteUser = async () => {
         setIsProcessing(true);
-        const toastId = toast.loading("PURGING_USER_DATA...");
+        const toastId = toast.loading(t("users.toast.purging"));
         try {
             await axiosAuth.delete(`/api/v1/auth/users/${user._id}`);
             revalidator.revalidate();
-            toast.success("USER_DELETED", {
+            toast.success(t("users.toast.userDeleted"), {
                 id: toastId,
-                description: "User and linked records were removed from the database.",
+                description: t("users.toast.userDeletedDesc"),
             });
             onClose();
         } catch (err: unknown) {
@@ -128,9 +135,9 @@ export const UserDetailDrawer = ({ user, onClose }: UserDetailDrawerProps) => {
                 "message" in err.response.data
                     ? String((err.response.data as { message?: string }).message)
                     : undefined;
-            toast.error("DELETE_FAILED", {
+            toast.error(t("users.toast.deleteFailed"), {
                 id: toastId,
-                description: msg || "Request failed.",
+                description: msg || t("users.toast.uplinkFailure"),
             });
         } finally {
             setIsProcessing(false);
@@ -139,10 +146,10 @@ export const UserDetailDrawer = ({ user, onClose }: UserDetailDrawerProps) => {
 
     /* Notification Handler */
     const handleSendNotification = async () => {
-        if (!directiveMessage.trim()) return toast.error("DIRECTIVE_REQUIRED");
+        if (!directiveMessage.trim()) return toast.error(t("users.toast.directiveRequired"));
 
         setIsProcessing(true);
-        const toastId = toast.loading("TRANSMITTING_SIGNAL...");
+        const toastId = toast.loading(t("users.toast.transmitting"));
 
         try {
             const actionUrl = actionUrlMessage.trim() || "/notifications";
@@ -160,22 +167,22 @@ export const UserDetailDrawer = ({ user, onClose }: UserDetailDrawerProps) => {
             const pushWarning = (res.data as { pushWarning?: string })?.pushWarning;
 
             if (sent > 0) {
-                toast.success("SIGNAL_RECEIVED", {
+                toast.success(t("users.toast.signalReceived"), {
                     id: toastId,
-                    description: `Push delivered to ${sent} device${sent > 1 ? "s" : ""}.`,
+                    description: t("users.toast.pushDelivered", { count: sent }),
                 });
             } else if (pushWarning) {
-                toast.success("SIGNAL_RECEIVED", {
+                toast.success(t("users.toast.signalReceived"), {
                     id: toastId,
-                    description: `${pushWarning} In-app notification was still created.`,
+                    description: t("users.toast.pushWarning", { warning: pushWarning }),
                 });
             } else if (failed > 0) {
-                toast.success("SIGNAL_RECEIVED", {
+                toast.success(t("users.toast.signalReceived"), {
                     id: toastId,
-                    description: `Notification saved, but push failed for ${failed} device${failed > 1 ? "s" : ""}.`,
+                    description: t("users.toast.pushFailed", { count: failed }),
                 });
             } else {
-                toast.success("SIGNAL_RECEIVED", { id: toastId });
+                toast.success(t("users.toast.signalReceived"), { id: toastId });
             }
             setShowDirectiveModal(false);
             setDirectiveMessage("");
@@ -192,8 +199,8 @@ export const UserDetailDrawer = ({ user, onClose }: UserDetailDrawerProps) => {
                 typeof err.response.data === "object" &&
                 "message" in err.response.data
                     ? String((err.response.data as { message?: string }).message)
-                    : "Request failed.";
-            toast.error("SIGNAL_LOST", { id: toastId, description: msg });
+                    : t("users.toast.uplinkFailure");
+            toast.error(t("users.toast.signalLost"), { id: toastId, description: msg });
         } finally {
             setIsProcessing(false);
         }
@@ -202,17 +209,17 @@ export const UserDetailDrawer = ({ user, onClose }: UserDetailDrawerProps) => {
     /* Admin Log */
 
     const saveNote = async () => {
-        const toastId = toast.loading("SYNCING_INTERNAL_LOG...");
+        const toastId = toast.loading(t("users.toast.syncingLog"));
         try {
             // await axiosAuth.patch(`/api/v1/admin/users/${user._id}/notes`, { note: adminNote });
-            toast.success("LOG_UPDATED", { id: toastId });
+            toast.success(t("users.toast.logUpdated"), { id: toastId });
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (err) {
-            toast.error("SYNC_FAILURE", { id: toastId });
+            toast.error(t("users.toast.syncFailure"), { id: toastId });
         }
     };
     const executeMacro = async (type: string) => {
-        const toastId = toast.loading(`INITIATING_${type}_SEQUENCE...`);
+        const toastId = toast.loading(t("users.toast.initializing"));
 
         try {
             // Example: logic to determine endpoint based on type
@@ -223,18 +230,18 @@ export const UserDetailDrawer = ({ user, onClose }: UserDetailDrawerProps) => {
             // await axiosAuth.post(endpoint);
             // revalidator.revalidate();
 
-            toast.success(`${type}_COMPLETE`, {
+            toast.success(t("users.toast.macroComplete", { type }), {
                 id: toastId,
-                description: `System parameters for ${user.nickname} have been recalibrated.`
+                description: t("users.toast.macroRecalibrated", { nickname: user.nickname }),
             });
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (err) {
-            toast.error(`${type}_FAILED`, { id: toastId });
+            toast.error(t("users.toast.macroFailed", { type }), { id: toastId });
         }
     };
 
     const handleWarn = async () => {
-        const toastId = toast.loading("ISSUING_FORMAL_WARNING...");
+        const toastId = toast.loading(t("users.toast.issuingWarning"));
         try {
             // 1. Update the database flag
             // await axiosAuth.patch(`/api/v1/admin/users/${user._id}/status`, {
@@ -251,79 +258,75 @@ export const UserDetailDrawer = ({ user, onClose }: UserDetailDrawerProps) => {
             // });
 
             // revalidator.revalidate();
-            toast.error("ENTITY_WARNED", {
+            toast.error(t("users.toast.entityWarned"), {
                 id: toastId,
-                description: "Warning signal transmitted and account flagged."
+                description: t("users.toast.warnDesc"),
             });
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (err) {
-            toast.error("TRANSMISSION_FAILED", { id: toastId });
+            toast.error(t("users.toast.transmissionFailed"), { id: toastId });
         }
     };
 
-    return (
+    const dossierBody = (
         <>
-            <div className="fixed inset-0 z-50 flex justify-end">
-                <div className="absolute inset-0 bg-admin-bg/85 backdrop-blur-md animate-in fade-in" onClick={onClose} />
-
-                <div className="relative w-full max-w-md h-screen bg-admin-panel border-l border-admin-border flex flex-col shadow-2xl animate-in slide-in-from-right duration-500">
-
-                    {/* --- HEADER --- */}
-                    <div className="p-6 border-b border-admin-border flex justify-between items-center bg-admin-bg/20">
-                        <div className="space-y-1">
-                            <div className="flex items-center gap-2">
-                                <h2 className="text-xl font-black uppercase tracking-tighter italic text-admin-primary">User Dossier</h2>
-                                <span className={`text-[8px] px-1.5 py-0.5 rounded border font-black tracking-widest ${user?.role === 'admin' ? 'bg-admin-accent/20 border-admin-accent text-admin-accent' : 'bg-admin-text-dim/10 border-admin-border text-admin-text-dim'}`}>
-                                    {(user?.role ?? "user").toUpperCase()}
-                                </span>
-                            </div>
-                            <p className="text-[10px] font-mono text-admin-text-dim">{user._id} / IP: {user.signup_ip || "0.0.0.0"}</p>
+            {!embedded ? (
+                <div className="p-6 border-b border-admin-border flex justify-between items-center bg-admin-bg/20">
+                    <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                            <h2 className="text-xl font-black uppercase tracking-tighter italic text-admin-primary">{t("users.dossier.title")}</h2>
+                            <span className={`text-[8px] px-1.5 py-0.5 rounded border font-black tracking-widest ${user?.role === 'admin' ? 'bg-admin-accent/20 border-admin-accent text-admin-accent' : 'bg-admin-text-dim/10 border-admin-border text-admin-text-dim'}`}>
+                                {(user?.role ?? "user").toUpperCase()}
+                            </span>
                         </div>
-                        <ButtonCloseDrawer onClose={onClose} />
+                        <p className="text-[10px] font-mono text-admin-text-dim">{user._id} / IP: {user.signup_ip || "0.0.0.0"}</p>
                     </div>
+                    <ButtonCloseDrawer onClose={onClose} />
+                </div>
+            ) : null}
 
-                    <div className="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
+            <div className={`${embedded ? "space-y-8" : "flex-1 overflow-y-auto"} p-6 space-y-8 custom-scrollbar`}>
                         {/* --- 1. NEURAL DATA (SWR) --- */}
                         <section className="space-y-4">
-                            <label className="text-[9px] font-black text-admin-primary uppercase tracking-[0.2em] block">AI Neural Analysis</label>
+                            <label className="text-[9px] font-black text-admin-primary uppercase tracking-[0.2em] block">{t("users.dossier.neuralAnalysis")}</label>
                             {isLoading ? (
                                 <div className="h-24 animate-pulse bg-admin-bg rounded-xl border border-admin-border" />
                             ) : latestSession ? (
                                 <div className="space-y-3">
                                     <div className="p-4 rounded-xl bg-admin-primary/5 border border-admin-primary/20">
-                                        <p className="text-[8px] font-black text-admin-primary uppercase mb-2">Gemini_Decision_Log:</p>
+                                        <p className="text-[8px] font-black text-admin-primary uppercase mb-2">{t("users.dossier.geminiLog")}:</p>
                                         <p className="text-[11px] text-admin-text italic leading-relaxed">"{latestSession?.gemini_decisionReason ?? "—"}"</p>
                                     </div>
                                     <div className="grid grid-cols-2 gap-2">
                                         <div className="p-2 bg-admin-card border border-admin-border rounded flex flex-col items-center">
-                                            <span className="text-[7px] text-admin-text-dim uppercase font-bold">Class</span>
+                                            <span className="text-[7px] text-admin-text-dim uppercase font-bold">{t("users.dossier.class")}</span>
                                             <span className="text-xs font-black text-admin-accent">{latestSession?.finalPsychotype ?? "—"}</span>
                                         </div>
                                         <div className="p-2 bg-admin-card border border-admin-border rounded flex flex-col items-center">
-                                            <span className="text-[7px] text-admin-text-dim uppercase font-bold">Combined</span>
-                                            <span className="text-xs font-black text-admin-text">{latestSession?.isCombinedClass ? "YES" : "NO"}</span>
+                                            <span className="text-[7px] text-admin-text-dim uppercase font-bold">{t("users.dossier.combined")}</span>
+                                            <span className="text-xs font-black text-admin-text">{latestSession?.isCombinedClass ? t("common.yes") : t("common.no")}</span>
                                         </div>
                                     </div>
                                 </div>
                             ) : (
-                                <div className="text-[10px] text-admin-text-dim italic border border-dashed border-admin-border p-4 rounded-xl text-center">NO_SESSION_DATA</div>
+                                <div className="text-[10px] text-admin-text-dim italic border border-dashed border-admin-border p-4 rounded-xl text-center">{t("users.dossier.noSession")}</div>
                             )}
                         </section>
 
                         {/* --- 2. PROGRESSION & ENERGY --- */}
                         <section className="space-y-4">
-                            <label className="text-[9px] font-black text-admin-accent uppercase tracking-[0.2em] block">Vital Stats & Progression</label>
+                            <label className="text-[9px] font-black text-admin-accent uppercase tracking-[0.2em] block">{t("users.dossier.vitalStats")}</label>
                             <div className="grid grid-cols-3 gap-2">
                                 <div className="p-2 bg-admin-bg border border-admin-border rounded">
-                                    <p className="text-[7px] font-bold text-admin-text-dim uppercase">Energy</p>
+                                    <p className="text-[7px] font-bold text-admin-text-dim uppercase">{t("users.dossier.energy")}</p>
                                     <p className="text-sm font-black text-admin-warning">{user.energyPoints} <span className="text-[8px]">PTS</span></p>
                                 </div>
                                 <div className="p-2 bg-admin-bg border border-admin-border rounded">
-                                    <p className="text-[7px] font-bold text-admin-text-dim uppercase">Level</p>
+                                    <p className="text-[7px] font-bold text-admin-text-dim uppercase">{t("users.dossier.level")}</p>
                                     <p className="text-sm font-black text-admin-primary">LVL {user.currentLevel}</p>
                                 </div>
                                 <div className="p-2 bg-admin-bg border border-admin-border rounded">
-                                    <p className="text-[7px] font-bold text-admin-text-dim uppercase">EXP</p>
+                                    <p className="text-[7px] font-bold text-admin-text-dim uppercase">{t("users.dossier.exp")}</p>
                                     <p className="text-sm font-black text-admin-text">{user.currentEXP}</p>
                                 </div>
                             </div>
@@ -331,7 +334,7 @@ export const UserDetailDrawer = ({ user, onClose }: UserDetailDrawerProps) => {
 
                         {/* --- 3. PSYCHOTYPE MATRIX --- */}
                         <section className="space-y-4">
-                            <label className="text-[9px] font-black text-admin-accent uppercase tracking-[0.2em] block">Calibration Matrix</label>
+                            <label className="text-[9px] font-black text-admin-accent uppercase tracking-[0.2em] block">{t("users.dossier.calibrationMatrix")}</label>
                             <div className="space-y-3 bg-admin-bg/40 p-4 rounded-xl border border-admin-border/50">
                                 {scoreMatrix.map((m) => (
                                     <div key={m.label} className="space-y-1">
@@ -350,39 +353,39 @@ export const UserDetailDrawer = ({ user, onClose }: UserDetailDrawerProps) => {
                         {/* --- 4. TRAUMA & BIO & WORKING_SPACE --- */}
                         <section className="space-y-4">
                             <div className="p-4 rounded-xl bg-admin-error/5 border border-admin-error/20">
-                                <label className="text-[8px] font-black text-admin-error uppercase mb-1 block">Core Trauma</label>
-                                <p className="text-xs font-bold text-admin-text leading-tight">{user.greatestPain || "UNSTATED"}</p>
+                                <label className="text-[8px] font-black text-admin-error uppercase mb-1 block">{t("users.dossier.coreTrauma")}</label>
+                                <p className="text-xs font-bold text-admin-text leading-tight">{user.greatestPain || t("users.dossier.unstated")}</p>
                             </div>
                             <div className="p-4 rounded-xl bg-admin-bg border border-admin-border">
-                                <label className="text-[8px] font-black text-admin-primary uppercase mb-1 block">Bio Packet</label>
-                                <p className="text-xs text-admin-text-dim italic leading-relaxed">"{user.bio || "No directive established."}"</p>
+                                <label className="text-[8px] font-black text-admin-primary uppercase mb-1 block">{t("users.dossier.bioPacket")}</label>
+                                <p className="text-xs text-admin-text-dim italic leading-relaxed">"{user.bio || t("users.dossier.noDirective")}"</p>
                             </div>
                             <div className="p-4 rounded-xl bg-admin-bg border border-admin-border">
-                                <label className="text-[8px] font-black text-admin-primary uppercase mb-1 block">Working Space</label>
-                                <p className="text-xs text-admin-text-dim italic leading-relaxed">"{user.profile?.workingSpace || "No directive established."}"</p>
+                                <label className="text-[8px] font-black text-admin-primary uppercase mb-1 block">{t("users.dossier.workingSpace")}</label>
+                                <p className="text-xs text-admin-text-dim italic leading-relaxed">"{user.profile?.workingSpace || t("users.dossier.noDirective")}"</p>
                             </div>
                         </section>
 
                         {/* --- 5. TECHNICAL/SECURITY --- */}
                         <section className="p-4 rounded-xl bg-admin-bg/40 border border-admin-border/50 space-y-2">
                             <div className="flex justify-between text-[10px] font-mono">
-                                <span className="text-admin-text-dim">CREATED:</span>
+                                <span className="text-admin-text-dim">{t("users.dossier.created")}:</span>
                                 <span className="text-admin-text">{new Date(user.created_at).toLocaleString()}</span>
                             </div>
                             <div className="flex justify-between text-[10px] font-mono">
-                                <span className="text-admin-text-dim">ACTIVATED:</span>
+                                <span className="text-admin-text-dim">{t("users.dossier.activated")}:</span>
                                 <span className={`font-bold ${user.email_activation ? 'text-admin-success' : 'text-admin-error'}`}>
-                                    {user.email_activation ? 'TRUE' : 'FALSE'}
+                                    {user.email_activation ? t("common.yes") : t("common.no")}
                                 </span>
                             </div>
                             <div className="flex justify-between text-[10px] font-mono">
-                                <span className="text-admin-text-dim">SUB_STATUS:</span>
+                                <span className="text-admin-text-dim">{t("users.dossier.subStatus")}:</span>
                                 <span className={`font-bold ${user.isSubscribed ? 'text-admin-accent' : 'text-admin-text-dim'}`}>
-                                    {user.isSubscribed ? 'ACTIVE_SUBSCRIBER' : 'FREE_TIER'}
+                                    {user.isSubscribed ? t("users.dossier.activeSubscriber") : t("users.dossier.freeTier")}
                                 </span>
                             </div>
                             <div className="flex justify-between text-[10px] font-mono">
-                                <span className="text-admin-text-dim">BIRTH_DATE:</span>
+                                <span className="text-admin-text-dim">{t("users.dossier.birthDate")}:</span>
                                 <span className="text-admin-text">{new Date(user.created_at).toLocaleString()}</span>
                             </div>
                         </section>
@@ -391,26 +394,26 @@ export const UserDetailDrawer = ({ user, onClose }: UserDetailDrawerProps) => {
                         <div className="pt-6 space-y-3">
                             {user?.role === "user" && (
                                 <AdminConfirmWrapper
-                                    title="Elevate Permissions"
-                                    description={`You are about to grant ${user.nickname} administrative privileges. This entity will be able to modify system parameters.`}
-                                    confirmText="GRANT_ACCESS"
-                                    onConfirm={() => handleAction(`/api/v1/auth/users/give-admin/${user._id}`, { role: "admin" }, "Permissions Elevated")}
+                                    title={t("users.dossier.promoteTitle")}
+                                    description={t("users.dossier.promoteDesc", { nickname: user.nickname })}
+                                    confirmText={t("users.dossier.promoteConfirm")}
+                                    onConfirm={() => handleAction(`/api/v1/auth/users/give-admin/${user._id}`, { role: "admin" }, t("users.toast.permissionsElevated"))}
                                     isLoading={isProcessing}
                                 >
                                     <ButtonComponent
                                         variant="secondary"
                                         className="w-full text-[10px] border-admin-accent/50 text-admin-accent hover:bg-admin-accent/10"
                                     >
-                                        PROMOTE_TO_ADMIN
+                                        {t("users.dossier.promoteBtn")}
                                     </ButtonComponent>
                                 </AdminConfirmWrapper>
                             )}
 
                             {user?.role === "user" && (
                                 <AdminConfirmWrapper
-                                    title="Permanent user deletion"
-                                    description={`Removes ${user.nickname} and all related data: profile (avatar on Cloudinary), quiz answers, activity logs, notifications, planner tasks/projects/labels, life map check-ins and reviews, room messages they sent (group chats kept), read cursors, DEVI conversations, direct message threads, AI memories, active/completed quests, specialist links, consultation bookings, and uploaded files (queued Cloudinary cleanup on failure). Chat rooms they created are kept; ownership is reassigned. Type DELETE to confirm.`}
-                                    confirmText="DELETE_USER"
+                                    title={t("users.dossier.deleteTitle")}
+                                    description={t("users.dossier.deleteDesc", { nickname: user.nickname })}
+                                    confirmText={t("users.dossier.deleteConfirm")}
                                     confirmWord="DELETE"
                                     variant="danger"
                                     onConfirm={() => {
@@ -423,36 +426,36 @@ export const UserDetailDrawer = ({ user, onClose }: UserDetailDrawerProps) => {
                                         variant="secondary"
                                         className="w-full text-[10px] border-admin-error/50 text-admin-error hover:bg-admin-error/10"
                                     >
-                                        PURGE_USER_AND_DATA
+                                        {t("users.dossier.deleteBtn")}
                                     </ButtonComponent>
                                 </AdminConfirmWrapper>
                             )}
 
                             <div className="grid grid-cols-2 gap-2">
                                 <ButtonComponent variant="secondary" size="sm" className="bg-admin-card border-admin-border text-[10px]">
-                                    RESET_ENERGY
+                                    {t("users.dossier.resetEnergy")}
                                 </ButtonComponent>
                                 <ButtonComponent variant="secondary" size="sm" className="bg-admin-card border-admin-border text-[10px]">
-                                    BLOCK_ENTITY
+                                    {t("users.dossier.blockEntity")}
                                 </ButtonComponent>
                             </div>
                             <ButtonComponent variant="oracle" size="sm" className="w-full text-[10px]" onClick={() => setShowDirectiveModal(true)}>
-                                BROADCAST_DIRECTIVE
+                                {t("users.dossier.broadcastDirective")}
                             </ButtonComponent>
                         </div>
 
                         {/* Admin Note */}
                         <div className="pt-6 space-y-3">
                             <section className="space-y-3 pt-4 border-t border-admin-border/30">
-                                <label className="text-[9px] font-black text-admin-primary uppercase tracking-widest block">Internal_Admin_Notes</label>
+                                <label className="text-[9px] font-black text-admin-primary uppercase tracking-widest block">{t("users.dossier.adminNotes")}</label>
                                 <textarea
                                     value={adminNote}
                                     onChange={(e) => setAdminNote(e.target.value)}
-                                    placeholder="Enter internal observations..."
+                                    placeholder={t("users.dossier.notesPlaceholder")}
                                     className="w-full h-20 bg-black/40 border border-admin-border/50 p-2 text-[10px] text-admin-text-dim font-mono focus:border-admin-accent outline-none"
                                 />
                                 <ButtonComponent variant="secondary" size="sm" className="w-full text-[9px]" onClick={saveNote}>
-                                    SAVE_INTERNAL_LOG
+                                    {t("users.dossier.saveNotes")}
                                 </ButtonComponent>
                             </section>
                         </div>
@@ -460,12 +463,12 @@ export const UserDetailDrawer = ({ user, onClose }: UserDetailDrawerProps) => {
                         {/* --- SESSION HISTORY (TREND ANALYSIS) --- */}
                         <section className="space-y-2">
                             <label className="text-[9px] font-black text-admin-primary uppercase tracking-widest block">
-                                Neural_Trend_Analysis
+                                {t("users.dossier.neuralTrend")}
                             </label>
                             <div className="h-20 w-full flex items-end gap-1 px-2 bg-admin-bg/20 border border-admin-border/30 rounded relative group">
                                 {userActivityIsLoading ? (
                                     <div className="absolute inset-0 flex items-center justify-center">
-                                        <span className="text-[10px] animate-pulse">CALCULATING_TRAJECTORY...</span>
+                                        <span className="text-[10px] animate-pulse">{t("users.dossier.calculating")}</span>
                                     </div>
                                 ) : userActivity?.data.sessionHistory && userActivity.data.sessionHistory.length > 0 ? (
                                     (() => {
@@ -482,7 +485,7 @@ export const UserDetailDrawer = ({ user, onClose }: UserDetailDrawerProps) => {
                                                 >
                                                     {/* Hover Tooltip */}
                                                     <span className="absolute -top-7 left-1/2 -translate-x-1/2 bg-admin-panel border border-admin-border text-[10px] px-1.5 py-0.5 opacity-0 group-hover/bar:opacity-100 transition-opacity z-10 whitespace-nowrap">
-                                                        {count} ACTIONS
+                                                        {t("users.dossier.actionsCount", { count })}
                                                     </span>
                                                 </div>
                                             );
@@ -490,28 +493,28 @@ export const UserDetailDrawer = ({ user, onClose }: UserDetailDrawerProps) => {
                                     })()
                                 ) : (
                                     <div className="absolute inset-0 flex items-center justify-center text-[10px] text-admin-text-dim italic">
-                                        NO_HISTORY_FOUND
+                                        {t("users.dossier.noHistory")}
                                     </div>
                                 )}
                             </div>
                             <div className="flex justify-between text-[10px] text-admin-text-dim uppercase font-mono px-1">
-                                <span>Oldest_Record</span>
-                                <span className="text-admin-primary/60 italic">Trajectory: {
+                                <span>{t("users.dossier.oldestRecord")}</span>
+                                <span className="text-admin-primary/60 italic">{
                                     userActivity?.data.sessionHistory && userActivity.data.sessionHistory.length > 1
-                                        ? (userActivity.data.sessionHistory.slice(-1)[0] >= userActivity.data.sessionHistory.slice(-2, -1)[0] ? 'STABLE/RISING' : 'DECLINING')
-                                        : 'INSUFFICIENT_DATA'
+                                        ? (userActivity.data.sessionHistory.slice(-1)[0] >= userActivity.data.sessionHistory.slice(-2, -1)[0] ? t("users.dossier.trajectoryStable") : t("users.dossier.trajectoryDeclining"))
+                                        : t("users.dossier.insufficientData")
                                 }</span>
-                                <span>Latest</span>
+                                <span>{t("users.dossier.latest")}</span>
                             </div>
                         </section>
 
                         {/* --- INTERACTION HEATMAP --- */}
                         <section className="space-y-2">
-                            <label className="text-[9px] font-black text-admin-primary uppercase tracking-widest block">Activity_Density_Matrix</label>
+                            <label className="text-[9px] font-black text-admin-primary uppercase tracking-widest block">{t("users.dossier.activityDensity")}</label>
                             <div className="flex gap-1 h-12 items-center bg-admin-bg/20 p-2 border border-admin-border/30 rounded relative">
                                 {userActivityIsLoading ? (
                                     <div className="absolute inset-0 flex items-center justify-center bg-admin-panel/50">
-                                        <span className="text-[8px] animate-pulse">SYNCING_MATRIX...</span>
+                                        <span className="text-[8px] animate-pulse">{t("users.dossier.syncingMatrix")}</span>
                                     </div>
                                 ) : (
                                     (userActivity?.data?.hourlyActivity ?? []).map((density: number, i: number) => {
@@ -527,7 +530,7 @@ export const UserDetailDrawer = ({ user, onClose }: UserDetailDrawerProps) => {
                                                         : `rgba(255, 255, 255, 0.05)`,
                                                     borderBottom: i === new Date().getHours() ? '2px solid white' : 'none'
                                                 }}
-                                                title={`Hour ${i}:00 | Activity: ${density} events`}
+                                                title={t("users.dossier.hourActivity", { hour: i, count: density })}
                                             />
                                         );
                                     })
@@ -535,17 +538,17 @@ export const UserDetailDrawer = ({ user, onClose }: UserDetailDrawerProps) => {
                             </div>
                             <div className="flex justify-between text-[10px] text-admin-text-dim uppercase font-mono">
                                 <span>00:00</span>
-                                <span>Peak_Intensity_Map</span>
+                                <span>{t("users.dossier.peakIntensity")}</span>
                                 <span>23:59</span>
                             </div>
                         </section>
 
                         {/* --- REAL-TIME PULSE (ACTIVITY FEED) --- */}
                         <section className="space-y-3">
-                            <label className="text-[9px] font-black text-admin-accent uppercase tracking-widest block">Neural_Pulse_Feed</label>
+                            <label className="text-[9px] font-black text-admin-accent uppercase tracking-widest block">{t("users.dossier.neuralPulse")}</label>
                             <div className="space-y-2 max-h-48 overflow-y-auto custom-scrollbar pr-2 min-h-20">
                                 {userActivityIsLoading ? (
-                                    <div className="text-[10px] text-admin-text-dim animate-pulse">READING_PULSE_DATA...</div>
+                                    <div className="text-[10px] text-admin-text-dim animate-pulse">{t("users.dossier.readingPulse")}</div>
                                 ) : userActivity?.data.logs && userActivity.data.logs.length > 0 ? (
                                     userActivity.data.logs.map((log: {
                                         _id: string;
@@ -579,21 +582,21 @@ export const UserDetailDrawer = ({ user, onClose }: UserDetailDrawerProps) => {
                                         );
                                     })
                                 ) : (
-                                    <div className="text-[10px] text-admin-text-dim italic">NO_PULSE_DETECTED</div>
+                                    <div className="text-[10px] text-admin-text-dim italic">{t("users.dossier.noPulse")}</div>
                                 )}
                             </div>
                         </section>
 
                         {/* --- UPDATED TACTICAL MACROS --- */}
                         <div className="space-y-2 pt-4 border-t border-admin-border/30">
-                            <label className="text-[9px] font-black text-admin-error uppercase tracking-widest block">Tactical_Command_Suite</label>
+                            <label className="text-[9px] font-black text-admin-error uppercase tracking-widest block">{t("users.dossier.tacticalSuite")}</label>
                             <div className="grid grid-cols-3 gap-2">
                                 <button
                                     onClick={() => executeMacro('STABILIZE')}
                                     className="flex flex-col items-center p-2 border border-admin-success/30 bg-admin-success/5 hover:bg-admin-success/20 transition-all cursor-pointer"
                                 >
                                     <span className="text-[9px] font-black text-admin-success">STABILIZE</span>
-                                    <span className="text-[6px] text-admin-text-dim uppercase">Fix Energy</span>
+                                    <span className="text-[6px] text-admin-text-dim uppercase">{t("users.dossier.stabilizeHint")}</span>
                                 </button>
 
                                 <button
@@ -601,7 +604,7 @@ export const UserDetailDrawer = ({ user, onClose }: UserDetailDrawerProps) => {
                                     className="flex flex-col items-center p-2 border border-admin-primary/30 bg-admin-primary/5 hover:bg-admin-primary/20 transition-all cursor-pointer"
                                 >
                                     <span className="text-[9px] font-black text-admin-primary">ELEVATE</span>
-                                    <span className="text-[6px] text-admin-text-dim uppercase">+500 EXP</span>
+                                    <span className="text-[6px] text-admin-text-dim uppercase">{t("users.dossier.elevateHint")}</span>
                                 </button>
 
                                 <button
@@ -609,12 +612,10 @@ export const UserDetailDrawer = ({ user, onClose }: UserDetailDrawerProps) => {
                                     className="flex flex-col items-center p-2 border border-admin-error/30 bg-admin-error/5 hover:bg-admin-error/20 transition-all cursor-pointer"
                                 >
                                     <span className="text-[9px] font-black text-admin-error">WARN</span>
-                                    <span className="text-[6px] text-admin-text-dim uppercase">Issue Flag</span>
+                                    <span className="text-[6px] text-admin-text-dim uppercase">{t("users.dossier.warnHint")}</span>
                                 </button>
                             </div>
                         </div>
-                    </div>
-                </div>
             </div>
 
             {/* --- INTEGRATED MODAL (Logic added here!) --- */}
@@ -634,7 +635,7 @@ export const UserDetailDrawer = ({ user, onClose }: UserDetailDrawerProps) => {
                         <div className="p-4 border-b border-admin-border bg-admin-primary/5 flex justify-between items-center">
                             <div className="flex items-center gap-2">
                                 <div className="w-1.5 h-1.5 bg-admin-primary animate-ping rounded-full" />
-                                <h3 className="text-[10px] font-black uppercase text-admin-primary italic tracking-[0.2em]">Transmit_Directive</h3>
+                                <h3 className="text-[10px] font-black uppercase text-admin-primary italic tracking-[0.2em]">{t("users.dossier.transmitDirective")}</h3>
                             </div>
                             <button onClick={() => setShowDirectiveModal(false)} className="text-admin-text-dim hover:text-white transition-colors cursor-pointer text-xs">✕</button>
                         </div>
@@ -643,8 +644,8 @@ export const UserDetailDrawer = ({ user, onClose }: UserDetailDrawerProps) => {
                             {/* 1. Priority Selection */}
                             <div className="space-y-2">
                                 <div className="flex justify-between items-center">
-                                    <label className="text-[10px] font-black text-admin-text-dim uppercase tracking-widest">Priority_Matrix</label>
-                                    <span className="text-[9px] font-mono text-admin-primary/50">LVL: {priority}</span>
+                                    <label className="text-[10px] font-black text-admin-text-dim uppercase tracking-widest">{t("users.dossier.priorityMatrix")}</label>
+                                    <span className="text-[9px] font-mono text-admin-primary/50">{t(PRIORITY_KEYS[priority])}</span>
                                 </div>
                                 <div className="grid grid-cols-4 gap-1.5">
                                     {(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'] as const).map((p) => (
@@ -657,7 +658,7 @@ export const UserDetailDrawer = ({ user, onClose }: UserDetailDrawerProps) => {
                                                 : 'border-admin-border text-admin-text-dim bg-admin-bg/40 hover:bg-admin-bg'
                                                 }`}
                                         >
-                                            {p}
+                                            {t(PRIORITY_KEYS[p])}
                                         </button>
                                     ))}
                                 </div>
@@ -665,12 +666,12 @@ export const UserDetailDrawer = ({ user, onClose }: UserDetailDrawerProps) => {
 
                             {/* 2. Directive Message */}
                             <div className="space-y-1.5">
-                                <label className="text-[8px] font-black text-admin-text-dim uppercase tracking-widest">Message_Payload</label>
+                                <label className="text-[8px] font-black text-admin-text-dim uppercase tracking-widest">{t("users.dossier.messagePayload")}</label>
                                 <textarea
                                     autoFocus
                                     value={directiveMessage}
                                     onChange={(e) => setDirectiveMessage(e.target.value)}
-                                    placeholder="Neural directive instructions..."
+                                    placeholder={t("users.dossier.messagePlaceholder")}
                                     className="w-full h-28 bg-black/40 border border-admin-border p-3 text-[11px] text-admin-text focus:outline-none focus:border-admin-primary font-mono resize-none custom-scrollbar placeholder:text-admin-text-dim/30"
                                 />
                             </div>
@@ -678,15 +679,15 @@ export const UserDetailDrawer = ({ user, onClose }: UserDetailDrawerProps) => {
                             {/* 3. Action URL (Now streamlined) */}
                             <div className="space-y-1.5">
                                 <label className="text-[8px] font-black text-admin-text-dim uppercase tracking-widest flex justify-between">
-                                    Redirect_Link
-                                    <span className="text-[7px] italic text-admin-text-dim/40 lowercase">optional</span>
+                                    {t("users.dossier.redirectLink")}
+                                    <span className="text-[7px] italic text-admin-text-dim/40 lowercase">{t("common.optional")}</span>
                                 </label>
                                 <div className="relative group">
                                     <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] text-admin-primary/50 font-mono italic">URL{'>'}</div>
                                     <input
                                         value={actionUrlMessage}
                                         onChange={(e) => setActionUrlMessage(e.target.value)}
-                                        placeholder="https://terminal.access/..."
+                                        placeholder={t("users.dossier.urlPlaceholder")}
                                         type="url"
                                         className="w-full bg-black/40 border border-admin-border py-2.5 pl-10 pr-3 text-[10px] text-admin-primary focus:outline-none focus:border-admin-primary font-mono transition-all"
                                     />
@@ -701,7 +702,7 @@ export const UserDetailDrawer = ({ user, onClose }: UserDetailDrawerProps) => {
                                 onClick={() => setShowDirectiveModal(false)}
                                 className="col-span-2 text-[9px] font-black uppercase tracking-tighter border-admin-border/50"
                             >
-                                Abort_Signal
+                                {t("users.dossier.abortSignal")}
                             </ButtonComponent>
                             <ButtonComponent
                                 variant="oracle"
@@ -709,7 +710,7 @@ export const UserDetailDrawer = ({ user, onClose }: UserDetailDrawerProps) => {
                                 isLoading={isProcessing}
                                 className="col-span-3 text-[9px] font-black uppercase tracking-tighter shadow-[0_0_15px_rgba(0,255,255,0.1)]"
                             >
-                                Execute_Transmission
+                                {t("users.dossier.executeTransmission")}
                             </ButtonComponent>
                         </div>
 
@@ -718,6 +719,21 @@ export const UserDetailDrawer = ({ user, onClose }: UserDetailDrawerProps) => {
                     </div>
                 </div>
             )}
+        </>
+    );
+
+    if (embedded) {
+        return dossierBody;
+    }
+
+    return (
+        <>
+            <div className="fixed inset-0 z-50 flex justify-end">
+                <div className="absolute inset-0 bg-admin-bg/85 backdrop-blur-md animate-in fade-in" onClick={onClose} />
+                <div className="relative w-full max-w-md h-screen bg-admin-panel border-l border-admin-border flex flex-col shadow-2xl animate-in slide-in-from-right duration-500">
+                    {dossierBody}
+                </div>
+            </div>
         </>
     );
 };

@@ -33,13 +33,100 @@
   --color-admin-error: #ef4444; /* Rose Red */
 }
 
-@keyframes shimmer {
+@keyframes admin-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes admin-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes admin-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes admin-slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes admin-shimmer {
   100% {
     transform: translateX(100%);
   }
 }
 
 @layer utilities {
+  .admin-fade-in {
+    animation: admin-fade-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .admin-fade-up {
+    animation: admin-fade-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .admin-scale-in {
+    animation: admin-scale-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .admin-slide-in-right {
+    animation: admin-slide-in-right 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .admin-stagger > .admin-stagger-item {
+    animation: admin-fade-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .admin-stagger > .admin-stagger-item:nth-child(1) { animation-delay: 0ms; }
+  .admin-stagger > .admin-stagger-item:nth-child(2) { animation-delay: 50ms; }
+  .admin-stagger > .admin-stagger-item:nth-child(3) { animation-delay: 100ms; }
+  .admin-stagger > .admin-stagger-item:nth-child(4) { animation-delay: 150ms; }
+  .admin-stagger > .admin-stagger-item:nth-child(5) { animation-delay: 200ms; }
+  .admin-stagger > .admin-stagger-item:nth-child(6) { animation-delay: 250ms; }
+  .admin-stagger > .admin-stagger-item:nth-child(7) { animation-delay: 300ms; }
+  .admin-stagger > .admin-stagger-item:nth-child(8) { animation-delay: 350ms; }
+  .admin-stagger > .admin-stagger-item:nth-child(9) { animation-delay: 400ms; }
+  .admin-stagger > .admin-stagger-item:nth-child(10) { animation-delay: 450ms; }
+  .admin-stagger > .admin-stagger-item:nth-child(11) { animation-delay: 500ms; }
+  .admin-stagger > .admin-stagger-item:nth-child(12) { animation-delay: 550ms; }
+
+  .admin-nav-link {
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  }
+
+  .admin-nav-link:hover {
+    transform: translateX(2px);
+  }
+
+  .admin-nav-link-active {
+    animation: admin-slide-in-right 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .admin-page-enter {
+    animation: admin-fade-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
   /* Targeted scrollbar styling for the GlassTextArea */
   .custom-scrollbar::-webkit-scrollbar {
     width: 6px;

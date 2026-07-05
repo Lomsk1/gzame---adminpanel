@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { AdminDrawerShell } from "./admin-drawer-shell";
 import { AdminInput } from "../ui/input-form";
+import { useAdminT } from "../../store/locale/locale";
 import type { Specialist, SpecialistCategory } from "../../types/specialist/specialist";
 import {
   AvatarUploadField,
@@ -11,6 +12,8 @@ import {
   KYC_OPTIONS,
   LANGUAGE_OPTIONS,
   LIFE_SPHERES,
+  TRUST_TIER_OPTIONS,
+  type TrustTierValue,
 } from "../specialists";
 
 function categoryIds(spec: Specialist): string[] {
@@ -39,6 +42,20 @@ export type SpecialistFormData = {
   monthlyClientLimit?: number;
   countries?: string[];
   languages?: string[];
+  isAmbassador?: boolean;
+  ambassadorCountryCode?: string;
+  referredBySpecialistId?: string;
+  applyReferralCode?: string;
+  regenerateAmbassadorCode?: boolean;
+  trustTier?: Specialist["trust_tier"];
+  legalName?: string;
+  entityType?: string;
+  taxId?: string;
+  taxCountry?: string;
+  addressLine1?: string;
+  addressCity?: string;
+  addressPostalCode?: string;
+  addressCountry?: string;
 };
 
 type EditorTab = "profile" | "reach" | "links" | "portal";
@@ -46,17 +63,13 @@ type EditorTab = "profile" | "reach" | "links" | "portal";
 interface Props {
   specialist: Specialist | null;
   categories: SpecialistCategory[];
+  allSpecialists?: Specialist[];
   onClose: () => void;
   onSave: (data: SpecialistFormData) => void;
   isSubmitting?: boolean;
 }
 
-const TAB_LABELS: { id: EditorTab; label: string; short: string }[] = [
-  { id: "profile", label: "Profile", short: "Profile" },
-  { id: "reach", label: "Reach", short: "Reach" },
-  { id: "links", label: "Links", short: "Links" },
-  { id: "portal", label: "Portal", short: "Portal" },
-];
+const EDITOR_TABS: EditorTab[] = ["profile", "reach", "links", "portal"];
 
 const inputLabelClass = "text-[11px] font-black text-admin-text-dim uppercase tracking-widest block mb-1.5";
 const inputFieldClass =
@@ -65,10 +78,12 @@ const inputFieldClass =
 export const SpecialistEditorDrawer = ({
   specialist,
   categories,
+  allSpecialists = [],
   onClose,
   onSave,
   isSubmitting,
 }: Props) => {
+  const { t } = useAdminT();
   const [activeTab, setActiveTab] = useState<EditorTab>("profile");
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | null>(specialist?.avatar ?? null);
@@ -87,6 +102,9 @@ export const SpecialistEditorDrawer = ({
   const [portalEmail, setPortalEmail] = useState(specialist?.portal_user_email ?? "");
   const [kycStatus, setKycStatus] = useState<Specialist["kyc_status"]>(
     specialist?.kyc_status ?? "none",
+  );
+  const [trustTier, setTrustTier] = useState<TrustTierValue>(
+    (specialist?.trust_tier as TrustTierValue) ?? "T0",
   );
   const [suggestedSpheres, setSuggestedSpheres] = useState<string[]>(
     specialist?.suggested_spheres ?? [],
@@ -108,6 +126,27 @@ export const SpecialistEditorDrawer = ({
   );
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>(
     specialist?.languages ?? [],
+  );
+  const [isAmbassador, setIsAmbassador] = useState(specialist?.is_ambassador ?? false);
+  const [ambassadorCountryCode, setAmbassadorCountryCode] = useState(
+    specialist?.ambassador_country_code ?? "",
+  );
+  const [referredBySpecialistId, setReferredBySpecialistId] = useState(
+    specialist?.referred_by_specialist_id ?? "",
+  );
+  const [applyReferralCode, setApplyReferralCode] = useState("");
+  const [regenerateAmbassadorCode, setRegenerateAmbassadorCode] = useState(false);
+  const [legalName, setLegalName] = useState((specialist as { legal_name?: string })?.legal_name ?? "");
+  const [entityType, setEntityType] = useState((specialist as { entity_type?: string })?.entity_type ?? "");
+  const [taxId, setTaxId] = useState((specialist as { tax_id?: string })?.tax_id ?? "");
+  const [taxCountry, setTaxCountry] = useState((specialist as { tax_country?: string })?.tax_country ?? "");
+  const [addressLine1, setAddressLine1] = useState((specialist as { address_line1?: string })?.address_line1 ?? "");
+  const [addressCity, setAddressCity] = useState((specialist as { address_city?: string })?.address_city ?? "");
+  const [addressPostalCode, setAddressPostalCode] = useState(
+    (specialist as { address_postal_code?: string })?.address_postal_code ?? "",
+  );
+  const [addressCountry, setAddressCountry] = useState(
+    (specialist as { address_country?: string })?.address_country ?? "",
   );
 
   const categoryOptions = useMemo(
@@ -195,9 +234,23 @@ export const SpecialistEditorDrawer = ({
       servicePrice,
       serviceCurrency,
       kycStatus,
+      trustTier,
       monthlyClientLimit,
       countries: selectedCountries,
       languages: selectedLanguages,
+      isAmbassador,
+      ambassadorCountryCode: ambassadorCountryCode.trim() || undefined,
+      referredBySpecialistId: referredBySpecialistId || undefined,
+      applyReferralCode: applyReferralCode.trim() || undefined,
+      regenerateAmbassadorCode: regenerateAmbassadorCode || undefined,
+      legalName: legalName.trim() || undefined,
+      entityType: entityType.trim() || undefined,
+      taxId: taxId.trim() || undefined,
+      taxCountry: taxCountry.trim() || undefined,
+      addressLine1: addressLine1.trim() || undefined,
+      addressCity: addressCity.trim() || undefined,
+      addressPostalCode: addressPostalCode.trim() || undefined,
+      addressCountry: addressCountry.trim() || undefined,
     });
   };
 
@@ -208,33 +261,37 @@ export const SpecialistEditorDrawer = ({
       onClick={handleSave}
       className="w-full rounded-xl bg-admin-primary py-4 text-sm font-black uppercase tracking-widest text-white transition-all hover:brightness-110 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
     >
-      {isSubmitting ? "Saving…" : specialist ? "Save changes" : "Create specialist"}
+      {isSubmitting
+        ? t("drawer.saving")
+        : specialist
+          ? t("specialists.editor.saveChanges")
+          : t("specialists.editor.create")}
     </button>
   );
 
   return (
     <AdminDrawerShell
       isOpen
-      title={specialist ? "Edit specialist" : "New specialist"}
-      subtitle={specialist ? specialist.name : "Directory entry"}
+      title={specialist ? t("specialists.editor.editTitle") : t("specialists.editor.newTitle")}
+      subtitle={specialist ? specialist.name : t("specialists.editor.directoryEntry")}
       onClose={onClose}
       isSubmitting={isSubmitting}
       footer={footer}
       panelClassName="max-w-2xl sm:max-w-xl md:max-w-2xl"
     >
       <div className="-mx-1 mb-4 flex gap-1.5 overflow-x-auto pb-1 custom-scrollbar sm:flex-wrap sm:overflow-visible">
-        {TAB_LABELS.map((tab) => (
+        {EDITOR_TABS.map((tabId) => (
           <button
-            key={tab.id}
+            key={tabId}
             type="button"
-            onClick={() => setActiveTab(tab.id)}
+            onClick={() => setActiveTab(tabId)}
             className={`shrink-0 rounded-full border px-3.5 py-2 text-xs font-semibold transition-colors sm:px-4 ${
-              activeTab === tab.id
+              activeTab === tabId
                 ? "border-admin-primary bg-admin-primary text-white shadow-sm"
                 : "border-admin-border bg-admin-bg/40 text-admin-text-dim hover:border-admin-primary/30 hover:text-admin-text"
             }`}
           >
-            {tab.short}
+            {t(`specialists.editor.tab.${tabId}`)}
           </button>
         ))}
       </div>
@@ -242,7 +299,7 @@ export const SpecialistEditorDrawer = ({
       {activeTab === "profile" ? (
         <div className="space-y-4">
           <FormSection
-            title="Identity"
+            title={t("specialists.editor.identity")}
             description="Photo, name, and public profile copy shown in the app."
             icon="👤"
           >
@@ -252,7 +309,7 @@ export const SpecialistEditorDrawer = ({
               onClear={clearAvatar}
             />
             <AdminInput
-              label="Full name"
+              label={t("specialists.editor.fullName")}
               value={name}
               onChange={(v) => setName(String(v ?? ""))}
               placeholder="Dr. Jane Smith"
@@ -260,7 +317,7 @@ export const SpecialistEditorDrawer = ({
               inputClassName={inputFieldClass}
             />
             <AdminInput
-              label="Specialty"
+              label={t("specialists.editor.specialty")}
               value={specialty}
               onChange={(v) => setSpecialty(String(v ?? ""))}
               placeholder="Life coach, therapist…"
@@ -291,7 +348,7 @@ export const SpecialistEditorDrawer = ({
           </FormSection>
 
           <FormSection
-            title="Visibility"
+            title={t("specialists.editor.visibility")}
             description="Control listing order and whether this specialist appears in the app."
             icon="◎"
             defaultOpen
@@ -310,7 +367,7 @@ export const SpecialistEditorDrawer = ({
               </button>
             </div>
             <AdminInput
-              label="Promotion order"
+              label={t("specialists.editor.promotionOrder")}
               type="number"
               value={order}
               onChange={(v) => setOrder(v === "" ? 0 : Number(v))}
@@ -338,7 +395,7 @@ export const SpecialistEditorDrawer = ({
       {activeTab === "reach" ? (
         <div className="space-y-4">
           <FormSection
-            title="Countries"
+            title={t("specialists.editor.countries")}
             description="Where this specialist offers services. Users can filter by country in the app."
             icon="🌍"
           >
@@ -349,11 +406,13 @@ export const SpecialistEditorDrawer = ({
               searchable
               searchPlaceholder="Search country or code…"
               emptyLabel="No countries match your search."
+              columns={1}
+              listClassName="max-h-64 overflow-y-auto pr-1 custom-scrollbar"
             />
           </FormSection>
 
           <FormSection
-            title="Languages"
+            title={t("specialists.editor.languages")}
             description="Languages the specialist can conduct sessions in."
             icon="🗣"
           >
@@ -370,7 +429,7 @@ export const SpecialistEditorDrawer = ({
       {activeTab === "links" ? (
         <div className="space-y-4">
           <FormSection
-            title="External links"
+            title={t("specialists.editor.externalLinks")}
             description="Portfolio and booking URLs opened from the mobile app."
             icon="🔗"
           >
@@ -383,7 +442,7 @@ export const SpecialistEditorDrawer = ({
               inputClassName={inputFieldClass}
             />
             <AdminInput
-              label="Booking link"
+              label={t("specialists.editor.bookingLink")}
               value={booking}
               onChange={(v) => setBooking(String(v ?? ""))}
               placeholder="https://wa.me/… or Calendly"
@@ -397,7 +456,7 @@ export const SpecialistEditorDrawer = ({
       {activeTab === "portal" ? (
         <div className="space-y-4">
           <FormSection
-            title="Specialist portal"
+            title={t("specialists.editor.portal")}
             description="Mobile app access for Life Map, client messaging, and specialist dashboard."
             icon="📱"
           >
@@ -434,8 +493,31 @@ export const SpecialistEditorDrawer = ({
               </select>
             </div>
 
+            <div>
+              <label className={inputLabelClass}>Payout trust tier</label>
+              <select
+                value={trustTier}
+                onChange={(e) => setTrustTier(e.target.value as TrustTierValue)}
+                className={inputFieldClass}
+              >
+                {TRUST_TIER_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+              <p className="mt-1.5 text-[11px] text-admin-text-muted">
+                {TRUST_TIER_OPTIONS.find((o) => o.value === trustTier)?.hint ??
+                  "Controls rolling reserve % and bank payout clearance for new releases."}
+              </p>
+              <p className="mt-1 text-[11px] text-admin-text-dim">
+                Admin override for QA — nightly cron may recalculate tier from booking volume unless you
+                change it again.
+              </p>
+            </div>
+
             <AdminInput
-              label="Portal user email"
+              label={t("specialists.editor.portalEmail")}
               value={portalEmail}
               onChange={(v) => setPortalEmail(String(v ?? ""))}
               placeholder="specialist@email.com"
@@ -444,7 +526,7 @@ export const SpecialistEditorDrawer = ({
             />
 
             <AdminInput
-              label="Monthly client limit"
+              label={t("specialists.editor.monthlyLimit")}
               type="number"
               value={monthlyClientLimit}
               onChange={(v) => setMonthlyClientLimit(Math.max(1, Number(v) || 1))}
@@ -464,7 +546,107 @@ export const SpecialistEditorDrawer = ({
           </FormSection>
 
           <FormSection
-            title="Default service"
+            title={t("specialists.editor.ambassador")}
+            description="Mark ambassadors who recruit specialists. They earn 5% on recruited specialists' bookings (14-day clawback, then Stripe transfer)."
+            icon="🤝"
+          >
+            <label className="flex items-center gap-2 text-sm text-admin-text cursor-pointer">
+              <input
+                type="checkbox"
+                checked={isAmbassador}
+                onChange={(e) => setIsAmbassador(e.target.checked)}
+                className="rounded border-admin-border"
+              />
+              This specialist is an ambassador (can recruit others)
+            </label>
+            {isAmbassador && specialist?.ambassador_referral_code ? (
+              <div className="rounded-xl border border-admin-border bg-admin-panel/30 p-3">
+                <p className={inputLabelClass}>Referral code</p>
+                <div className="flex items-center justify-between gap-3">
+                  <code className="text-lg font-bold tracking-widest text-admin-primary">
+                    {specialist.ambassador_referral_code}
+                  </code>
+                  <button
+                    type="button"
+                    className="text-xs font-bold text-admin-primary hover:underline"
+                    onClick={() => {
+                      void navigator.clipboard.writeText(specialist.ambassador_referral_code ?? "");
+                    }}
+                  >
+                    Copy
+                  </button>
+                </div>
+                <label className="mt-3 flex items-center gap-2 text-xs text-admin-text-dim cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={regenerateAmbassadorCode}
+                    onChange={(e) => setRegenerateAmbassadorCode(e.target.checked)}
+                    className="rounded border-admin-border"
+                  />
+                  Regenerate code on save
+                </label>
+              </div>
+            ) : null}
+            <div>
+              <label className={inputLabelClass}>Ambassador territory (country)</label>
+              <select
+                value={ambassadorCountryCode}
+                onChange={(e) => setAmbassadorCountryCode(e.target.value)}
+                className={inputFieldClass}
+              >
+                <option value="">— None —</option>
+                {countryOptions.map((c) => (
+                  <option key={c.value} value={c.value}>
+                    {c.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className={inputLabelClass}>Referred by specialist</label>
+              <select
+                value={referredBySpecialistId}
+                onChange={(e) => setReferredBySpecialistId(e.target.value)}
+                className={inputFieldClass}
+              >
+                <option value="">— None —</option>
+                {allSpecialists
+                  .filter((s) => s._id !== specialist?._id)
+                  .map((s) => (
+                    <option key={s._id} value={s._id}>
+                      {s.name}
+                      {s.is_ambassador ? " (ambassador)" : ""}
+                    </option>
+                  ))}
+              </select>
+            </div>
+            <AdminInput
+              label={t("specialists.editor.referralCode")}
+              value={applyReferralCode}
+              onChange={(v) => setApplyReferralCode(String(v ?? "").toUpperCase())}
+              placeholder="GZ12345678"
+              labelClassName={inputLabelClass}
+              inputClassName={inputFieldClass}
+            />
+          </FormSection>
+
+          <FormSection
+            title="DAC7 tax identity"
+            description="Legal name and tax ID for yearly DAC7 marketplace reporting."
+            icon="📋"
+          >
+            <AdminInput label={t("specialists.editor.legalName")} value={legalName} onChange={(v) => setLegalName(String(v ?? ""))} labelClassName={inputLabelClass} inputClassName={inputFieldClass} />
+            <AdminInput label={t("specialists.editor.entityType")} value={entityType} onChange={(v) => setEntityType(String(v ?? ""))} placeholder={t("specialists.editor.entityPlaceholder")} labelClassName={inputLabelClass} inputClassName={inputFieldClass} />
+            <AdminInput label={t("specialists.editor.taxId")} value={taxId} onChange={(v) => setTaxId(String(v ?? ""))} labelClassName={inputLabelClass} inputClassName={inputFieldClass} />
+            <AdminInput label="Tax country (ISO)" value={taxCountry} onChange={(v) => setTaxCountry(String(v ?? ""))} labelClassName={inputLabelClass} inputClassName={inputFieldClass} />
+            <AdminInput label="Address line 1" value={addressLine1} onChange={(v) => setAddressLine1(String(v ?? ""))} labelClassName={inputLabelClass} inputClassName={inputFieldClass} />
+            <AdminInput label={t("specialists.editor.city")} value={addressCity} onChange={(v) => setAddressCity(String(v ?? ""))} labelClassName={inputLabelClass} inputClassName={inputFieldClass} />
+            <AdminInput label={t("specialists.editor.postalCode")} value={addressPostalCode} onChange={(v) => setAddressPostalCode(String(v ?? ""))} labelClassName={inputLabelClass} inputClassName={inputFieldClass} />
+            <AdminInput label="Address country (ISO)" value={addressCountry} onChange={(v) => setAddressCountry(String(v ?? ""))} labelClassName={inputLabelClass} inputClassName={inputFieldClass} />
+          </FormSection>
+
+          <FormSection
+            title={t("specialists.editor.defaultService")}
             description="Optional — configure a service title, duration, and price for booking and portal."
             icon="💶"
             defaultOpen

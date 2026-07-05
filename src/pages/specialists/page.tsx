@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { useLoaderData, useFetcher, useRevalidator, Link } from "react-router";
 import { GlassCard } from "../../components/cards/card-glass";
 import { CategoryEditorDrawer } from "../../components/drawers/category-editor-drawer";
+import { SpecialistDetailDrawer } from "../../components/drawers/specialist-detail-drawer";
 import { SpecialistEditorDrawer, type SpecialistFormData } from "../../components/drawers/specialist-editor-drawer";
 import { ButtonComponent } from "../../components/form/button";
 import {
@@ -12,6 +13,7 @@ import {
   SpecialistListItem,
   SpecialistListSkeleton,
   SpecialistMetricTile,
+  SpecialistTableRow,
   SpecialistToolbar,
   buildSpecialistServices,
   type SpecialistStatusFilter,
@@ -23,6 +25,8 @@ import { axiosMultipartAuth } from "../../helper/axios";
 import type { SpecialistCategory, Specialist } from "../../types/specialist/specialist";
 import type { SpecialistCategoryListResponse, SpecialistListResponse } from "../../types/specialist/specialist";
 import type { SpecialistsPageActionResponse } from "../../features/specialists/specialists-page.actions";
+import { AdminPageHeader, AdminPageShell } from "../../components/admin";
+import { useAdminT } from "../../store/locale/locale";
 
 type PageTab = "specialists" | "categories";
 
@@ -33,12 +37,14 @@ function specialistCategoryIds(spec: Specialist): string[] {
 }
 
 function readStoredViewMode(): SpecialistViewMode {
-  if (typeof window === "undefined") return "grid";
+  if (typeof window === "undefined") return "table";
   const stored = localStorage.getItem(VIEW_MODE_KEY);
-  return stored === "list" ? "list" : "grid";
+  if (stored === "list" || stored === "grid" || stored === "table") return stored;
+  return "table";
 }
 
 export default function SpecialistsPage() {
+  const { t } = useAdminT();
   const { categoriesData, specialistsData } = useLoaderData() as {
     categoriesData: SpecialistCategoryListResponse;
     specialistsData: SpecialistListResponse;
@@ -60,6 +66,7 @@ export default function SpecialistsPage() {
   const [editingCategory, setEditingCategory] = useState<SpecialistCategory | null>(null);
   const [specialistDrawerOpen, setSpecialistDrawerOpen] = useState(false);
   const [editingSpecialist, setEditingSpecialist] = useState<Specialist | null>(null);
+  const [inspectingSpecialist, setInspectingSpecialist] = useState<Specialist | null>(null);
   const [isSubmittingSpecialistWithFile, setIsSubmittingSpecialistWithFile] = useState(false);
 
   useEffect(() => {
@@ -73,7 +80,7 @@ export default function SpecialistsPage() {
         toast.success(d.message);
         revalidator.revalidate();
       } else {
-        toast.error(d.error || "Action failed");
+        toast.error(d.error || t("common.actionFailed"));
       }
       fetcher.reset();
     }
@@ -191,6 +198,20 @@ export default function SpecialistsPage() {
       monthly_client_limit: Math.max(1, rest.monthlyClientLimit ?? 10),
       countries: rest.countries ?? [],
       languages: rest.languages ?? [],
+      is_ambassador: rest.isAmbassador === true,
+      ambassador_country_code: rest.ambassadorCountryCode || undefined,
+      referred_by_specialist_id: rest.referredBySpecialistId || undefined,
+      apply_referral_code: rest.applyReferralCode || undefined,
+      regenerate_ambassador_code: rest.regenerateAmbassadorCode === true,
+      legal_name: rest.legalName || undefined,
+      entity_type: rest.entityType || undefined,
+      tax_id: rest.taxId || undefined,
+      tax_country: rest.taxCountry || undefined,
+      address_line1: rest.addressLine1 || undefined,
+      address_city: rest.addressCity || undefined,
+      address_postal_code: rest.addressPostalCode || undefined,
+      address_country: rest.addressCountry || undefined,
+      trust_tier: rest.trustTier || undefined,
     };
 
     setIsSubmittingSpecialistWithFile(true);
@@ -231,7 +252,7 @@ export default function SpecialistsPage() {
           kyc_status: rest.kycStatus,
         });
       }
-      toast.success(editingSpecialist ? "Specialist updated." : "Specialist created.");
+      toast.success(editingSpecialist ? t("specialists.toast.updated") : t("specialists.toast.created"));
       revalidator.revalidate();
       setSpecialistDrawerOpen(false);
       setEditingSpecialist(null);
@@ -240,7 +261,7 @@ export default function SpecialistsPage() {
         err && typeof err === "object" && "response" in err
           ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
           : "Request failed.";
-      toast.error(msg ?? "Request failed.");
+      toast.error(msg ?? t("specialists.toast.failed"));
     } finally {
       setIsSubmittingSpecialistWithFile(false);
     }
@@ -255,6 +276,10 @@ export default function SpecialistsPage() {
     setSpecialistDrawerOpen(true);
   };
 
+  const openInspectSpecialist = (spec: Specialist) => {
+    setInspectingSpecialist(spec);
+  };
+
   const openEditSpecialist = (spec: Specialist) => {
     setEditingSpecialist(spec);
     setSpecialistDrawerOpen(true);
@@ -265,42 +290,32 @@ export default function SpecialistsPage() {
   const isRefreshing = revalidator.state === "loading";
 
   return (
-    <div className="min-h-full animate-in fade-in duration-500">
-      <div className="border-b border-admin-primary/10 bg-gradient-to-b from-admin-panel/40 to-transparent px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-        <div className="mx-auto max-w-7xl">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-            <div className="min-w-0">
-              <p className="text-xs font-semibold uppercase tracking-wider text-admin-primary">
-                Directory
-              </p>
-              <h1 className="mt-1 text-2xl font-bold tracking-tight text-admin-text sm:text-3xl">
-                Specialists
-              </h1>
-              <p className="mt-2 max-w-2xl text-sm leading-relaxed text-admin-text-dim">
-                Manage experts for the mobile app — profiles, countries, languages, booking links, and portal access.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Link
-                to="/specialists/booking-clicks"
-                className="inline-flex items-center justify-center rounded-xl border border-admin-border bg-admin-bg/50 px-4 py-2.5 text-sm font-medium text-admin-text-dim transition-colors hover:border-admin-primary/40 hover:text-admin-primary"
-              >
-                Booking analytics
-              </Link>
-              <ButtonComponent
-                variant="oracle"
-                size="sm"
-                onClick={openNewSpecialist}
-                className="min-w-[140px] flex-1 sm:flex-none"
-              >
-                + New specialist
-              </ButtonComponent>
-            </div>
+    <AdminPageShell className="space-y-6">
+      <AdminPageHeader
+        title={t("pages.specialists.title")}
+        actions={
+          <div className="flex flex-wrap gap-2">
+            <Link
+              to="/specialists/booking-clicks"
+              className="inline-flex items-center justify-center rounded-xl border border-admin-border bg-admin-bg/50 px-4 py-2.5 text-sm font-medium text-admin-text-dim transition-colors hover:border-admin-primary/40 hover:text-admin-primary"
+            >
+              {t("specialists.bookingAnalytics")}
+            </Link>
+            <ButtonComponent
+              variant="oracle"
+              size="sm"
+              onClick={openNewSpecialist}
+              className="min-w-[140px] flex-1 sm:flex-none"
+            >
+              {t("specialists.newSpecialist")}
+            </ButtonComponent>
           </div>
+        }
+      />
 
-          <div className="mt-6 grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-3 xl:grid-cols-5">
+      <div className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-3 xl:grid-cols-5 admin-fade-up" style={{ animationDelay: "80ms" }}>
             <SpecialistMetricTile
-              label="Total"
+              label={t("specialists.metric.total")}
               value={stats.total}
               tone="primary"
               active={activeTab === "specialists" && statusFilter === "all" && !reachFilter && !categoryFilter}
@@ -312,7 +327,7 @@ export default function SpecialistsPage() {
               }}
             />
             <SpecialistMetricTile
-              label="Active"
+              label={t("specialists.metric.active")}
               value={stats.active}
               tone="success"
               active={statusFilter === "active"}
@@ -323,7 +338,7 @@ export default function SpecialistsPage() {
               }}
             />
             <SpecialistMetricTile
-              label="Portal"
+              label={t("specialists.metric.portal")}
               value={stats.portal}
               tone="accent"
               active={statusFilter === "portal"}
@@ -334,9 +349,9 @@ export default function SpecialistsPage() {
               }}
             />
             <SpecialistMetricTile
-              label="With reach"
+              label={t("specialists.metric.withReach")}
               value={stats.withCountries}
-              hint="Countries set"
+              hint={t("specialists.metric.countriesHint")}
               tone="warning"
               active={reachFilter}
               onClick={() => {
@@ -346,21 +361,19 @@ export default function SpecialistsPage() {
               }}
             />
             <SpecialistMetricTile
-              label="Categories"
+              label={t("specialists.metric.categories")}
               value={stats.categories}
               tone="primary"
               active={activeTab === "categories"}
               onClick={() => setActiveTab("categories")}
             />
           </div>
-        </div>
-      </div>
 
-      <div className="mx-auto max-w-7xl space-y-4 px-4 py-5 sm:space-y-6 sm:px-6 sm:py-6 lg:px-8">
+      <div className="space-y-4 sm:space-y-6 admin-fade-up" style={{ animationDelay: "120ms" }}>
         <div className="flex gap-1 rounded-xl border border-admin-border/50 bg-admin-panel/30 p-1">
           {([
-            { id: "specialists" as const, label: "Specialists", count: stats.total },
-            { id: "categories" as const, label: "Categories", count: stats.categories },
+            { id: "specialists" as const, label: t("specialists.tab.specialists"), count: stats.total },
+            { id: "categories" as const, label: t("specialists.tab.categories"), count: stats.categories },
           ]).map((tab) => (
             <button
               key={tab.id}
@@ -420,8 +433,8 @@ export default function SpecialistsPage() {
               {reachFilter ? (
                 <div className="flex items-center gap-2">
                   <span className="inline-flex items-center gap-1.5 rounded-full border border-admin-warning/30 bg-admin-warning/10 px-2.5 py-1 text-[11px] font-medium text-admin-warning">
-                    With countries configured
-                    <button type="button" onClick={() => setReachFilter(false)} aria-label="Remove filter">
+                    {t("specialists.filter.withCountries")}
+                    <button type="button" onClick={() => setReachFilter(false)} aria-label={t("specialists.filter.remove")}>
                       ×
                     </button>
                   </span>
@@ -432,19 +445,45 @@ export default function SpecialistsPage() {
                 <SpecialistListSkeleton count={viewMode === "grid" ? 4 : 6} />
               ) : filteredSpecialists.length === 0 ? (
                 <SpecialistEmptyState
-                  title={specialists.length === 0 ? "No specialists yet" : "No matches found"}
+                  title={specialists.length === 0 ? t("specialists.empty.noSpecialists") : t("specialists.empty.noMatches")}
                   description={
                     specialists.length === 0
-                      ? "Create categories first, then add your first specialist with photo, countries, and languages."
-                      : "Try different search terms or clear your filters."
+                      ? t("specialists.empty.noSpecialistsDesc")
+                      : t("specialists.empty.noMatchesDesc")
                   }
-                  actionLabel={specialists.length === 0 ? "Add specialist" : "Clear filters"}
+                  actionLabel={specialists.length === 0 ? t("specialists.empty.addSpecialist") : t("specialists.empty.clearFilters")}
                   icon={specialists.length === 0 ? "👤" : "🔍"}
                   onAction={() => {
                     if (specialists.length === 0) openNewSpecialist();
                     else clearAllFilters();
                   }}
                 />
+              ) : viewMode === "table" ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[720px] text-left">
+                    <thead className="border-b border-admin-border/40 bg-admin-panel/30 text-[9px] font-black uppercase tracking-[0.2em] text-admin-text-dim">
+                      <tr>
+                        <th className="px-4 py-3">{t("specialists.table.specialist")}</th>
+                        <th className="hidden px-4 py-3 md:table-cell">{t("specialists.table.categories")}</th>
+                        <th className="hidden px-4 py-3 lg:table-cell">{t("specialists.table.bio")}</th>
+                        <th className="hidden px-4 py-3 sm:table-cell">{t("specialists.table.reach")}</th>
+                        <th className="px-4 py-3">{t("common.status")}</th>
+                        <th className="px-4 py-3 text-right">{t("specialists.table.ops")}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredSpecialists.map((spec) => (
+                        <SpecialistTableRow
+                          key={spec._id}
+                          specialist={spec}
+                          onInspect={() => openInspectSpecialist(spec)}
+                          onEdit={() => openEditSpecialist(spec)}
+                          onDelete={() => handleDeleteSpecialist(spec._id)}
+                        />
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               ) : viewMode === "list" ? (
                 <div className="space-y-2 sm:space-y-3">
                   {filteredSpecialists.map((spec) => (
@@ -474,9 +513,9 @@ export default function SpecialistsPage() {
           <GlassCard>
             <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h2 className="text-lg font-bold text-admin-text">Categories</h2>
+                <h2 className="text-lg font-bold text-admin-text">{t("specialists.categories.title")}</h2>
                 <p className="mt-1 text-sm text-admin-text-dim">
-                  Multilingual labels used to group specialists in the app.
+                  {t("specialists.categories.desc")}
                 </p>
               </div>
               <ButtonComponent
@@ -488,15 +527,15 @@ export default function SpecialistsPage() {
                 }}
                 className="w-full sm:w-auto"
               >
-                + Add category
+                {t("specialists.categories.add")}
               </ButtonComponent>
             </div>
 
             {categories.length === 0 ? (
               <SpecialistEmptyState
-                title="No categories yet"
-                description="Categories help users filter specialists — e.g. Coach, Therapist, Nutritionist."
-                actionLabel="Create category"
+                title={t("specialists.categories.empty")}
+                description={t("specialists.categories.emptyDesc")}
+                actionLabel={t("specialists.categories.create")}
                 icon="🏷"
                 onAction={() => {
                   setEditingCategory(null);
@@ -535,10 +574,26 @@ export default function SpecialistsPage() {
         />
       ) : null}
 
+      {inspectingSpecialist ? (
+        <SpecialistDetailDrawer
+          specialist={inspectingSpecialist}
+          onClose={() => setInspectingSpecialist(null)}
+          onEdit={() => {
+            openEditSpecialist(inspectingSpecialist);
+            setInspectingSpecialist(null);
+          }}
+          onDeleted={() => {
+            setInspectingSpecialist(null);
+            revalidator.revalidate();
+          }}
+        />
+      ) : null}
+
       {specialistDrawerOpen ? (
         <SpecialistEditorDrawer
           specialist={editingSpecialist}
           categories={categories}
+          allSpecialists={specialists}
           onClose={() => {
             setSpecialistDrawerOpen(false);
             setEditingSpecialist(null);
@@ -547,6 +602,6 @@ export default function SpecialistsPage() {
           isSubmitting={isSubmittingSpecialist}
         />
       ) : null}
-    </div>
+    </AdminPageShell>
   );
 }

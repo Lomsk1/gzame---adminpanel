@@ -10,16 +10,20 @@ function categoryTitle(c: SpecialistCategory | string): string {
 
 interface Props {
   specialist: Specialist;
+  onInspect: () => void;
   onEdit: () => void;
   onDelete: () => void;
 }
 
-export function SpecialistTableRow({ specialist, onEdit, onDelete }: Props) {
+export function SpecialistTableRow({ specialist, onInspect, onEdit, onDelete }: Props) {
   const countries = (specialist.countries ?? []).slice(0, 3);
   const categories = Array.isArray(specialist.categories) ? specialist.categories : [];
 
   return (
-    <tr className="group border-b border-admin-border/20 transition-colors hover:bg-admin-primary/5">
+    <tr
+      className="group cursor-pointer border-b border-admin-border/20 transition-colors hover:bg-admin-primary/5"
+      onClick={onInspect}
+    >
       <td className="px-4 py-4">
         <div className="flex items-center gap-3">
           <img
@@ -74,7 +78,10 @@ export function SpecialistTableRow({ specialist, onEdit, onDelete }: Props) {
         <div className="flex justify-end gap-2 opacity-90 transition-opacity group-hover:opacity-100">
           <button
             type="button"
-            onClick={onEdit}
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit();
+            }}
             className="text-[11px] font-black uppercase tracking-wider text-admin-primary hover:underline"
           >
             Edit
@@ -88,6 +95,7 @@ export function SpecialistTableRow({ specialist, onEdit, onDelete }: Props) {
           >
             <button
               type="button"
+              onClick={(e) => e.stopPropagation()}
               className="text-[11px] font-black uppercase tracking-wider text-admin-error hover:underline"
             >
               Delete
