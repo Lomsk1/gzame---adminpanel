@@ -200,7 +200,12 @@ export default function SpecialistsPage() {
       languages: rest.languages ?? [],
       is_ambassador: rest.isAmbassador === true,
       ambassador_country_code: rest.ambassadorCountryCode || undefined,
-      referred_by_specialist_id: rest.referredBySpecialistId || undefined,
+      ambassador_recruit_ids: rest.isAmbassador ? (rest.ambassadorRecruitIds ?? []) : undefined,
+      referred_by_specialist_id: !rest.isAmbassador
+        ? rest.referredBySpecialistId?.trim()
+          ? rest.referredBySpecialistId.trim()
+          : null
+        : undefined,
       apply_referral_code: rest.applyReferralCode || undefined,
       regenerate_ambassador_code: rest.regenerateAmbassadorCode === true,
       legal_name: rest.legalName || undefined,

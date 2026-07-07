@@ -15,7 +15,7 @@ export const specialistsPageLoader = async () => {
   try {
     const [categoriesRes, specialistsRes] = await Promise.all([
       axiosAuth.get<SpecialistCategoryListResponse>("/api/v1/specialists/categories").then((r) => r.data).catch(() => emptyCategories),
-      axiosAuth.get<SpecialistListResponse>("/api/v1/specialists").then((r) => r.data).catch(() => emptySpecialists),
+      axiosAuth.get<SpecialistListResponse>("/api/v1/specialists?limit=500").then((r) => r.data).catch(() => emptySpecialists),
     ]);
     return {
       categoriesData: categoriesRes ?? emptyCategories,

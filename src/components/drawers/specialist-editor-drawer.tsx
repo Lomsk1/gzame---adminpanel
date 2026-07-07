@@ -20,6 +20,53 @@ function categoryIds(spec: Specialist): string[] {
   return (spec.categories || []).map((c) => (typeof c === "string" ? c : c._id));
 }
 
+function resolveSpecialistId(value?: string | { _id?: string } | null): string {
+  if (!value) return "";
+  if (typeof value === "string") return value;
+  return value._id ? String(value._id) : "";
+}
+
+function sameSpecialistId(a: unknown, b: unknown): boolean {
+  if (!a || !b) return false;
+  return String(a) === String(b);
+}
+
+function AmbassadorToggleCard({
+  checked,
+  onChange,
+  title,
+  description,
+}: {
+  checked: boolean;
+  onChange: (next: boolean) => void;
+  title: string;
+  description: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={() => onChange(!checked)}
+      className={`flex w-full items-start gap-3 rounded-xl border px-4 py-3.5 text-left transition-all ${
+        checked
+          ? "border-admin-primary bg-admin-primary/15 shadow-[0_0_0_1px_rgba(59,130,246,0.25)]"
+          : "border-admin-border/70 bg-admin-panel/30 hover:border-admin-border hover:bg-admin-panel/50"
+      }`}
+    >
+      <span
+        className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md border text-[11px] font-black transition-colors ${
+          checked ? "border-admin-primary bg-admin-primary text-white" : "border-admin-border bg-admin-bg/40"
+        }`}
+      >
+        {checked ? "✓" : ""}
+      </span>
+      <span className="min-w-0">
+        <span className="block text-sm font-bold text-admin-text">{title}</span>
+        <span className="mt-1 block text-xs leading-relaxed text-admin-text-dim">{description}</span>
+      </span>
+    </button>
+  );
+}
+
 export type SpecialistFormData = {
   avatarFile?: File | null;
   avatar?: string;
@@ -44,6 +91,7 @@ export type SpecialistFormData = {
   languages?: string[];
   isAmbassador?: boolean;
   ambassadorCountryCode?: string;
+  ambassadorRecruitIds?: string[];
   referredBySpecialistId?: string;
   applyReferralCode?: string;
   regenerateAmbassadorCode?: boolean;
@@ -131,8 +179,17 @@ export const SpecialistEditorDrawer = ({
   const [ambassadorCountryCode, setAmbassadorCountryCode] = useState(
     specialist?.ambassador_country_code ?? "",
   );
-  const [referredBySpecialistId, setReferredBySpecialistId] = useState(
-    specialist?.referred_by_specialist_id ?? "",
+  const [referredBySpecialistId, setReferredBySpecialistId] = useState(() =>
+    resolveSpecialistId(
+      specialist?.referred_by_specialist_id ?? specialist?.referred_by_specialist ?? null,
+    ),
+  );
+  const [ambassadorRecruitIds, setAmbassadorRecruitIds] = useState<string[]>(() =>
+    specialist?._id
+      ? allSpecialists
+          .filter((s) => sameSpecialistId(s.referred_by_specialist_id, specialist._id))
+          .map((s) => s._id)
+      : [],
   );
   const [applyReferralCode, setApplyReferralCode] = useState("");
   const [regenerateAmbassadorCode, setRegenerateAmbassadorCode] = useState(false);
@@ -183,6 +240,66 @@ export const SpecialistEditorDrawer = ({
     () => LIFE_SPHERES.map((s) => ({ value: s.id, label: s.label })),
     [],
   );
+
+  const recruitOptions = useMemo(
+    () =>
+      allSpecialists
+        .filter((s) => s._id !== specialist?._id && !s.is_ambassador)
+        .map((s) => ({
+          value: s._id,
+          label: s.name,
+          hint: s.specialty || s.countries?.join(", "),
+        })),
+    [allSpecialists, specialist?._id],
+  );
+
+  const referredByOptions = useMemo(() => {
+    const ambassadors = allSpecialists.filter(
+      (s) => s._id !== specialist?._id && s.is_ambassador,
+    );
+    if (
+      referredBySpecialistId &&
+      !ambassadors.some((s) => s._id === referredBySpecialistId)
+    ) {
+      const current = allSpecialists.find((s) => s._id === referredBySpecialistId);
+      if (current) return [...ambassadors, current];
+    }
+    return ambassadors;
+  }, [allSpecialists, specialist?._id, referredBySpecialistId]);
+
+  const referredByName = useMemo(() => {
+    if (!referredBySpecialistId) return "";
+    const match = allSpecialists.find((s) => s._id === referredBySpecialistId);
+    if (match) return match.name;
+    if (specialist?.referred_by_specialist?.name) return specialist.referred_by_specialist.name;
+    return referredBySpecialistId;
+  }, [allSpecialists, referredBySpecialistId, specialist?.referred_by_specialist?.name]);
+
+  const attachedRecruitNames = useMemo(
+    () =>
+      ambassadorRecruitIds
+        .map((id) => allSpecialists.find((s) => s._id === id)?.name ?? id)
+        .filter(Boolean),
+    [ambassadorRecruitIds, allSpecialists],
+  );
+
+  useEffect(() => {
+    if (specialist?._id) {
+      setAmbassadorRecruitIds(
+        allSpecialists
+          .filter((s) => sameSpecialistId(s.referred_by_specialist_id, specialist._id))
+          .map((s) => s._id),
+      );
+      setReferredBySpecialistId(
+        resolveSpecialistId(
+          specialist.referred_by_specialist_id ?? specialist.referred_by_specialist ?? null,
+        ),
+      );
+    } else {
+      setAmbassadorRecruitIds([]);
+      setReferredBySpecialistId("");
+    }
+  }, [specialist?._id, specialist?.referred_by_specialist_id, specialist?.referred_by_specialist, allSpecialists]);
 
   useEffect(() => {
     return () => {
@@ -240,7 +357,8 @@ export const SpecialistEditorDrawer = ({
       languages: selectedLanguages,
       isAmbassador,
       ambassadorCountryCode: ambassadorCountryCode.trim() || undefined,
-      referredBySpecialistId: referredBySpecialistId || undefined,
+      ambassadorRecruitIds: isAmbassador ? ambassadorRecruitIds : undefined,
+      referredBySpecialistId: !isAmbassador ? referredBySpecialistId || undefined : undefined,
       applyReferralCode: applyReferralCode.trim() || undefined,
       regenerateAmbassadorCode: regenerateAmbassadorCode || undefined,
       legalName: legalName.trim() || undefined,
@@ -547,87 +665,174 @@ export const SpecialistEditorDrawer = ({
 
           <FormSection
             title={t("specialists.editor.ambassador")}
-            description="Mark ambassadors who recruit specialists. They earn 5% on recruited specialists' bookings (14-day clawback, then Stripe transfer)."
+            description={t("specialists.editor.ambassadorDesc")}
             icon="🤝"
           >
-            <label className="flex items-center gap-2 text-sm text-admin-text cursor-pointer">
-              <input
-                type="checkbox"
-                checked={isAmbassador}
-                onChange={(e) => setIsAmbassador(e.target.checked)}
-                className="rounded border-admin-border"
-              />
-              This specialist is an ambassador (can recruit others)
-            </label>
-            {isAmbassador && specialist?.ambassador_referral_code ? (
-              <div className="rounded-xl border border-admin-border bg-admin-panel/30 p-3">
-                <p className={inputLabelClass}>Referral code</p>
-                <div className="flex items-center justify-between gap-3">
-                  <code className="text-lg font-bold tracking-widest text-admin-primary">
-                    {specialist.ambassador_referral_code}
-                  </code>
-                  <button
-                    type="button"
-                    className="text-xs font-bold text-admin-primary hover:underline"
-                    onClick={() => {
-                      void navigator.clipboard.writeText(specialist.ambassador_referral_code ?? "");
-                    }}
-                  >
-                    Copy
-                  </button>
-                </div>
-                <label className="mt-3 flex items-center gap-2 text-xs text-admin-text-dim cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={regenerateAmbassadorCode}
-                    onChange={(e) => setRegenerateAmbassadorCode(e.target.checked)}
-                    className="rounded border-admin-border"
-                  />
-                  Regenerate code on save
-                </label>
-              </div>
-            ) : null}
-            <div>
-              <label className={inputLabelClass}>Ambassador territory (country)</label>
-              <select
-                value={ambassadorCountryCode}
-                onChange={(e) => setAmbassadorCountryCode(e.target.value)}
-                className={inputFieldClass}
-              >
-                <option value="">— None —</option>
-                {countryOptions.map((c) => (
-                  <option key={c.value} value={c.value}>
-                    {c.label}
-                  </option>
-                ))}
-              </select>
+            <div className="rounded-xl border border-admin-border/60 bg-admin-bg/20 px-3 py-2.5 text-xs leading-relaxed text-admin-text-dim">
+              {t("specialists.editor.ambassadorRolesHint")}
+              <span className="mt-1 block text-admin-primary/90">{t("specialists.editor.ambassadorSyncHint")}</span>
             </div>
-            <div>
-              <label className={inputLabelClass}>Referred by specialist</label>
-              <select
-                value={referredBySpecialistId}
-                onChange={(e) => setReferredBySpecialistId(e.target.value)}
-                className={inputFieldClass}
-              >
-                <option value="">— None —</option>
-                {allSpecialists
-                  .filter((s) => s._id !== specialist?._id)
-                  .map((s) => (
-                    <option key={s._id} value={s._id}>
-                      {s.name}
-                      {s.is_ambassador ? " (ambassador)" : ""}
-                    </option>
-                  ))}
-              </select>
-            </div>
-            <AdminInput
-              label={t("specialists.editor.referralCode")}
-              value={applyReferralCode}
-              onChange={(v) => setApplyReferralCode(String(v ?? "").toUpperCase())}
-              placeholder="GZ12345678"
-              labelClassName={inputLabelClass}
-              inputClassName={inputFieldClass}
+
+            <AmbassadorToggleCard
+              checked={isAmbassador}
+              onChange={setIsAmbassador}
+              title={t("specialists.editor.isAmbassadorTitle")}
+              description={t("specialists.editor.isAmbassadorDesc")}
             />
+
+            {isAmbassador ? (
+              <>
+                {isAmbassador && specialist?.ambassador_referral_code ? (
+                  <div className="rounded-xl border border-admin-border bg-admin-panel/30 p-3">
+                    <p className={inputLabelClass}>{t("specialists.editor.referralCodeLabel")}</p>
+                    <div className="flex items-center justify-between gap-3">
+                      <code className="text-lg font-bold tracking-widest text-admin-primary">
+                        {specialist.ambassador_referral_code}
+                      </code>
+                      <button
+                        type="button"
+                        className="text-xs font-bold text-admin-primary hover:underline"
+                        onClick={() => {
+                          void navigator.clipboard.writeText(specialist.ambassador_referral_code ?? "");
+                        }}
+                      >
+                        {t("specialists.editor.copy")}
+                      </button>
+                    </div>
+                    <AmbassadorToggleCard
+                      checked={regenerateAmbassadorCode}
+                      onChange={setRegenerateAmbassadorCode}
+                      title={t("specialists.editor.regenerateCodeTitle")}
+                      description={t("specialists.editor.regenerateCodeDesc")}
+                    />
+                  </div>
+                ) : null}
+                <div>
+                  <label className={inputLabelClass}>{t("specialists.editor.ambassadorTerritory")}</label>
+                  <select
+                    value={ambassadorCountryCode}
+                    onChange={(e) => setAmbassadorCountryCode(e.target.value)}
+                    className={inputFieldClass}
+                  >
+                    <option value="">{t("specialists.editor.none")}</option>
+                    {countryOptions.map((c) => (
+                      <option key={c.value} value={c.value}>
+                        {c.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <div className="mb-2 flex items-center justify-between gap-2">
+                    <label className={inputLabelClass}>{t("specialists.editor.attachedRecruits")}</label>
+                    {ambassadorRecruitIds.length > 0 ? (
+                      <button
+                        type="button"
+                        onClick={() => setAmbassadorRecruitIds([])}
+                        className="text-[11px] font-bold uppercase tracking-wide text-red-400 hover:text-red-300"
+                      >
+                        {t("specialists.editor.clearAllRecruits")}
+                      </button>
+                    ) : null}
+                  </div>
+                  <p className="mb-2 text-xs text-admin-text-dim">
+                    {t("specialists.editor.attachedRecruitsDesc")}
+                  </p>
+                  {attachedRecruitNames.length > 0 ? (
+                    <div className="mb-3 flex flex-wrap gap-2">
+                      {ambassadorRecruitIds.map((id) => {
+                        const name = allSpecialists.find((s) => s._id === id)?.name ?? id;
+                        return (
+                          <span
+                            key={id}
+                            className="inline-flex items-center gap-1.5 rounded-full border border-admin-primary/30 bg-admin-primary/10 px-2.5 py-1 text-xs font-semibold text-admin-text"
+                          >
+                            {name}
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setAmbassadorRecruitIds((prev) => prev.filter((v) => v !== id))
+                              }
+                              className="text-admin-text-dim hover:text-red-400"
+                              aria-label={`Remove ${name}`}
+                            >
+                              ×
+                            </button>
+                          </span>
+                        );
+                      })}
+                    </div>
+                  ) : null}
+                  <ChipToggleGroup
+                    options={recruitOptions}
+                    selected={ambassadorRecruitIds}
+                    onChange={setAmbassadorRecruitIds}
+                    searchable
+                    searchPlaceholder={t("specialists.editor.searchRecruits")}
+                    emptyLabel={t("specialists.editor.noRecruitOptions")}
+                    columns={1}
+                  />
+                </div>
+              </>
+            ) : (
+              <div className="space-y-3 rounded-xl border border-admin-border/70 bg-admin-panel/20 p-3">
+                <div>
+                  <label className={inputLabelClass}>{t("specialists.editor.referredBy")}</label>
+                  <p className="mb-2 text-xs text-admin-text-dim">
+                    {t("specialists.editor.referredByDesc")}
+                  </p>
+                </div>
+                {referredBySpecialistId ? (
+                  <div className="flex items-center justify-between gap-3 rounded-lg border border-admin-primary/25 bg-admin-primary/10 px-3 py-2.5">
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-admin-text-dim">
+                        {t("specialists.editor.currentReferrer")}
+                      </p>
+                      <p className="truncate text-sm font-semibold text-admin-text">{referredByName}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setReferredBySpecialistId("")}
+                      className="shrink-0 rounded-lg border border-red-500/30 bg-red-500/10 px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-wide text-red-400 hover:bg-red-500/20"
+                    >
+                      {t("specialists.editor.removeReferrer")}
+                    </button>
+                  </div>
+                ) : (
+                  <p className="text-xs italic text-admin-text-dim">{t("specialists.editor.noReferrer")}</p>
+                )}
+                <div>
+                  <label className="mb-1.5 block text-[11px] font-bold text-admin-text-dim">
+                    {referredBySpecialistId
+                      ? t("specialists.editor.changeReferrer")
+                      : t("specialists.editor.selectReferrer")}
+                  </label>
+                  <select
+                    value={referredBySpecialistId}
+                    onChange={(e) => setReferredBySpecialistId(e.target.value)}
+                    className={inputFieldClass}
+                  >
+                    <option value="">{t("specialists.editor.none")}</option>
+                    {referredByOptions.map((s) => (
+                      <option key={s._id} value={s._id}>
+                        {s.name}
+                        {s.is_ambassador ? "" : ` (${t("specialists.editor.notAmbassador")})`}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                {!referredBySpecialistId ? (
+                  <AdminInput
+                    label={t("specialists.editor.referralCode")}
+                    value={applyReferralCode}
+                    onChange={(v) => setApplyReferralCode(String(v ?? "").toUpperCase())}
+                    placeholder="GZ12345678"
+                    labelClassName={inputLabelClass}
+                    inputClassName={inputFieldClass}
+                  />
+                ) : null}
+              </div>
+            )}
           </FormSection>
 
           <FormSection
