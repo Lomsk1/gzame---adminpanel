@@ -124,7 +124,7 @@ export default function NotificationBroadcastPage() {
         <div className="space-y-5">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <label className="space-y-1">
-              <span className="text-[10px] font-black uppercase tracking-wider text-admin-text-dim">{t("broadcast.targetScope")}</span>
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-admin-text-dim">{t("broadcast.targetScope")}</span>
               <select
                 value={scope}
                 onChange={(e) => setScope(e.target.value as Scope)}
@@ -136,7 +136,7 @@ export default function NotificationBroadcastPage() {
             </label>
 
             <label className="space-y-1">
-              <span className="text-[10px] font-black uppercase tracking-wider text-admin-text-dim">{t("broadcast.psychotype")}</span>
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-admin-text-dim">{t("broadcast.psychotype")}</span>
               <select
                 value={psychotype}
                 onChange={(e) => setPsychotype(e.target.value as (typeof PSYCHOTYPES)[number])}
@@ -154,7 +154,7 @@ export default function NotificationBroadcastPage() {
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <label className="space-y-1">
-              <span className="text-[10px] font-black uppercase tracking-wider text-admin-text-dim">{t("broadcast.type")}</span>
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-admin-text-dim">{t("broadcast.type")}</span>
               <select
                 value={type}
                 onChange={(e) => {
@@ -176,7 +176,7 @@ export default function NotificationBroadcastPage() {
               </select>
             </label>
             <label className="space-y-1">
-              <span className="text-[10px] font-black uppercase tracking-wider text-admin-text-dim">{t("broadcast.priority")}</span>
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-admin-text-dim">{t("broadcast.priority")}</span>
               <select
                 value={priority}
                 onChange={(e) => setPriority(e.target.value as Priority)}
@@ -189,7 +189,7 @@ export default function NotificationBroadcastPage() {
               </select>
             </label>
             <label className="space-y-1">
-              <span className="text-[10px] font-black uppercase tracking-wider text-admin-text-dim">{t("broadcast.actionUrl")}</span>
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-admin-text-dim">{t("broadcast.actionUrl")}</span>
               <input
                 value={actionUrl}
                 onChange={(e) => setActionUrl(e.target.value)}
@@ -210,7 +210,7 @@ export default function NotificationBroadcastPage() {
           </div>
 
           <label className="space-y-1">
-            <span className="text-[10px] font-black uppercase tracking-wider text-admin-text-dim">{t("broadcast.titleLabel")}</span>
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-admin-text-dim">{t("broadcast.titleLabel")}</span>
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -219,7 +219,7 @@ export default function NotificationBroadcastPage() {
           </label>
 
           <label className="space-y-1">
-            <span className="text-[10px] font-black uppercase tracking-wider text-admin-text-dim">{t("broadcast.messageContent")}</span>
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-admin-text-dim">{t("broadcast.messageContent")}</span>
             <textarea
               rows={5}
               value={content}
@@ -246,17 +246,17 @@ export default function NotificationBroadcastPage() {
         <GlassCard>
           <div className="grid grid-cols-1 gap-4 text-sm md:grid-cols-3">
             <div>
-              <p className="text-[10px] font-black uppercase tracking-wider text-admin-text-dim">{t("broadcast.result.targeted")}</p>
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-admin-text-dim">{t("broadcast.result.targeted")}</p>
               <p className="mt-1 text-2xl font-black text-admin-primary">{lastResult.totalUsers}</p>
             </div>
             <div>
-              <p className="text-[10px] font-black uppercase tracking-wider text-admin-text-dim">{t("broadcast.result.push")}</p>
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-admin-text-dim">{t("broadcast.result.push")}</p>
               <p className="mt-1 text-2xl font-black text-admin-text">
                 {lastResult.push.sent} / {lastResult.push.failed}
               </p>
             </div>
             <div>
-              <p className="text-[10px] font-black uppercase tracking-wider text-admin-text-dim">{t("broadcast.result.noToken")}</p>
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-admin-text-dim">{t("broadcast.result.noToken")}</p>
               <p className="mt-1 text-2xl font-black text-admin-warning">{lastResult.push.usersWithoutToken}</p>
             </div>
           </div>

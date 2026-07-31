@@ -1,35 +1,41 @@
 import React from "react";
 
 interface GlassCardProps {
-    children: React.ReactNode;
-    className?: string;
-    glow?: boolean; // Adds a subtle primary-colored glow behind the card
-    hoverable?: boolean; // Adds lift and increased brightness on hover
-    title?: string,
-    onClick?: () => void;
-    noContentPadding?: boolean;
-    contentClassName?: string;
+  children: React.ReactNode;
+  className?: string;
+  glow?: boolean;
+  hoverable?: boolean;
+  title?: string;
+  onClick?: () => void;
+  noContentPadding?: boolean;
+  contentClassName?: string;
 }
 
-/* Change bg opacity from 40 to 60 for better readability */
-
 export const GlassCard = ({
-    children,
-    className = "",
-    glow = false,
-    hoverable = false,
-    title,
-    onClick,
-    noContentPadding = false,
-    contentClassName = "",
+  children,
+  className = "",
+  glow = false,
+  hoverable = false,
+  title,
+  onClick,
+  noContentPadding = false,
+  contentClassName = "",
 }: GlassCardProps) => {
-
-    return (
-        <div className={`relative bg-admin-panel/60 backdrop-blur-md border border-admin-border/50 rounded-2xl shadow-2xl ${glow ? 'shadow-[0_0_40px_rgba(59,130,246,0.15)]' : ''} ${hoverable ? 'transition-all duration-300 hover:bg-admin-panel/80 hover:border-admin-primary/40' : ''} ${className}`} title={title} onClick={onClick}>
-            <div className="absolute inset-0 bg-admin-bg/20 rounded-2xl pointer-events-none" />
-            <div className={`relative z-20 ${noContentPadding ? "p-0 h-full min-h-0" : "p-6"} ${contentClassName}`}>
-                {children}
-            </div>
-        </div>
-    );
+  return (
+    <div
+      className={`relative bg-admin-card border border-admin-border rounded-xl shadow-[var(--shadow-admin)] ${
+        glow ? "shadow-[0_0_32px_rgba(var(--admin-primary-rgb),0.12)]" : ""
+      } ${
+        hoverable
+          ? "transition-colors duration-200 hover:border-admin-primary/40 cursor-pointer"
+          : ""
+      } ${className}`}
+      title={title}
+      onClick={onClick}
+    >
+      <div className={`relative z-10 ${noContentPadding ? "p-0 h-full min-h-0" : "p-5 md:p-6"} ${contentClassName}`}>
+        {children}
+      </div>
+    </div>
+  );
 };

@@ -15,9 +15,9 @@ export function AdminLanguageSwitcher({ compact = false }: { compact?: boolean }
           key={code}
           type="button"
           onClick={() => setLocale(code as AdminLocale)}
-          className={`rounded-lg px-2.5 py-1.5 text-xs font-bold transition-all duration-200 ${
+          className={`rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors duration-200 ${
             locale === code
-              ? "bg-admin-primary/20 text-admin-primary border border-admin-primary/35 shadow-sm"
+              ? "bg-admin-primary/20 text-admin-primary border border-admin-primary/35"
               : "text-admin-text-dim hover:text-admin-text border border-transparent"
           }`}
           title={code}

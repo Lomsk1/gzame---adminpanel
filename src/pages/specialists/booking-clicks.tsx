@@ -5,7 +5,7 @@ import type { BookingClickRecord, BookingClicksResponse } from "../../types/spec
 import type { Specialist } from "../../types/specialist/specialist";
 import axiosAuth from "../../helper/axios";
 import { format, subMonths, subYears, subDays, startOfDay } from "date-fns";
-import { AdminPageHeader, AdminPageShell } from "../../components/admin";
+import { AdminButton, AdminCard, AdminPageHeader, AdminPageShell } from "../../components/admin";
 import {
   BookingClicksFilters,
   BookingClicksStats,
@@ -146,24 +146,25 @@ export default function BookingClicksPage() {
         icon={<MousePointerClick className="w-5 h-5 text-admin-primary" />}
         actions={
           <div className="flex flex-wrap gap-2">
-            <button
+            <AdminButton
               type="button"
               onClick={handleDownloadCurrent}
               disabled={data.length === 0}
-              className="inline-flex items-center gap-2 rounded-xl border border-admin-border bg-admin-panel px-4 py-2 text-xs font-bold uppercase tracking-wide text-admin-text hover:border-admin-primary/50 transition-all disabled:opacity-40"
+              variant="secondary"
+              size="md"
             >
               <Download className="w-4 h-4" />
               {t("bookingClicks.downloadPage")}
-            </button>
-            <button
+            </AdminButton>
+            <AdminButton
               type="button"
               onClick={handleDownloadAllFiltered}
               disabled={downloadingAll}
-              className="inline-flex items-center gap-2 rounded-xl bg-admin-primary px-4 py-2 text-xs font-black uppercase tracking-wide text-admin-bg hover:brightness-110 transition-all disabled:opacity-40"
+              size="md"
             >
               <Download className="w-4 h-4" />
               {downloadingAll ? t("earlyAccess.preparing") : t("bookingClicks.downloadAll")}
-            </button>
+            </AdminButton>
           </div>
         }
       />
@@ -194,25 +195,27 @@ export default function BookingClicksPage() {
       <BookingClicksTable rows={data} />
 
       {totalPages > 1 && (
-        <div className="flex justify-between items-center rounded-xl border border-admin-border bg-admin-panel/40 p-4 admin-fade-up">
-          <button
+        <AdminCard padding="sm" className="flex items-center justify-between admin-fade-up">
+          <AdminButton
             type="button"
             disabled={page <= 1}
             onClick={() => handlePageChange(page - 1)}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-admin-border text-xs font-bold uppercase hover:border-admin-primary transition-all disabled:opacity-40"
+            variant="secondary"
+            size="sm"
           >
             <ChevronLeft className="w-4 h-4" /> {t("common.previous")}
-          </button>
+          </AdminButton>
           <span className="text-sm text-admin-text-dim">{t("common.page", { current: page, total: totalPages })}</span>
-          <button
+          <AdminButton
             type="button"
             disabled={page >= totalPages}
             onClick={() => handlePageChange(page + 1)}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-admin-border text-xs font-bold uppercase hover:border-admin-primary transition-all disabled:opacity-40"
+            variant="secondary"
+            size="sm"
           >
             {t("common.next")} <ChevronRight className="w-4 h-4" />
-          </button>
-        </div>
+          </AdminButton>
+        </AdminCard>
       )}
     </AdminPageShell>
   );

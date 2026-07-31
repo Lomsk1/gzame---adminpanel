@@ -4,20 +4,21 @@ import { useAdminT } from "../../store/locale/locale";
 
 export const StatusFunnel = ({ data }: { data: DashboardStats["funnelData"] }) => {
   const { t } = useAdminT();
+  const rows = Array.isArray(data) ? data : [];
 
   return (
-    <div className="bg-admin-card border border-admin-border rounded-3xl p-6 h-full flex flex-col admin-fade-up">
-      <h3 className="font-bold text-admin-text mb-6 uppercase text-xs tracking-widest">
+    <div className="bg-admin-card border border-admin-border rounded-xl p-5 h-full flex flex-col admin-fade-up shadow-[var(--shadow-admin-sm)]">
+      <h3 className="mb-5 text-xs font-semibold tracking-wider uppercase text-admin-text-muted">
         {t("home.chart.funnelTitle")}
       </h3>
       <div className="flex-1 w-full min-h-80">
         <ResponsiveContainer width="100%" height="100%" initialDimension={{ width: 400, height: 300 }}>
-          <BarChart data={data} layout="vertical" margin={{ left: 20, right: 30 }}>
+          <BarChart data={rows} layout="vertical" margin={{ left: 20, right: 30 }}>
             <XAxis type="number" hide />
             <YAxis
               dataKey="name"
               type="category"
-              tick={{ fill: "#fff", fontSize: 12 }}
+              tick={{ fill: "var(--color-admin-text)", fontSize: 12 }}
               width={50}
               axisLine={false}
               tickLine={false}
@@ -26,15 +27,16 @@ export const StatusFunnel = ({ data }: { data: DashboardStats["funnelData"] }) =
             <Tooltip
               cursor={{ fill: "transparent" }}
               contentStyle={{
-                backgroundColor: "#0d163d",
+                backgroundColor: "var(--color-admin-panel)",
                 border: "1px solid var(--color-admin-border)",
                 borderRadius: "12px",
+                color: "var(--color-admin-text)",
               }}
               labelStyle={{ color: "var(--color-admin-text-dim)", fontSize: "12px" }}
-              itemStyle={{ color: "#fff", fontSize: "14px", fontWeight: "bold" }}
+              itemStyle={{ color: "var(--color-admin-text)", fontSize: "14px", fontWeight: 600 }}
             />
-            <Bar dataKey="value" radius={[0, 10, 10, 0]} barSize={30}>
-              {data.map((_entry, index) => (
+            <Bar dataKey="value" radius={[0, 8, 8, 0]} barSize={28}>
+              {rows.map((_entry, index) => (
                 <Cell
                   key={index}
                   fill={index === 2 ? "var(--color-admin-success)" : "var(--color-admin-primary)"}

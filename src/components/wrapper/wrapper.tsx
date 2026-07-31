@@ -48,7 +48,7 @@ export const AdminConfirmWrapper = ({
         <div className={`${isFixed ? "fixed inset-0 z-9999" : "fixed inset-0 z-100"} flex items-center justify-center p-4`}>
             {/* Backdrop */}
             <div
-                className={`absolute inset-0 animate-in fade-in duration-200 ${isFixed
+                className={`absolute inset-0 admin-overlay-in ${isFixed
                     ? "bg-black/80 backdrop-blur-xl" // Heavy focus for isFixed
                     : "bg-admin-bg/90 backdrop-blur-md" // Original style
                     }`}
@@ -56,7 +56,7 @@ export const AdminConfirmWrapper = ({
             />
 
             {/* Modal Box */}
-            <div className="relative w-full max-w-sm bg-admin-panel border border-admin-border p-6 rounded-2xl shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="relative w-full max-w-sm bg-admin-panel border border-admin-border p-6 rounded-2xl shadow-2xl admin-dialog-in">
                 <h3 className={`text-lg font-black uppercase italic tracking-tighter mb-2 ${variant === 'danger' ? 'text-admin-error' : 'text-admin-primary'}`}>
                     {title}
                 </h3>

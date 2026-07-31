@@ -12,9 +12,17 @@ export default function LoginPage() {
   const { t } = useAdminT();
 
   return (
-    <main className="min-h-screen w-full flex items-center justify-center bg-admin-bg relative overflow-hidden">
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-admin-primary/10 rounded-full blur-[120px]" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-admin-accent/10 rounded-full blur-[120px]" />
+    <main className="min-h-screen w-full flex items-center justify-center bg-admin-bg relative overflow-hidden font-sans">
+      <div
+        className="absolute inset-0 opacity-40 pointer-events-none"
+        style={{
+          backgroundImage:
+            "linear-gradient(rgba(var(--admin-border-rgb), 0.12) 1px, transparent 1px), linear-gradient(90deg, rgba(var(--admin-border-rgb), 0.12) 1px, transparent 1px)",
+          backgroundSize: "48px 48px",
+        }}
+      />
+      <div className="absolute top-[-20%] left-[-10%] w-[45%] h-[45%] bg-admin-primary/8 rounded-full blur-[100px]" />
+      <div className="absolute bottom-[-15%] right-[-10%] w-[40%] h-[40%] bg-admin-accent/8 rounded-full blur-[100px]" />
 
       <AdminFadeIn className="absolute top-6 right-6 z-20">
         <AdminLanguageSwitcher />
@@ -22,12 +30,12 @@ export default function LoginPage() {
 
       <section className="w-full max-w-md px-6 z-10">
         <AdminScaleIn>
-          <div className="bg-admin-panel/50 backdrop-blur-xl border border-admin-border p-8 rounded-3xl shadow-2xl">
-            <div className="text-center mb-10 admin-fade-up" style={{ animationDelay: "80ms" }}>
-              <div className="w-16 h-16 bg-admin-primary/20 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-admin-primary/30">
-                <span className="text-admin-primary text-3xl font-bold">A</span>
+          <div className="bg-admin-panel border border-admin-border p-8 rounded-2xl shadow-[var(--shadow-admin-lg)]">
+            <div className="text-center mb-8 admin-fade-up" style={{ animationDelay: "80ms" }}>
+              <div className="w-14 h-14 bg-admin-primary/15 rounded-xl flex items-center justify-center mx-auto mb-4 border border-admin-primary/30">
+                <span className="text-admin-primary text-2xl font-bold font-mono">G</span>
               </div>
-              <h1 className="text-3xl font-extrabold text-admin-text tracking-tight">
+              <h1 className="text-2xl font-semibold text-admin-text tracking-tight">
                 {t("login.title")}
               </h1>
               <p className="text-admin-text-dim mt-2 text-sm">{t("login.subtitle")}</p>
@@ -51,12 +59,12 @@ export default function LoginPage() {
               />
 
               {actionData?.error ? (
-                <div className="bg-admin-error/10 border border-admin-error/20 py-2 px-4 rounded-lg admin-scale-in">
+                <div className="bg-admin-error/10 border border-admin-error/25 py-2.5 px-4 rounded-xl admin-scale-in">
                   <p className="text-admin-error text-xs font-medium text-center">{actionData.error}</p>
                 </div>
               ) : null}
 
-              <div className="pt-4">
+              <div className="pt-3">
                 <ButtonComponent type="submit" isLoading={isSubmitting}>
                   {t("login.submit")}
                 </ButtonComponent>
@@ -74,7 +82,10 @@ export default function LoginPage() {
           </div>
         </AdminScaleIn>
 
-        <p className="text-center mt-8 text-admin-text-dim/50 text-xs admin-fade-in" style={{ animationDelay: "260ms" }}>
+        <p
+          className="text-center mt-8 text-admin-text-muted text-xs admin-fade-in"
+          style={{ animationDelay: "260ms" }}
+        >
           {t("app.copyright", { year: new Date().getFullYear() })}
         </p>
       </section>

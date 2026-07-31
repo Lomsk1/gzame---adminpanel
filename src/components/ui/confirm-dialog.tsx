@@ -36,34 +36,36 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
     primary:
       "bg-admin-primary border-admin-primary/50 text-admin-bg hover:bg-admin-primary/90 disabled:opacity-60",
     success:
-      "bg-emerald-600 border-emerald-500/50 text-white hover:bg-emerald-600/90 disabled:opacity-60",
+      "bg-admin-success border-admin-success/50 text-admin-bg hover:bg-admin-success/90 disabled:opacity-60",
     default:
-      "bg-admin-card border-admin-border text-admin-text hover:bg-admin-panel disabled:opacity-60",
+      "bg-admin-card border-admin-border text-admin-text hover:bg-admin-elevated disabled:opacity-60",
   };
   const btnClass = variantStyles[variant];
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="absolute inset-0" onClick={loading ? undefined : onCancel} aria-hidden />
+    <div className="fixed inset-0 z-[100] flex items-center justify-center admin-overlay-in">
+      <button
+        type="button"
+        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+        aria-label="Close dialog"
+        onClick={loading ? undefined : onCancel}
+      />
       <div
-        className="relative w-full max-w-md mx-4 rounded-2xl border border-admin-border/80 bg-admin-panel shadow-[0_24px_80px_-12px_rgba(0,0,0,0.65)] animate-in zoom-in-95 duration-200 overflow-hidden"
+        className="relative w-full max-w-md mx-4 rounded-xl border border-admin-border bg-admin-panel shadow-[var(--shadow-admin-lg)] admin-dialog-in overflow-hidden"
         role="dialog"
         aria-modal="true"
         aria-labelledby="confirm-title"
       >
-        <div className="h-1 w-full bg-linear-to-r from-admin-primary/40 via-amber-400/40 to-admin-primary/40" />
+        <div className="h-0.5 w-full bg-admin-primary/60" />
         <div className="p-6">
-          <h2
-            id="confirm-title"
-            className="text-lg font-bold text-admin-text tracking-tight mb-2"
-          >
+          <h2 id="confirm-title" className="text-lg font-semibold text-admin-text tracking-tight mb-2">
             {title}
           </h2>
-          {message && (
+          {message ? (
             <p className="text-sm text-admin-text-dim leading-relaxed mb-6 whitespace-pre-wrap">
               {message}
             </p>
-          )}
+          ) : null}
           <div className="flex gap-3 justify-end">
             <button
               type="button"

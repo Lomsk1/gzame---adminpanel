@@ -16,7 +16,7 @@ export function AdminPageShell({
 }: AdminPageShellProps) {
   return (
     <AdminFadeIn
-      className={`mx-auto w-full ${maxWidthClass} ${noPadding ? "" : "p-6"} space-y-5 ${className}`}
+      className={`mx-auto w-full ${maxWidthClass} ${noPadding ? "" : "p-4 sm:p-6"} space-y-5 ${className}`}
     >
       {children}
     </AdminFadeIn>

@@ -224,7 +224,7 @@ export default function AdminChatPage() {
         </div>
 
         <div className="xl:col-span-6">
-          <GlassCard className="h-[70vh] overflow-hidden border-admin-border/40" glow noContentPadding>
+          <GlassCard className="h-[70vh] overflow-hidden border-admin-border/40" noContentPadding>
             <Suspense
               fallback={
                 <div className="h-full flex items-center justify-center text-sm text-admin-text-dim">

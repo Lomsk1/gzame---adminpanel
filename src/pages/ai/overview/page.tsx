@@ -11,6 +11,7 @@ import {
   ArrowRight,
   GitBranch,
   Clock,
+  Wand2,
 } from "lucide-react";
 import { StatCard } from "../../../components/stats/stat-card";
 import { GlassCard } from "../../../components/cards/card-glass";
@@ -22,6 +23,7 @@ import { AdminPageHeader, AdminPageShell } from "../../../components/admin";
 import { useAdminT } from "../../../store/locale/locale";
 
 const QUICK_LINK_KEYS = [
+  { to: "/ai/devi-prompt", titleKey: "aiOverview.quickLinks.deviPrompt", descKey: "aiOverview.quickLinks.deviPromptDesc", icon: Wand2 },
   { to: "/wiki", titleKey: "aiOverview.quickLinks.wiki", descKey: "aiOverview.quickLinks.wikiDesc", icon: BookOpen },
   { to: "/ai/memory", titleKey: "aiOverview.quickLinks.memory", descKey: "aiOverview.quickLinks.memoryDesc", icon: Brain },
   { to: "/ai", titleKey: "aiOverview.quickLinks.oracle", descKey: "aiOverview.quickLinks.oracleDesc", icon: Sparkles },
@@ -35,19 +37,19 @@ export default function AiOverviewPage() {
   const counts = overview?.counts;
 
   return (
-    <AdminPageShell maxWidthClass="max-w-7xl" className="space-y-8">
+    <AdminPageShell maxWidthClass="max-w-7xl" className="space-y-6">
       <AdminPageHeader
         title={t("pages.aiOverview.title")}
         icon={<Brain className="w-5 h-5 text-admin-primary" />}
       />
 
       {error ? (
-        <GlassCard className="p-4 border-admin-error/30 bg-admin-error/10 text-admin-error text-sm admin-fade-up">
+        <GlassCard className="border-admin-error/30 bg-admin-error/10 text-admin-error text-sm" contentClassName="py-3">
           {error}
         </GlassCard>
       ) : null}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 admin-stagger">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           title={t("aiOverview.stats.wikiEntries")}
           value={String(counts?.wikiActive ?? "—")}
@@ -76,29 +78,29 @@ export default function AiOverviewPage() {
         />
       </div>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 admin-stagger">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {QUICK_LINK_KEYS.map((link) => {
           const Icon = link.icon;
           return (
             <Link
               key={link.to}
               to={link.to}
-              className="group p-4 rounded-xl border border-admin-border bg-admin-panel/40 hover:border-admin-primary/40 transition-all admin-nav-link"
+              className="group rounded-xl border border-admin-border bg-admin-panel/40 p-4 transition-all hover:border-admin-primary/40 admin-nav-link"
             >
-              <Icon className="w-5 h-5 text-admin-primary mb-2" />
-              <p className="font-bold text-admin-text text-sm">{t(link.titleKey)}</p>
-              <p className="text-xs text-admin-text-dim mt-1">{t(link.descKey)}</p>
-              <ArrowRight className="w-4 h-4 text-admin-primary mt-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <Icon className="mb-2 h-5 w-5 text-admin-primary" />
+              <p className="text-sm font-bold text-admin-text">{t(link.titleKey)}</p>
+              <p className="mt-1 text-xs text-admin-text-dim">{t(link.descKey)}</p>
+              <ArrowRight className="mt-2 h-4 w-4 text-admin-primary opacity-0 transition-opacity group-hover:opacity-100" />
             </Link>
           );
         })}
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-6">
-        <GlassCard className="p-6 admin-fade-up">
-          <div className="flex items-center gap-2 mb-4">
+      <div className="grid gap-6 lg:grid-cols-2">
+        <GlassCard contentClassName="space-y-4">
+          <div className="flex items-center gap-2">
             <GitBranch className="w-4 h-4 text-admin-primary" />
-            <h2 className="text-sm font-black text-admin-text uppercase italic">{t("aiOverview.pipelines")}</h2>
+            <h2 className="text-sm font-semibold text-admin-text uppercase tracking-wide">{t("aiOverview.pipelines")}</h2>
           </div>
           <div className="space-y-4">
             {(overview?.pipelines ?? []).map((pipe) => (
@@ -120,10 +122,10 @@ export default function AiOverviewPage() {
         </GlassCard>
 
         <div className="space-y-6">
-          <GlassCard className="p-6 admin-fade-up">
-            <div className="flex items-center gap-2 mb-4">
+          <GlassCard contentClassName="space-y-4">
+            <div className="flex items-center gap-2">
               <Settings2 className="w-4 h-4 text-admin-primary" />
-              <h2 className="text-sm font-black text-admin-text uppercase italic">
+              <h2 className="text-sm font-semibold text-admin-text uppercase tracking-wide">
                 {t("aiOverview.runtimeConfig")}
               </h2>
             </div>
@@ -154,16 +156,16 @@ export default function AiOverviewPage() {
               <p className="text-sm text-admin-text-dim">{t("aiOverview.config.unavailable")}</p>
             )}
             {counts && counts.wikiNeedsEmbed > 0 ? (
-              <div className="mt-4 p-3 rounded-lg bg-admin-warning/10 border border-admin-warning/30 text-sm text-admin-warning">
+              <div className="mt-1 p-3 rounded-lg bg-admin-warning/10 border border-admin-warning/30 text-sm text-admin-warning">
                 {t("aiOverview.wikiNeedsEmbed", { count: counts.wikiNeedsEmbed })}
               </div>
             ) : null}
           </GlassCard>
 
-          <GlassCard className="p-6 admin-fade-up">
-            <div className="flex items-center gap-2 mb-4">
+          <GlassCard contentClassName="space-y-4">
+            <div className="flex items-center gap-2">
               <Clock className="w-4 h-4 text-admin-primary" />
-              <h2 className="text-sm font-black text-admin-text uppercase italic">
+              <h2 className="text-sm font-semibold text-admin-text uppercase tracking-wide">
                 {t("aiOverview.backgroundJobs")}
               </h2>
             </div>
@@ -183,10 +185,10 @@ export default function AiOverviewPage() {
       </div>
 
       {counts && counts.memoriesByKind.length > 0 ? (
-        <GlassCard className="p-6 admin-fade-up">
-          <div className="flex items-center gap-2 mb-4">
+        <GlassCard contentClassName="space-y-4">
+          <div className="flex items-center gap-2">
             <Activity className="w-4 h-4 text-admin-primary" />
-            <h2 className="text-sm font-black text-admin-text uppercase italic">
+            <h2 className="text-sm font-semibold text-admin-text uppercase tracking-wide">
               {t("aiOverview.memoriesByKind")}
             </h2>
           </div>
@@ -196,14 +198,14 @@ export default function AiOverviewPage() {
                 key={row._id}
                 className="p-3 rounded-xl bg-admin-bg border border-admin-border text-center"
               >
-                <p className="text-[10px] uppercase text-admin-text-dim tracking-wider">
+                <p className="text-[11px] uppercase text-admin-text-dim tracking-wide">
                   {memoryKindLabel(t, row._id)}
                 </p>
-                <p className="text-xl font-black text-admin-text mt-1">{row.count}</p>
+                <p className="text-xl font-bold text-admin-text mt-1">{row.count}</p>
               </div>
             ))}
           </div>
-          <Link to="/ai/memory" className="inline-block mt-4">
+          <Link to="/ai/memory" className="inline-block">
             <ButtonComponent variant="secondary" size="sm" className="w-auto!">
               {t("aiOverview.browseMemories")}
               <ArrowRight className="w-4 h-4 ml-2 inline" />

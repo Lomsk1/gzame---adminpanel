@@ -244,8 +244,8 @@ export default function ReportsPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 admin-fade-up" style={{ animationDelay: "80ms" }}>
         <StatCard title={t("reports.stats.open")} value={String(overview.open)} color="bg-amber-500" />
         <StatCard title={t("reports.stats.resolvedToday")} value={String(overview.resolvedToday)} color="bg-emerald-500" />
-        <StatCard title={t("reports.stats.withEvidence")} value={String(overview.withEvidence)} color="bg-violet-500" />
-        <StatCard title={t("reports.stats.totalResolved")} value={String(overview.totalResolved)} color="bg-blue-500" />
+        <StatCard title={t("reports.stats.withEvidence")} value={String(overview.withEvidence)} color="bg-admin-info" />
+        <StatCard title={t("reports.stats.totalResolved")} value={String(overview.totalResolved)} color="bg-admin-primary" />
       </div>
 
       <ReportFinancialExplainer />
@@ -391,8 +391,8 @@ export default function ReportsPage() {
               <ConversationSection booking={booking} />
 
               {deviRec ? (
-                <section className="rounded-2xl border border-violet-500/25 bg-violet-500/5 p-4">
-                  <h3 className="text-xs font-bold uppercase text-violet-300 flex items-center gap-2">
+              <section className="rounded-2xl border border-admin-info/25 bg-admin-info/5 p-4">
+                  <h3 className="text-xs font-bold uppercase text-admin-info flex items-center gap-2">
                     <Shield size={14} />
                     {t("reports.deviRecommendation")}
                   </h3>
@@ -565,8 +565,8 @@ function ConversationSection({ booking }: { booking: ReportListItem }) {
   if (!hasThread) return null;
 
   return (
-    <section className="rounded-2xl border border-violet-500/25 bg-violet-500/5 p-4 space-y-3">
-      <h3 className="text-xs font-bold uppercase tracking-wider text-violet-300">{t("reports.conversation")}</h3>
+    <section className="rounded-2xl border border-admin-info/25 bg-admin-info/5 p-4 space-y-3">
+      <h3 className="text-xs font-bold uppercase tracking-wider text-admin-info">{t("reports.conversation")}</h3>
       {booking.dispute_info_request_message ? (
         <div className="rounded-xl bg-black/20 border border-admin-border/30 p-3">
           <p className="text-[10px] font-bold uppercase text-admin-text-dim mb-1">

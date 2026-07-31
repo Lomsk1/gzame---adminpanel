@@ -26,10 +26,10 @@ export const NeuralBridge = ({ activeChat, onSendMessage, onClose }: NeuralBridg
     };
 
     return (
-        <GlassCard className="fixed bottom-6 right-6 w-96 h-130 flex flex-col p-0 overflow-hidden border-admin-primary/40 shadow-[0_0_50px_rgba(59,130,246,0.15)] animate-in slide-in-from-bottom-10 z-100">
+        <GlassCard className="fixed bottom-6 right-6 w-96 h-130 flex flex-col p-0 overflow-hidden border-admin-primary/40 admin-fade-up z-100">
             <div className="p-4 bg-admin-primary/10 border-b border-admin-border/50 flex justify-between items-center backdrop-blur-md">
                 <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 rounded-full bg-admin-success animate-pulse shadow-[0_0_8px_#10b981]" />
+                    <div className="w-2 h-2 rounded-full bg-admin-success animate-pulse" />
                     <span className="text-[10px] font-black uppercase tracking-widest text-admin-text italic">Bridge: {activeChat.user}</span>
                 </div>
                 <button onClick={onClose} className="text-admin-text-dim hover:text-admin-error transition-colors text-[10px] font-bold cursor-pointer">DISCONNECT</button>
@@ -42,7 +42,7 @@ export const NeuralBridge = ({ activeChat, onSendMessage, onClose }: NeuralBridg
                             {msg.role === 'admin' ? 'Oracle Command' : 'Agent Response'}
                         </span>
                         <div className={`p-3 rounded-2xl text-xs leading-relaxed ${msg.role === 'admin'
-                            ? 'bg-admin-primary text-white rounded-tr-none shadow-lg'
+                            ? 'bg-admin-primary text-admin-bg rounded-tr-none shadow-lg'
                             : 'bg-admin-card border border-admin-border text-admin-text rounded-tl-none'
                             }`}>
                             {msg.content}

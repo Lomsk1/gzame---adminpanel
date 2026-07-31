@@ -21,7 +21,7 @@ export default function RootLayout() {
   if (isRefreshing) return <LoaderMain />;
 
   return (
-    <div className="flex min-h-screen bg-admin-bg text-admin-text selection:bg-admin-primary/30">
+    <div className="flex min-h-screen bg-admin-bg text-admin-text selection:bg-admin-primary/30 font-sans">
       <AdminLocaleDocumentSync />
       <MainSidebar />
 
@@ -30,8 +30,10 @@ export default function RootLayout() {
 
         <main className="flex-1 overflow-y-auto admin-page-enter">
           {navigation.state === "loading" ? (
-            <div className="fixed top-0 left-0 right-0 h-0.5 bg-admin-primary/80 z-50 admin-fade-in">
-              <div className="h-full w-1/3 bg-admin-primary animate-[admin-shimmer_1.2s_ease-in-out_infinite]" />
+            <div className="fixed top-0 left-0 right-0 h-0.5 bg-admin-primary/30 z-50 overflow-hidden">
+              <div className="h-full w-1/3 bg-admin-primary relative overflow-hidden">
+                <div className="absolute inset-0 -translate-x-full animate-[admin-shimmer_1.2s_ease-in-out_infinite] bg-linear-to-r from-transparent via-white/30 to-transparent" />
+              </div>
             </div>
           ) : null}
           <Outlet />
@@ -41,11 +43,8 @@ export default function RootLayout() {
       <Toaster
         theme="dark"
         toastOptions={{
-          className: "bg-admin-panel border border-admin-border text-admin-text",
-          style: {
-            background: "#0d143d",
-            borderColor: "rgba(59, 130, 246, 0.2)",
-          },
+          className:
+            "bg-admin-panel! border! border-admin-border! text-admin-text! font-sans!",
         }}
       />
     </div>

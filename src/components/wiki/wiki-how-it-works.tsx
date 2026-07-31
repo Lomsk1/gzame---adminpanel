@@ -75,7 +75,7 @@ export function WikiHowItWorks() {
       </button>
 
       {open && (
-        <div className="px-5 pb-5 pt-0 space-y-6 border-t border-admin-border/60 animate-in slide-in-from-top-2 duration-300">
+        <div className="px-5 pb-5 pt-0 space-y-6 border-t border-admin-border/60 admin-fade-up">
           <div className="grid md:grid-cols-3 gap-4 pt-5">
             {steps.map((step) => {
               const Icon = step.icon;

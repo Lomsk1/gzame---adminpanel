@@ -59,7 +59,7 @@ export const AvatarMenu: React.FC<AvatarMenuProps> = ({
       <div className="fixed inset-0 z-40" aria-hidden />
       <div
         ref={menuRef}
-        className="fixed z-50 min-w-56 rounded-xl border border-admin-border bg-admin-panel p-2 shadow-xl animate-in fade-in zoom-in-95 duration-150"
+        className="fixed z-50 min-w-56 rounded-xl border border-admin-border bg-admin-panel p-2 shadow-xl admin-dialog-in"
         style={
           anchorEl
             ? {

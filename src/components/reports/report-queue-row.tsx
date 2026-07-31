@@ -46,7 +46,7 @@ export function ReportQueueRow({ report, active, onSelect }: Props) {
         {evidence > 0 ? (
           <>
             <span aria-hidden>·</span>
-            <span className="text-violet-300 font-semibold">
+            <span className="text-admin-info font-semibold">
               {t(evidence === 1 ? "queue.photos" : "queue.photos_plural", { count: evidence })}
             </span>
           </>

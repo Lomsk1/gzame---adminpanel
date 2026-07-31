@@ -1,6 +1,6 @@
 const SkeletonCard = () => (
-    <div className="h-32 bg-admin-card/50 border border-admin-border/50 rounded-2xl animate-pulse relative overflow-hidden">
-        <div className="absolute inset-0  from-transparent via-white/5 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
+    <div className="relative h-32 overflow-hidden rounded-xl border border-admin-border bg-admin-card/50 animate-pulse">
+        <div className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-admin-primary/10 to-transparent animate-[shimmer_2s_infinite]" />
     </div>
 );
 
@@ -13,14 +13,14 @@ export const DashboardSkeleton = () => (
 
         {/* Charts Row */}
         <div className="grid grid-cols-12 gap-6 h-112.5">
-            <div className="col-span-12 lg:col-span-7 bg-admin-card/50 rounded-3xl animate-pulse" />
-            <div className="col-span-12 lg:col-span-5 bg-admin-card/50 rounded-3xl animate-pulse" />
+            <div className="col-span-12 rounded-xl border border-admin-border bg-admin-card/50 animate-pulse lg:col-span-7" />
+            <div className="col-span-12 rounded-xl border border-admin-border bg-admin-card/50 animate-pulse lg:col-span-5" />
         </div>
 
         {/* Table Row */}
         <div className="grid grid-cols-12 gap-6 h-64">
-            <div className="col-span-8 bg-admin-card/50 rounded-3xl animate-pulse" />
-            <div className="col-span-4 bg-admin-card/50 rounded-3xl animate-pulse" />
+            <div className="col-span-8 rounded-xl border border-admin-border bg-admin-card/50 animate-pulse" />
+            <div className="col-span-4 rounded-xl border border-admin-border bg-admin-card/50 animate-pulse" />
         </div>
     </div>
 );

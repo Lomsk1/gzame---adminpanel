@@ -9,10 +9,14 @@ type AdminEmptyStateProps = {
 export function AdminEmptyState({ icon, message, className = "" }: AdminEmptyStateProps) {
   return (
     <div
-      className={`flex flex-col items-center justify-center gap-3 py-16 text-admin-text-dim admin-fade-up ${className}`}
+      className={`flex flex-col items-center justify-center gap-3 py-14 text-admin-text-dim admin-fade-up ${className}`}
     >
-      {icon}
-      <p className="text-sm text-center max-w-xs leading-relaxed">{message}</p>
+      {icon ? (
+        <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-admin-border bg-admin-elevated text-admin-text-muted">
+          {icon}
+        </div>
+      ) : null}
+      <p className="text-sm text-center max-w-sm leading-relaxed">{message}</p>
     </div>
   );
 }

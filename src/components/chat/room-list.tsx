@@ -60,7 +60,7 @@ export const ChatRoomList: React.FC<ChatRoomListProps> = ({
                 type="button"
                 onClick={() => onSelectRoom(room._id)}
                 className={`w-full rounded-xl border px-3 py-3 text-left transition-all ${isActive
-                    ? "border-admin-primary/50 bg-admin-primary/10 shadow-[0_0_16px_rgba(59,130,246,0.16)]"
+                    ? "border-admin-primary/50 bg-admin-primary/10"
                     : "border-admin-border/20 hover:border-admin-primary/30 hover:bg-admin-panel/20"
                     }`}
             >

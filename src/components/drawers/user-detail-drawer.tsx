@@ -623,11 +623,11 @@ export const UserDetailDrawer = ({ user, onClose, embedded = false }: UserDetail
                 <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
                     {/* Backdrop with heavier blur for focus */}
                     <div
-                        className="absolute inset-0 bg-black/80 backdrop-blur-md animate-in fade-in"
+                        className="absolute inset-0 bg-black/80 backdrop-blur-md admin-overlay-in"
                         onClick={() => setShowDirectiveModal(false)}
                     />
 
-                    <div className="relative w-full max-w-sm bg-admin-panel border border-admin-border shadow-[0_0_50px_rgba(0,0,0,0.5)] animate-in zoom-in-95 duration-200 overflow-hidden">
+                    <div className="relative w-full max-w-sm bg-admin-panel border border-admin-border shadow-[0_0_50px_rgba(0,0,0,0.5)] admin-dialog-in overflow-hidden">
                         {/* Top Scanning Bar Effect */}
                         <div className="absolute top-0 left-0 w-full h-px bg-admin-primary/50 animate-pulse" />
 
@@ -729,8 +729,8 @@ export const UserDetailDrawer = ({ user, onClose, embedded = false }: UserDetail
     return (
         <>
             <div className="fixed inset-0 z-50 flex justify-end">
-                <div className="absolute inset-0 bg-admin-bg/85 backdrop-blur-md animate-in fade-in" onClick={onClose} />
-                <div className="relative w-full max-w-md h-screen bg-admin-panel border-l border-admin-border flex flex-col shadow-2xl animate-in slide-in-from-right duration-500">
+                <div className="absolute inset-0 bg-admin-bg/85 backdrop-blur-md admin-overlay-in" onClick={onClose} />
+                <div className="relative w-full max-w-md h-screen bg-admin-panel border-l border-admin-border flex flex-col shadow-2xl admin-drawer-in">
                     {dossierBody}
                 </div>
             </div>

@@ -106,7 +106,7 @@ export default function QuestionsManagementPage() {
                                                             {q.title.en}
                                                         </h3>
                                                         {q.priority && (
-                                                            <div className="flex h-2 w-2 rounded-full bg-admin-accent animate-pulse shadow-[0_0_8px_#ff4400]" title={t("questions.highPriority")} />
+                                                            <div className="flex h-2 w-2 rounded-full bg-admin-accent animate-pulse" title={t("questions.highPriority")} />
                                                         )}
                                                     </div>
                                                     <p className="text-sm text-admin-text-dim font-georgian italic leading-relaxed">
@@ -117,13 +117,13 @@ export default function QuestionsManagementPage() {
                                                 {/* Meta Indicators */}
                                                 <div className="flex items-center gap-4 border-t md:border-t-0 md:border-l border-admin-border/50 pt-4 md:pt-0 md:pl-6">
                                                     <div className="text-center min-w-20">
-                                                        <p className="text-[9px] font-black text-admin-text-dim uppercase tracking-tighter">{t("questions.options")}</p>
+                                                        <p className="text-[11px] font-semibold text-admin-text-dim uppercase tracking-wide">{t("questions.options")}</p>
                                                         <p className="text-xl font-mono font-bold text-admin-text">{q.options.length}</p>
                                                     </div>
                                                     <div className="h-8 w-px bg-admin-border/30" />
                                                     <div className="text-center min-w-20">
-                                                        <p className="text-[9px] font-black text-admin-text-dim uppercase tracking-tighter">{t("common.status")}</p>
-                                                        <p className={`text-[10px] font-black uppercase ${q.isActive ? 'text-admin-primary' : 'text-admin-error'}`}>
+                                                        <p className="text-[11px] font-semibold text-admin-text-dim uppercase tracking-wide">{t("common.status")}</p>
+                                                        <p className={`text-[11px] font-semibold uppercase ${q.isActive ? 'text-admin-primary' : 'text-admin-error'}`}>
                                                             {q.isActive ? t("questions.status.online") : t("questions.status.offline")}
                                                         </p>
                                                     </div>
@@ -135,7 +135,7 @@ export default function QuestionsManagementPage() {
                                                 {/* EDIT BUTTON */}
                                                 <button
                                                     onClick={() => { setEditingQuestion(q); setDrawerOpen(true); }}
-                                                    className="flex-1 px-6 py-4 text-[10px] font-black text-admin-text hover:bg-admin-primary hover:text-black transition-all cursor-pointer uppercase tracking-[0.2em] flex items-center justify-center group"
+                                                    className="flex-1 px-6 py-4 text-[11px] font-semibold text-admin-text hover:bg-admin-primary hover:text-admin-bg transition-colors cursor-pointer uppercase tracking-wider flex items-center justify-center group"
                                                 >
                                                     <span className="group-hover:translate-x-1 transition-transform">{t("questions.editNode")}</span>
                                                 </button>
@@ -152,7 +152,7 @@ export default function QuestionsManagementPage() {
 
                                                 >
                                                     <button
-                                                        className="w-full h-full px-6 py-4 text-[10px] font-black text-admin-error hover:bg-admin-error hover:text-white transition-all cursor-pointer uppercase tracking-[0.2em] border-l lg:border-l-0 lg:border-t border-admin-border flex items-center justify-center group"
+                                                        className="w-full h-full px-6 py-4 text-[11px] font-semibold text-admin-error hover:bg-admin-error hover:text-white transition-colors cursor-pointer uppercase tracking-wider border-l lg:border-l-0 lg:border-t border-admin-border flex items-center justify-center group"
                                                     >
                                                         <span className="group-hover:scale-110 transition-transform">{t("questions.purge")}</span>
                                                     </button>

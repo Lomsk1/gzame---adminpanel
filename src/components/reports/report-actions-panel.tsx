@@ -60,7 +60,7 @@ export function ReportActionsPanel(props: Props) {
         onEmailChange={onEmailChange}
       />
 
-      <section className="rounded-2xl border border-violet-500/25 bg-violet-500/5 p-4 space-y-3">
+      <section className="rounded-2xl border border-admin-info/25 bg-admin-info/5 p-4 space-y-3">
         <div>
           <h3 className="text-sm font-bold text-admin-text">{t("reports.askClientTitle")}</h3>
           <p className="text-xs text-admin-text-dim mt-0.5">{t("reports.askClientHint")}</p>
@@ -76,7 +76,7 @@ export function ReportActionsPanel(props: Props) {
           type="button"
           disabled={!!busy || !infoMessage.trim()}
           onClick={onRequestInfo}
-          className="rounded-xl px-4 py-2.5 text-xs font-bold border border-violet-500/30 bg-violet-500/10 text-violet-200 hover:bg-violet-500/20 disabled:opacity-50 transition-colors"
+          className="rounded-xl px-4 py-2.5 text-xs font-bold border border-admin-info/30 bg-admin-info/10 text-admin-info hover:bg-admin-info/20 disabled:opacity-50 transition-colors"
         >
           {busy === "info" ? t("reports.sendingInfo") : t("reports.requestInfo")}
         </button>

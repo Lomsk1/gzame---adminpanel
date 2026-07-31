@@ -48,13 +48,13 @@ function AmbassadorToggleCard({
       onClick={() => onChange(!checked)}
       className={`flex w-full items-start gap-3 rounded-xl border px-4 py-3.5 text-left transition-all ${
         checked
-          ? "border-admin-primary bg-admin-primary/15 shadow-[0_0_0_1px_rgba(59,130,246,0.25)]"
+          ? "border-admin-primary bg-admin-primary/15 shadow-[0_0_0_1px_rgba(var(--admin-primary-rgb),0.25)]"
           : "border-admin-border/70 bg-admin-panel/30 hover:border-admin-border hover:bg-admin-panel/50"
       }`}
     >
       <span
         className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md border text-[11px] font-black transition-colors ${
-          checked ? "border-admin-primary bg-admin-primary text-white" : "border-admin-border bg-admin-bg/40"
+          checked ? "border-admin-primary bg-admin-primary text-admin-bg" : "border-admin-border bg-admin-bg/40"
         }`}
       >
         {checked ? "✓" : ""}
@@ -405,7 +405,7 @@ export const SpecialistEditorDrawer = ({
             onClick={() => setActiveTab(tabId)}
             className={`shrink-0 rounded-full border px-3.5 py-2 text-xs font-semibold transition-colors sm:px-4 ${
               activeTab === tabId
-                ? "border-admin-primary bg-admin-primary text-white shadow-sm"
+                ? "border-admin-primary bg-admin-primary text-admin-bg shadow-sm"
                 : "border-admin-border bg-admin-bg/40 text-admin-text-dim hover:border-admin-primary/30 hover:text-admin-text"
             }`}
           >

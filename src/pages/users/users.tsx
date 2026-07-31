@@ -1,6 +1,5 @@
 import { useState, Suspense, useEffect } from "react";
 import { useLoaderData, Await, Form, useSubmit, useNavigation, useLocation, useNavigate } from "react-router";
-import { GlassCard } from "../../components/cards/card-glass";
 import { UserDetailDrawer } from "../../components/drawers/user-detail-drawer";
 import { MetricCard, PsychotypeBadge } from "../../components/ui/psychotypeBadge";
 import { NeuralDistributionCard } from "../../components/cards/psychotipe";
@@ -9,7 +8,19 @@ import type { StatsUserTypes } from "../../types/stats/user";
 import type { UsersDataType } from "../../types/user/user";
 import { useDebounceCallback } from "usehooks-ts";
 import axiosAuth from "../../helper/axios";
-import { AdminPageShell } from "../../components/admin";
+import {
+    AdminBadge,
+    AdminCard,
+    AdminPageHeader,
+    AdminPageShell,
+    AdminTable,
+    AdminTableBody,
+    AdminTableHead,
+    AdminTd,
+    AdminTh,
+    AdminToolbar,
+    AdminTr,
+} from "../../components/admin";
 import { useAdminT } from "../../store/locale/locale";
 
 export default function UsersPage() {
@@ -48,37 +59,46 @@ export default function UsersPage() {
     const isSearching = navigation.location && new URLSearchParams(navigation.location.search).has("email");
 
     return (
-        <AdminPageShell className="space-y-6 bg-admin-bg/50">
+        <AdminPageShell className="space-y-6">
+            <AdminPageHeader title={t("pages.users.directory")} />
 
-            {/* 1. INDEPENDENT STATS SECTION */}
             <Suspense fallback={<StatsLoadingSkeleton />}>
                 <Await resolve={userStatsData}>
                     {(resolvedData) => {
-                        const { stats } = resolvedData;
+                        const stats = resolvedData?.stats;
+                        const totals = stats?.totals ?? {
+                            totalUsers: 0,
+                            activeUsers: 0,
+                            blockedUsers: 0,
+                            subscribers: 0,
+                            avgLevel: 0,
+                            avgStreak: 0,
+                            totalSubPsichotypeUsers: 0,
+                        };
+                        const growth = stats?.growth ?? { newToday: 0, newThisWeek: 0 };
                         return (
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                                <MetricCard label={t("pages.users.population")} value={stats.totals.totalUsers} subValue={`+${stats.growth.newThisWeek}`} variant="primary" />
-                                <MetricCard label={t("pages.users.active")} value={stats.totals.activeUsers} variant="primary" />
-                                <MetricCard label={t("pages.users.blocked")} value={stats.totals.blockedUsers} variant="error" />
-                                <MetricCard label={t("pages.users.avgIntel")} value={`L${stats.totals.avgLevel}`} variant="accent" />
-                                <MetricCard label={t("pages.users.onboarding")} value={`${stats.onboardingCompletionRate}%`} variant="warning" />
-                                <MetricCard label={t("pages.users.streak")} value={`${stats.totals.avgStreak}d`} variant="primary" />
-                                <MetricCard label={t("pages.users.subscribers")} value={stats.totals.subscribers} variant="accent" />
-                                <MetricCard label={t("pages.users.subRate")} value={`${stats.subscriptionRate}%`} variant="primary" />
+                                <MetricCard label={t("pages.users.population")} value={totals.totalUsers ?? 0} subValue={`+${growth.newThisWeek ?? 0}`} variant="primary" />
+                                <MetricCard label={t("pages.users.active")} value={totals.activeUsers ?? 0} variant="primary" />
+                                <MetricCard label={t("pages.users.blocked")} value={totals.blockedUsers ?? 0} variant="error" />
+                                <MetricCard label={t("pages.users.avgIntel")} value={`L${totals.avgLevel ?? 0}`} variant="accent" />
+                                <MetricCard label={t("pages.users.onboarding")} value={`${stats?.onboardingCompletionRate ?? 0}%`} variant="warning" />
+                                <MetricCard label={t("pages.users.streak")} value={`${totals.avgStreak ?? 0}d`} variant="primary" />
+                                <MetricCard label={t("pages.users.subscribers")} value={totals.subscribers ?? 0} variant="accent" />
+                                <MetricCard label={t("pages.users.subRate")} value={`${stats?.subscriptionRate ?? 0}%`} variant="primary" />
                             </div>
                         );
                     }}
                 </Await>
             </Suspense>
 
-            <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
-                {/* 2. MAIN DIRECTORY COLUMN */}
+            <div className="grid grid-cols-1 items-start gap-5 xl:grid-cols-12">
                 <div className="xl:col-span-8 space-y-4">
-                    <GlassCard className="p-0 overflow-hidden border-admin-border/50 shadow-2xl">
-                        <div className="p-4 border-b border-admin-border/50 flex justify-between items-center bg-admin-panel/40">
-                            <h2 className="text-sm font-black text-admin-primary uppercase tracking-tighter italic">{t("pages.users.directory")}</h2>
-
-                            {/* Refetch Trigger: Form auto-submits on change with debounce */}
+                    <AdminCard padding="none" className="overflow-hidden">
+                        <AdminToolbar
+                            className="rounded-none border-x-0 border-t-0"
+                            left={<h2 className="text-sm font-semibold text-admin-text">{t("pages.users.directory")}</h2>}
+                            right={
                             <Form
                                 method="get"
                                 onChange={(e) => debouncedSubmit(e.currentTarget)}
@@ -88,81 +108,87 @@ export default function UsersPage() {
                                         type="search"
                                         name="email"
                                         defaultValue={initialEmail}
-                                        className="bg-admin-bg border border-admin-border rounded-lg px-3 py-1.5 text-[11px] w-64 outline-none focus:ring-1 ring-admin-primary/50 transition-all"
+                                        className="w-64 rounded-lg border border-admin-border bg-admin-elevated px-3 py-2 text-[11px] text-admin-text outline-none transition-colors placeholder:text-admin-text-muted focus:border-admin-primary focus:ring-2 focus:ring-admin-primary/20"
                                         placeholder={t("pages.users.searchPlaceholder")}
                                     />
                                     {isSearching && (
-                                        <div className="absolute right-2 top-2">
+                                        <div className="absolute right-2 top-2.5">
                                             <div className="h-4 w-4 animate-spin rounded-full border-2 border-admin-primary border-t-transparent" />
                                         </div>
                                     )}
                                 </div>
                             </Form>
-                        </div>
+                            }
+                        >{null}</AdminToolbar>
 
-                        {/* TABLE LOADING BOUNDARY - This will show TableLoadingSkeleton only while searching */}
                         <Suspense fallback={<TableLoadingSkeleton />}>
                             <Await resolve={usersData} key={initialEmail}>
-                                {(resolvedUsers) => (
-                                    <div className="overflow-x-auto max-h-175 custom-scrollbar">
-                                        <table className="w-full text-left">
-                                            <thead className="sticky top-0 z-10 bg-admin-panel/95 backdrop-blur-md text-[9px] font-black text-admin-text-dim uppercase tracking-[0.2em] border-b border-admin-border/30">
+                                {(resolvedUsers) => {
+                                    const rows = Array.isArray(resolvedUsers?.data) ? resolvedUsers.data : [];
+                                    return (
+                                    <AdminTable className="max-h-175 rounded-none border-x-0 border-b-0">
+                                            <AdminTableHead>
                                                 <tr>
-                                                    <th className="px-6 py-4">{t("pages.users.tableUsers")}</th>
-                                                    <th className="px-6 py-4">{t("pages.users.tablePsychotype")}</th>
-                                                    <th className="px-6 py-4">{t("pages.users.tableStatus")}</th>
-                                                    <th className="px-6 py-4">{t("pages.users.tableStreak")}</th>
-                                                    <th className="px-6 py-4 text-right">{t("pages.users.tableOps")}</th>
+                                                    <AdminTh>{t("pages.users.tableUsers")}</AdminTh>
+                                                    <AdminTh>{t("pages.users.tablePsychotype")}</AdminTh>
+                                                    <AdminTh>{t("pages.users.tableStatus")}</AdminTh>
+                                                    <AdminTh>{t("pages.users.tableStreak")}</AdminTh>
+                                                    <AdminTh className="text-right">{t("pages.users.tableOps")}</AdminTh>
                                                 </tr>
-                                            </thead>
-                                            <tbody className="divide-y divide-admin-border/10">
-                                                {resolvedUsers.data.map((user) => (
-                                                    <tr
+                                            </AdminTableHead>
+                                            <AdminTableBody>
+                                                {rows.length === 0 ? (
+                                                    <tr>
+                                                        <td colSpan={5} className="px-4 py-12 text-center text-sm text-admin-text-dim">
+                                                            {t("common.noResults")}
+                                                        </td>
+                                                    </tr>
+                                                ) : rows.map((user) => (
+                                                    <AdminTr
                                                         key={user._id}
                                                         onClick={() => setSelectedUser(user)}
-                                                        className="hover:bg-admin-primary/5 transition-colors group cursor-pointer"
+                                                        className="group cursor-pointer"
                                                     >
-                                                        <td className="px-6 py-3">
+                                                        <AdminTd>
                                                             <div className="flex items-center gap-3">
-                                                                <span className="flex items-center justify-center min-w-6 h-6 rounded bg-admin-card border border-admin-border text-[13px] font-bold text-admin-primary">
+                                                                <span className="flex h-7 min-w-7 items-center justify-center rounded-md border border-admin-primary/25 bg-admin-primary/10 text-[13px] font-semibold text-admin-primary">
                                                                     {user.currentLevel}
                                                                 </span>
                                                                 <div className="flex flex-col">
-                                                                    <span className="text-[15px] font-bold text-admin-text">{user.nickname}</span>
+                                                                    <span className="text-sm font-semibold text-admin-text">{user.nickname}</span>
                                                                     <span className="text-[12px] text-admin-text-dim font-mono">{user.email}</span>
                                                                 </div>
                                                             </div>
-                                                        </td>
-                                                        <td className="px-6 py-3"><PsychotypeBadge type={user.psychotype} /></td>
-                                                        <td className="px-6 py-3"><StatusBadge status={user.status} /></td>
-                                                        <td className="px-6 py-3 text-xs font-mono text-admin-warning">{user.currentStreakDays}d</td>
-                                                        <td className="px-6 py-3 text-right">
-                                                            <button className="text-[10px] font-black text-admin-primary opacity-0 group-hover:opacity-100 uppercase transition-all">{t("pages.users.inspect")} &gt;</button>
-                                                        </td>
-                                                    </tr>
+                                                        </AdminTd>
+                                                        <AdminTd><PsychotypeBadge type={user.psychotype} /></AdminTd>
+                                                        <AdminTd><StatusBadge status={user.status} /></AdminTd>
+                                                        <AdminTd className="font-mono text-xs text-admin-warning">{user.currentStreakDays}d</AdminTd>
+                                                        <AdminTd className="text-right">
+                                                            <button className="text-[11px] font-semibold text-admin-primary opacity-0 transition-opacity group-hover:opacity-100">{t("pages.users.inspect")} &gt;</button>
+                                                        </AdminTd>
+                                                    </AdminTr>
                                                 ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                )}
+                                            </AdminTableBody>
+                                    </AdminTable>
+                                    );
+                                }}
                             </Await>
                         </Suspense>
-                    </GlassCard>
+                    </AdminCard>
                 </div>
 
-                {/* 3. STRATEGIC ANALYSIS COLUMN */}
                 <div className="xl:col-span-4 space-y-6">
                     <Suspense fallback={<SidebarLoadingSkeleton />}>
                         <Await resolve={userStatsData}>
                             {(resolvedData) => (
                                 <>
                                     <NeuralDistributionCard
-                                        primary={resolvedData.stats.psychotypeDistribution}
-                                        subPsychotypeDistribution={resolvedData.stats.subPsychotypeDistribution}
-                                        totalUsers={resolvedData.stats.totals.totalUsers}
-                                        totalSubPsichotypeUsers={resolvedData.stats.totals.totalSubPsichotypeUsers}
+                                        primary={resolvedData?.stats?.psychotypeDistribution ?? []}
+                                        subPsychotypeDistribution={resolvedData?.stats?.subPsychotypeDistribution ?? []}
+                                        totalUsers={resolvedData?.stats?.totals?.totalUsers ?? 0}
+                                        totalSubPsichotypeUsers={resolvedData?.stats?.totals?.totalSubPsichotypeUsers ?? 0}
                                     />
-                                    <TopOperatorsCard users={resolvedData.topUsers} />
+                                    <TopOperatorsCard users={resolvedData?.topUsers ?? []} />
                                 </>
                             )}
                         </Await>
@@ -185,19 +211,19 @@ export default function UsersPage() {
 
 const StatusBadge = ({ status }: { status: string }) => {
     const { t } = useAdminT();
-    const styles: Record<string, string> = {
-        active: "border-admin-success/30 text-admin-success bg-admin-success/5",
-        blocked: "border-admin-error/30 text-admin-error bg-admin-error/5",
-        inactive: "border-admin-text-dim/30 text-admin-text-dim bg-admin-text-dim/5",
+    const tones: Record<string, "success" | "error" | "default"> = {
+        active: "success",
+        blocked: "error",
+        inactive: "default",
     };
     const labelKey = `common.status.${status}` as "common.status.active" | "common.status.blocked" | "common.status.inactive";
     const label = ["active", "blocked", "inactive"].includes(status)
         ? t(labelKey)
         : status;
     return (
-        <span className={`text-[9px] font-bold px-2 py-0.5 rounded border ${styles[status] || styles.inactive}`}>
+        <AdminBadge tone={tones[status] || tones.inactive}>
             {label.toUpperCase()}
-        </span>
+        </AdminBadge>
     );
 };
 

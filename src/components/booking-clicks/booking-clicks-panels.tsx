@@ -1,6 +1,6 @@
 import { MousePointerClick, CalendarRange, Users, BarChart3 } from "lucide-react";
 import { StatCard } from "../stats/stat-card";
-import { AdminSection } from "../admin";
+import { AdminBadge, AdminButton, AdminSection, AdminTable, AdminTableBody, AdminTableHead, AdminTd, AdminTh, AdminTr } from "../admin";
 import { AdminDateField } from "../ui/admin-date-field";
 import { useAdminT } from "../../store/locale/locale";
 
@@ -81,7 +81,7 @@ export function BookingClicksFilters({
     <AdminSection
       title={t("bookingClicks.filtersTitle")}
       description={t("bookingClicks.quickRange")}
-      tone="violet"
+      tone="info"
       headerRight={<CalendarRange className="w-4 h-4 text-admin-primary/70" />}
     >
       <div className="flex flex-wrap gap-2">
@@ -92,9 +92,9 @@ export function BookingClicksFilters({
               key={preset.label}
               type="button"
               onClick={() => onPreset(preset.from, preset.to)}
-              className={`rounded-xl px-4 py-2.5 text-xs font-bold uppercase tracking-wide border transition-all duration-200 ${
+              className={`rounded-lg border px-3 py-2 text-[11px] font-semibold transition-colors ${
                 isActive
-                  ? "bg-admin-primary/15 border-admin-primary text-admin-primary shadow-[0_0_12px_rgba(59,130,246,0.12)]"
+                  ? "bg-admin-primary/15 border-admin-primary text-admin-primary shadow-[0_0_16px_rgba(var(--admin-primary-rgb),0.15)]"
                   : "bg-admin-bg/60 border-admin-border text-admin-text-dim hover:border-admin-primary/50 hover:text-admin-text"
               }`}
             >
@@ -105,7 +105,7 @@ export function BookingClicksFilters({
       </div>
 
       <div className="pt-4 mt-4 border-t border-admin-border/50">
-        <p className="text-xs font-semibold text-admin-text-dim uppercase tracking-wide mb-3">
+        <p className="mb-3 text-[11px] font-semibold text-admin-text-dim">
           {t("bookingClicks.customRange")}
         </p>
         <div className="flex flex-wrap gap-4 items-end">
@@ -122,7 +122,7 @@ export function BookingClicksFilters({
             min={fromDate || undefined}
           />
           <label className="flex flex-col gap-1.5 min-w-44">
-            <span className="text-[10px] text-admin-text-dim uppercase tracking-wider">{t("bookingClicks.specialist")}</span>
+            <span className="text-[11px] font-semibold text-admin-text-dim">{t("bookingClicks.specialist")}</span>
             <select
               value={specialistId}
               onChange={(e) => onSpecialistChange(e.target.value)}
@@ -136,13 +136,13 @@ export function BookingClicksFilters({
               ))}
             </select>
           </label>
-          <button
+          <AdminButton
             type="button"
             onClick={onApply}
-            className="rounded-xl bg-admin-primary px-5 py-2.5 text-xs font-black uppercase tracking-wider text-admin-bg hover:brightness-110 transition-all"
+            size="md"
           >
             {t("common.apply")}
-          </button>
+          </AdminButton>
         </div>
       </div>
     </AdminSection>
@@ -175,70 +175,68 @@ export function BookingClicksTable({ rows }: BookingClicksTableProps) {
         </div>
       }
     >
-      <div className="overflow-x-auto rounded-xl border border-admin-border/60">
-        <table className="w-full text-left text-sm">
-          <thead>
-            <tr className="border-b border-admin-border bg-admin-panel/60">
-              <th className="px-4 py-3 text-[10px] font-bold text-admin-text-dim uppercase tracking-wider">
-                {t("bookingClicks.table.dateTime")}
-              </th>
-              <th className="px-4 py-3 text-[10px] font-bold text-admin-text-dim uppercase tracking-wider">
-                <span className="inline-flex items-center gap-1.5">
-                  <Users className="w-3.5 h-3.5" />
-                  {t("bookingClicks.table.user")}
-                </span>
-              </th>
-              <th className="px-4 py-3 text-[10px] font-bold text-admin-text-dim uppercase tracking-wider">
-                {t("bookingClicks.table.userEmail")}
-              </th>
-              <th className="px-4 py-3 text-[10px] font-bold text-admin-text-dim uppercase tracking-wider">
-                {t("bookingClicks.specialist")}
-              </th>
+      <AdminTable>
+        <AdminTableHead>
+          <tr>
+            <AdminTh>
+              {t("bookingClicks.table.dateTime")}
+            </AdminTh>
+            <AdminTh>
+              <span className="inline-flex items-center gap-1.5">
+                <Users className="w-3.5 h-3.5" />
+                {t("bookingClicks.table.user")}
+              </span>
+            </AdminTh>
+            <AdminTh>
+              {t("bookingClicks.table.userEmail")}
+            </AdminTh>
+            <AdminTh>
+              {t("bookingClicks.specialist")}
+            </AdminTh>
+          </tr>
+        </AdminTableHead>
+        <AdminTableBody>
+          {rows.length === 0 ? (
+            <tr>
+              <td colSpan={4} className="px-4 py-16 text-center text-admin-text-dim text-sm">
+                {t("bookingClicks.empty")}
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {rows.length === 0 ? (
-              <tr>
-                <td colSpan={4} className="px-4 py-16 text-center text-admin-text-dim text-sm">
-                  {t("bookingClicks.empty")}
-                </td>
-              </tr>
-            ) : (
-              rows.map((row, i) => (
-                <tr
-                  key={row._id}
-                  className="border-b border-admin-border/40 hover:bg-admin-primary/5 transition-colors admin-fade-up"
-                  style={{ animationDelay: `${Math.min(i * 30, 300)}ms` }}
-                >
-                  <td className="px-4 py-3 font-mono text-admin-text text-xs whitespace-nowrap">
-                    {row.clicked_at
-                      ? new Date(row.clicked_at).toLocaleString(undefined, {
-                          year: "numeric",
-                          month: "2-digit",
-                          day: "2-digit",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                          second: "2-digit",
-                        })
-                      : "—"}
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className="font-semibold text-admin-text">
-                      {row.user?.nickname || t("bookingClicks.rowAnonymous")}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-admin-text-dim text-xs">{row.user?.email ?? "—"}</td>
-                  <td className="px-4 py-3">
-                    <span className="inline-flex items-center rounded-lg border border-admin-primary/25 bg-admin-primary/10 px-2 py-0.5 text-xs font-semibold text-admin-primary">
-                      {row.specialist?.name ?? "—"}
-                    </span>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+          ) : (
+            rows.map((row, i) => (
+              <AdminTr
+                key={row._id}
+                className="admin-fade-up"
+                style={{ animationDelay: `${Math.min(i * 30, 300)}ms` }}
+              >
+                <AdminTd className="whitespace-nowrap font-mono text-xs">
+                  {row.clicked_at
+                    ? new Date(row.clicked_at).toLocaleString(undefined, {
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        second: "2-digit",
+                      })
+                    : "—"}
+                </AdminTd>
+                <AdminTd>
+                  <span className="font-semibold text-admin-text">
+                    {row.user?.nickname || t("bookingClicks.rowAnonymous")}
+                  </span>
+                </AdminTd>
+                <AdminTd className="text-xs text-admin-text-dim">{row.user?.email ?? "—"}</AdminTd>
+                <AdminTd>
+                  <AdminBadge tone="primary">
+                    {row.specialist?.name ?? "—"}
+                  </AdminBadge>
+                </AdminTd>
+              </AdminTr>
+            ))
+          )}
+        </AdminTableBody>
+      </AdminTable>
     </AdminSection>
   );
 }

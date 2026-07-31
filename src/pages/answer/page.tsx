@@ -37,7 +37,7 @@ export default function AnswersManagementPage() {
                         <input
                             type="text"
                             placeholder={t("answers.searchPlaceholder")}
-                            className="w-full bg-admin-panel border border-admin-border rounded-lg pl-10 pr-4 py-2.5 text-[10px] font-mono text-admin-text focus:border-admin-primary outline-none"
+                            className="w-full bg-admin-panel border border-admin-border rounded-lg pl-10 pr-4 py-2.5 text-sm text-admin-text focus:border-admin-primary outline-none"
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
@@ -47,10 +47,12 @@ export default function AnswersManagementPage() {
             <Suspense fallback={<LoadingState />}>
                 <Await resolve={answersData}>
                     {(resolved: AnswersTypes) => {
-                        const totalPages = Math.ceil(resolved.total / currentLimit);
+                        const rows = Array.isArray(resolved?.data) ? resolved.data : [];
+                        const total = resolved?.total ?? 0;
+                        const totalPages = Math.max(1, Math.ceil(total / currentLimit) || 1);
 
                         // Local filter for the already-fetched batch
-                        const filteredData = resolved.data.filter(session =>
+                        const filteredData = rows.filter(session =>
                             session.user_id?.nickname?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                             session.user_id?.email?.toLowerCase().includes(searchTerm.toLowerCase())
                         );
@@ -59,10 +61,10 @@ export default function AnswersManagementPage() {
                             <div className="space-y-6">
                                 {/* --- VITAL STATS --- */}
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                    <StatsMini label={t("answers.stats.globalRecords")} val={resolved.total.toLocaleString()} />
+                                    <StatsMini label={t("answers.stats.globalRecords")} val={total.toLocaleString()} />
                                     <StatsMini label={t("answers.stats.currentBatch")} val={filteredData.length} color="text-admin-primary" />
                                     <StatsMini label={t("answers.stats.totalPages")} val={totalPages} />
-                                    <StatsMini label={t("answers.stats.dataSource")} val={resolved.fromCache ? t("answers.stats.cache") : t("answers.stats.dbLive")} />
+                                    <StatsMini label={t("answers.stats.dataSource")} val={resolved?.fromCache ? t("answers.stats.cache") : t("answers.stats.dbLive")} />
                                 </div>
 
                                 {/* --- DATA LIST --- */}
@@ -72,7 +74,7 @@ export default function AnswersManagementPage() {
                                             <AnswerRow key={session._id} session={session} />
                                         ))
                                     ) : (
-                                        <div className="h-40 border border-dashed border-admin-border rounded-xl flex items-center justify-center text-admin-text-dim text-[10px] uppercase font-bold">
+                                        <div className="h-40 border border-dashed border-admin-border rounded-xl flex items-center justify-center text-admin-text-dim text-[11px] uppercase font-semibold">
                                             {t("answers.empty")}
                                         </div>
                                     )}
@@ -83,7 +85,7 @@ export default function AnswersManagementPage() {
                                     <button
                                         disabled={currentPage <= 1}
                                         onClick={() => handlePageChange(currentPage - 1)}
-                                        className="flex items-center gap-2 px-6 py-2 bg-admin-bg border border-admin-border rounded text-[10px] font-black uppercase hover:border-admin-primary transition-all disabled:opacity-20"
+                                        className="flex items-center gap-2 px-6 py-2 bg-admin-bg border border-admin-border rounded text-[11px] font-semibold uppercase hover:border-admin-primary transition-colors disabled:opacity-20"
                                     >
                                         <ChevronLeft size={14} /> {t("answers.prevBatch")}
                                     </button>
@@ -98,7 +100,7 @@ export default function AnswersManagementPage() {
                                     <button
                                         disabled={currentPage >= totalPages}
                                         onClick={() => handlePageChange(currentPage + 1)}
-                                        className="flex items-center gap-2 px-6 py-2 bg-admin-bg border border-admin-border rounded text-[10px] font-black uppercase hover:border-admin-primary transition-all disabled:opacity-20"
+                                        className="flex items-center gap-2 px-6 py-2 bg-admin-bg border border-admin-border rounded text-[11px] font-semibold uppercase hover:border-admin-primary transition-colors disabled:opacity-20"
                                     >
                                         {t("answers.nextBatch")} <ChevronRight size={14} />
                                     </button>
@@ -138,11 +140,11 @@ function AnswerRow({ session }: { session: AnswerSession }) {
                     </div>
                     <div className="grid grid-cols-2 gap-2 font-mono">
                         <div className="p-2 bg-admin-bg/50 border border-admin-border rounded flex flex-col items-center">
-                            <span className="text-[9px] text-admin-text-dim uppercase font-bold">{t("answers.archetype")}</span>
+                            <span className="text-[11px] text-admin-text-dim uppercase font-semibold">{t("answers.archetype")}</span>
                             <span className="text-[12px] font-black text-admin-accent italic">{session.finalPsychotype}</span>
                         </div>
                         <div className="p-2 bg-admin-bg/50 border border-admin-border rounded flex flex-col items-center">
-                            <span className="text-[9px] text-admin-text-dim uppercase font-bold">{t("answers.vote")}</span>
+                            <span className="text-[11px] text-admin-text-dim uppercase font-semibold">{t("answers.vote")}</span>
                             <span className="text-[12px] font-black text-admin-primary">{session.geminiVote}</span>
                         </div>
                     </div>
@@ -161,7 +163,7 @@ function AnswerRow({ session }: { session: AnswerSession }) {
                     <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
                         {Object.entries(session?.percentageScores ?? {}).map(([key, val]) => (
                             <div key={key} className="space-y-1.5">
-                                <div className="flex justify-between text-[9px] font-black uppercase text-admin-text-dim">
+                                <div className="flex justify-between text-[11px] font-semibold uppercase text-admin-text-dim">
                                     <span>{key.slice(0, 3)}</span>
                                     <span>{val}%</span>
                                 </div>
@@ -181,7 +183,7 @@ function AnswerRow({ session }: { session: AnswerSession }) {
                     </div>
                     <button
                         onClick={() => setShowRaw(!showRaw)}
-                        className="px-4 py-2 bg-admin-panel border border-admin-border text-[10px] font-black text-admin-primary rounded uppercase hover:bg-admin-primary hover:text-black transition-all"
+                        className="px-4 py-2 bg-admin-panel border border-admin-border text-[11px] font-semibold text-admin-primary rounded uppercase hover:bg-admin-primary hover:text-admin-bg transition-colors"
                     >
                         {showRaw ? t("answers.closeScan") : t("answers.rawData")}
                     </button>
@@ -189,7 +191,7 @@ function AnswerRow({ session }: { session: AnswerSession }) {
             </div>
 
             {showRaw && (
-                <div className="bg-black/40 border-t border-admin-border p-5 grid grid-cols-2 md:grid-cols-5 gap-3 animate-in slide-in-from-top duration-300">
+                <div className="bg-black/40 border-t border-admin-border p-5 grid grid-cols-2 md:grid-cols-5 gap-3 admin-fade-up">
                     {session.answers.map((ans, i) => (
                         <div key={ans._id} className="p-2 border border-admin-border/30 rounded flex items-center justify-between bg-admin-panel/20">
                             <span className="text-[10px] font-bold text-admin-text-dim">{t("answers.questionLabel", { num: i + 1 })}</span>

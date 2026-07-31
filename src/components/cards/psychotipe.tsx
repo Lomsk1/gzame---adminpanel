@@ -42,7 +42,13 @@ export const NeuralDistributionCard = ({
                         </p>
                     </div>
                     <div className="space-y-4">
-                        {primary.map((item) => (
+                        {(primary ?? []).length === 0 ? (
+                            <div className="py-4 border border-dashed border-admin-border/20 rounded flex items-center justify-center">
+                                <p className="text-[9px] italic text-admin-text-dim/40 uppercase tracking-tighter text-center px-2">
+                                    {t("common.noResults")}
+                                </p>
+                            </div>
+                        ) : (primary ?? []).map((item) => (
                             <ProgressBar
                                 key={`primary-${item._id}`}
                                 id={item._id}
@@ -63,8 +69,8 @@ export const NeuralDistributionCard = ({
                         </p>
                     </div>
                     <div className="space-y-4">
-                        {subPsychotypeDistribution.length > 0 ? (
-                            subPsychotypeDistribution.map((item) => (
+                        {(subPsychotypeDistribution ?? []).length > 0 ? (
+                            (subPsychotypeDistribution ?? []).map((item) => (
                                 <ProgressBar
                                     key={`sub-${item._id}`}
                                     id={item._id}

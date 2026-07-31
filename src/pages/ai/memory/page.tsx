@@ -98,7 +98,7 @@ export default function AiMemoryPage() {
 
       {stats && stats.memoriesIndexedByKind.length > 0 && (
         <GlassCard className="p-6">
-          <h2 className="text-sm font-black text-admin-text uppercase italic mb-4 flex items-center gap-2">
+          <h2 className="text-sm font-semibold text-admin-text uppercase tracking-wide mb-4 flex items-center gap-2">
             <Database className="w-4 h-4 text-admin-primary" />
             {t("aiMemory.byKind", { days: stats.periodDays })}
           </h2>
@@ -108,10 +108,10 @@ export default function AiMemoryPage() {
                 key={row._id}
                 className="p-3 rounded-xl bg-admin-bg border border-admin-border"
               >
-                <p className="text-[10px] uppercase text-admin-text-dim tracking-wider">
+                <p className="text-[11px] uppercase text-admin-text-dim tracking-wide">
                   {memoryKindLabel(t, row._id)}
                 </p>
-                <p className="text-2xl font-black text-admin-text mt-1">{row.count}</p>
+                <p className="text-2xl font-bold text-admin-text mt-1">{row.count}</p>
               </div>
             ))}
           </div>
@@ -119,7 +119,7 @@ export default function AiMemoryPage() {
       )}
 
       <GlassCard className="p-6">
-        <h2 className="text-sm font-black text-admin-text uppercase italic mb-4">
+        <h2 className="text-sm font-semibold text-admin-text uppercase tracking-wide mb-4">
           {t("aiMemory.browser")}
         </h2>
 
@@ -200,7 +200,7 @@ export default function AiMemoryPage() {
                 memories?.items.map((row) => (
                   <tr key={row._id} className="border-b border-admin-border/50 hover:bg-admin-bg/30">
                     <td className="py-3 pr-4">
-                      <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-admin-primary/10 text-admin-primary">
+                      <span className="text-[11px] font-semibold uppercase px-2 py-0.5 rounded bg-admin-primary/10 text-admin-primary">
                         {memoryKindLabel(t, row.kind)}
                       </span>
                     </td>

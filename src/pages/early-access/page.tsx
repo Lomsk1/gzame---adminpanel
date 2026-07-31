@@ -209,7 +209,7 @@ export default function EarlyAccessPage() {
       <div className={`${panelClass} p-5`}>
         <div className="flex flex-col gap-5 lg:flex-row lg:items-stretch lg:gap-6">
           <div className="lg:w-auto lg:shrink-0">
-            <p className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-admin-text-dim">{t("earlyAccess.status")}</p>
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-admin-text-dim">{t("earlyAccess.status")}</p>
             <div className="flex flex-wrap gap-1.5">
               {STATUS_CHIP_VALUES.map((chip) => {
                 const active =
@@ -231,7 +231,7 @@ export default function EarlyAccessPage() {
                     onClick={() => setStatusFromChip(chip.value)}
                     className={`rounded-full px-3.5 py-1.5 text-xs font-bold uppercase tracking-wide transition-all ${
                       active
-                        ? "bg-admin-primary text-white shadow-[0_0_12px_rgba(59,130,246,0.35)]"
+                        ? "bg-admin-primary text-admin-bg"
                         : "border border-admin-border/80 bg-admin-bg/50 text-admin-text-dim hover:border-admin-primary/40 hover:text-admin-text"
                     }`}
                   >
@@ -245,7 +245,7 @@ export default function EarlyAccessPage() {
           <div className="hidden w-px shrink-0 bg-admin-border/50 lg:block" aria-hidden />
 
           <div className="min-w-0 flex-1">
-            <p className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-admin-text-dim">{t("common.search")}</p>
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-admin-text-dim">{t("common.search")}</p>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
               <div className="relative min-w-0 flex-1">
                 <Search
@@ -295,16 +295,16 @@ export default function EarlyAccessPage() {
           <table className="w-full min-w-[720px] text-left text-sm">
             <thead>
               <tr className="border-b border-admin-border bg-admin-bg/40">
-                <th className="whitespace-nowrap px-4 py-3 text-[10px] font-black uppercase tracking-wider text-admin-text-dim">
+                <th className="whitespace-nowrap px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-admin-text-dim">
                   {t("earlyAccess.table.signedUp")}
                 </th>
-                <th className="px-4 py-3 text-[10px] font-black uppercase tracking-wider text-admin-text-dim">{t("common.name")}</th>
-                <th className="px-4 py-3 text-[10px] font-black uppercase tracking-wider text-admin-text-dim">{t("common.email")}</th>
-                <th className="px-4 py-3 text-[10px] font-black uppercase tracking-wider text-admin-text-dim">{t("common.status")}</th>
-                <th className="min-w-[180px] px-4 py-3 text-[10px] font-black uppercase tracking-wider text-admin-text-dim">
+                <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-admin-text-dim">{t("common.name")}</th>
+                <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-admin-text-dim">{t("common.email")}</th>
+                <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-admin-text-dim">{t("common.status")}</th>
+                <th className="min-w-[180px] px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-admin-text-dim">
                   {t("earlyAccess.table.notes")}
                 </th>
-                <th className="w-16 px-4 py-3 text-[10px] font-black uppercase tracking-wider text-admin-text-dim" />
+                <th className="w-16 px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-admin-text-dim" />
               </tr>
             </thead>
             <tbody>

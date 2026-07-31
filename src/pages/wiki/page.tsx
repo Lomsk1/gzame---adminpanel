@@ -192,7 +192,7 @@ export default function WikiPage() {
       <GlassCard className="p-5">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-end">
           <div className="lg:col-span-5">
-            <label className="block text-[10px] font-bold uppercase tracking-widest text-admin-text-dim mb-2">
+            <label className="block text-[11px] font-semibold uppercase tracking-wide text-admin-text-dim mb-2">
               {t("common.search")}
             </label>
             <div className="relative">
@@ -207,7 +207,7 @@ export default function WikiPage() {
           </div>
 
           <div className="lg:col-span-3">
-            <label className="block text-[10px] font-bold uppercase tracking-widest text-admin-text-dim mb-2">
+            <label className="block text-[11px] font-semibold uppercase tracking-wide text-admin-text-dim mb-2">
               {t("wiki.filter.category")}
             </label>
             <div className="relative">
@@ -228,7 +228,7 @@ export default function WikiPage() {
           </div>
 
           <div className="lg:col-span-2">
-            <label className="block text-[10px] font-bold uppercase tracking-widest text-admin-text-dim mb-2">
+            <label className="block text-[11px] font-semibold uppercase tracking-wide text-admin-text-dim mb-2">
               {t("wiki.filter.sortBy")}
             </label>
             <select
@@ -298,14 +298,14 @@ export default function WikiPage() {
                 onClick={() => setSelectedId(entry._id)}
                 className={`w-full text-left p-4 rounded-xl border transition-all duration-200 ${
                   selected?._id === entry._id
-                    ? "bg-admin-primary/10 border-admin-primary/40 shadow-[inset_0_0_20px_rgba(59,130,246,0.08)]"
+                    ? "bg-admin-primary/10 border-admin-primary/40"
                     : "bg-admin-panel/40 border-admin-border hover:border-admin-primary/30"
                 } ${!entry.is_active ? "opacity-55" : ""}`}
               >
                 <div className="flex items-start justify-between gap-2">
                   <WikiCategoryBadge category={entry.category} />
                   {!entry.embedded_at && (
-                    <span className="text-[9px] font-bold uppercase text-admin-warning border border-admin-warning/40 px-1.5 py-0.5 rounded">
+                    <span className="text-[11px] font-semibold uppercase text-admin-warning border border-admin-warning/40 px-1.5 py-0.5 rounded">
                       {t("wiki.noEmbed")}
                     </span>
                   )}
@@ -332,7 +332,7 @@ export default function WikiPage() {
                       </span>
                     )}
                   </div>
-                  <h2 className="text-xl font-black text-admin-text uppercase italic tracking-tight">
+                  <h2 className="text-xl font-semibold text-admin-text tracking-tight">
                     {selected.title}
                   </h2>
                   <p className="text-xs text-admin-text-dim font-mono mt-1">{selected.slug}</p>
@@ -396,7 +396,7 @@ export default function WikiPage() {
               <div className="flex-1 min-h-0">
                 <div className="flex items-center gap-2 mb-2">
                   <Eye className="w-4 h-4 text-admin-primary" />
-                  <span className="text-[10px] font-black text-admin-primary uppercase tracking-widest">
+                  <span className="text-[11px] font-semibold text-admin-primary uppercase tracking-wide">
                     {t("wiki.preview")}
                   </span>
                 </div>
@@ -422,7 +422,7 @@ export default function WikiPage() {
 
       {/* Help panel */}
       <GlassCard className="p-5 border-admin-primary/20 bg-admin-primary/5">
-        <h3 className="text-xs font-black text-admin-primary uppercase tracking-widest mb-3">
+        <h3 className="text-[11px] font-semibold text-admin-primary uppercase tracking-wide mb-3">
           {t("wiki.seedTitle")}
         </h3>
         <ol className="grid md:grid-cols-2 gap-2 text-sm text-admin-text-dim list-decimal list-inside">

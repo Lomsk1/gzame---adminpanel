@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useLoaderData, useFetcher, useRevalidator, Link } from "react-router";
-import { GlassCard } from "../../components/cards/card-glass";
 import { CategoryEditorDrawer } from "../../components/drawers/category-editor-drawer";
 import { SpecialistDetailDrawer } from "../../components/drawers/specialist-detail-drawer";
 import { SpecialistEditorDrawer, type SpecialistFormData } from "../../components/drawers/specialist-editor-drawer";
@@ -25,7 +24,16 @@ import { axiosMultipartAuth } from "../../helper/axios";
 import type { SpecialistCategory, Specialist } from "../../types/specialist/specialist";
 import type { SpecialistCategoryListResponse, SpecialistListResponse } from "../../types/specialist/specialist";
 import type { SpecialistsPageActionResponse } from "../../features/specialists/specialists-page.actions";
-import { AdminPageHeader, AdminPageShell } from "../../components/admin";
+import {
+  AdminCard,
+  AdminPageHeader,
+  AdminPageShell,
+  AdminSection,
+  AdminTable,
+  AdminTableBody,
+  AdminTableHead,
+  AdminTh,
+} from "../../components/admin";
 import { useAdminT } from "../../store/locale/locale";
 
 type PageTab = "specialists" | "categories";
@@ -310,7 +318,7 @@ export default function SpecialistsPage() {
               variant="oracle"
               size="sm"
               onClick={openNewSpecialist}
-              className="min-w-[140px] flex-1 sm:flex-none"
+              className="min-w-35 flex-1 sm:flex-none"
             >
               {t("specialists.newSpecialist")}
             </ButtonComponent>
@@ -386,7 +394,7 @@ export default function SpecialistsPage() {
               onClick={() => setActiveTab(tab.id)}
               className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors sm:flex-none sm:px-5 ${
                 activeTab === tab.id
-                  ? "bg-admin-primary text-white shadow-sm"
+                  ? "bg-admin-primary text-admin-bg shadow-sm"
                   : "text-admin-text-dim hover:bg-admin-bg/50 hover:text-admin-text"
               }`}
             >
@@ -403,8 +411,8 @@ export default function SpecialistsPage() {
         </div>
 
         {activeTab === "specialists" ? (
-          <GlassCard className="overflow-hidden p-0" noContentPadding>
-            <div className="border-b border-admin-border/40 bg-admin-panel/20 p-4 sm:p-5">
+          <AdminCard padding="none" className="overflow-hidden">
+            <div className="border-b border-admin-border bg-admin-panel/60 p-4 sm:p-5">
               <SpecialistToolbar
                 search={search}
                 onSearchChange={setSearch}
@@ -464,31 +472,29 @@ export default function SpecialistsPage() {
                   }}
                 />
               ) : viewMode === "table" ? (
-                <div className="overflow-x-auto">
-                  <table className="w-full min-w-[720px] text-left">
-                    <thead className="border-b border-admin-border/40 bg-admin-panel/30 text-[9px] font-black uppercase tracking-[0.2em] text-admin-text-dim">
-                      <tr>
-                        <th className="px-4 py-3">{t("specialists.table.specialist")}</th>
-                        <th className="hidden px-4 py-3 md:table-cell">{t("specialists.table.categories")}</th>
-                        <th className="hidden px-4 py-3 lg:table-cell">{t("specialists.table.bio")}</th>
-                        <th className="hidden px-4 py-3 sm:table-cell">{t("specialists.table.reach")}</th>
-                        <th className="px-4 py-3">{t("common.status")}</th>
-                        <th className="px-4 py-3 text-right">{t("specialists.table.ops")}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredSpecialists.map((spec) => (
-                        <SpecialistTableRow
-                          key={spec._id}
-                          specialist={spec}
-                          onInspect={() => openInspectSpecialist(spec)}
-                          onEdit={() => openEditSpecialist(spec)}
-                          onDelete={() => handleDeleteSpecialist(spec._id)}
-                        />
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                <AdminTable className="border-x-0 border-b-0 rounded-none">
+                  <AdminTableHead>
+                    <tr>
+                      <AdminTh>{t("specialists.table.specialist")}</AdminTh>
+                      <AdminTh className="hidden md:table-cell">{t("specialists.table.categories")}</AdminTh>
+                      <AdminTh className="hidden lg:table-cell">{t("specialists.table.bio")}</AdminTh>
+                      <AdminTh className="hidden sm:table-cell">{t("specialists.table.reach")}</AdminTh>
+                      <AdminTh>{t("common.status")}</AdminTh>
+                      <AdminTh className="text-right">{t("specialists.table.ops")}</AdminTh>
+                    </tr>
+                  </AdminTableHead>
+                  <AdminTableBody>
+                    {filteredSpecialists.map((spec) => (
+                      <SpecialistTableRow
+                        key={spec._id}
+                        specialist={spec}
+                        onInspect={() => openInspectSpecialist(spec)}
+                        onEdit={() => openEditSpecialist(spec)}
+                        onDelete={() => handleDeleteSpecialist(spec._id)}
+                      />
+                    ))}
+                  </AdminTableBody>
+                </AdminTable>
               ) : viewMode === "list" ? (
                 <div className="space-y-2 sm:space-y-3">
                   {filteredSpecialists.map((spec) => (
@@ -513,16 +519,12 @@ export default function SpecialistsPage() {
                 </div>
               )}
             </div>
-          </GlassCard>
+          </AdminCard>
         ) : (
-          <GlassCard>
-            <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h2 className="text-lg font-bold text-admin-text">{t("specialists.categories.title")}</h2>
-                <p className="mt-1 text-sm text-admin-text-dim">
-                  {t("specialists.categories.desc")}
-                </p>
-              </div>
+          <AdminSection
+            title={t("specialists.categories.title")}
+            description={t("specialists.categories.desc")}
+            headerRight={
               <ButtonComponent
                 variant="secondary"
                 size="sm"
@@ -534,8 +536,8 @@ export default function SpecialistsPage() {
               >
                 {t("specialists.categories.add")}
               </ButtonComponent>
-            </div>
-
+            }
+          >
             {categories.length === 0 ? (
               <SpecialistEmptyState
                 title={t("specialists.categories.empty")}
@@ -563,7 +565,7 @@ export default function SpecialistsPage() {
                 ))}
               </div>
             )}
-          </GlassCard>
+          </AdminSection>
         )}
       </div>
 

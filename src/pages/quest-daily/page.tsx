@@ -15,19 +15,21 @@ export default function ActiveQuestsPage() {
     const [inspectingPayload, setInspectingPayload] = useState<QuestDailyTypes['data'][0] | null>(null);
 
     return (
-        <AdminPageShell className="space-y-6 font-mono">
+        <AdminPageShell className="space-y-6">
             <AdminPageHeader title={t("pages.dailyQuests.title")} icon={<Activity className="text-admin-accent w-5 h-5" />} />
 
             <Suspense fallback={<ActiveLoadingGrid />}>
                 <Await resolve={activeQuests}>
                     {(resolved: QuestDailyTypes) => {
+                        const rows = Array.isArray(resolved?.data) ? resolved.data : [];
                         const stats = (() => {
-                            const totalPotential = resolved.data.length * 3;
-                            const completedCount = resolved.data.reduce((acc, s) =>
-                                acc + s.completed.filter(Boolean).length, 0);
+                            const totalPotential = rows.length * 3;
+                            const completedCount = rows.reduce((acc, s) =>
+                                acc + (Array.isArray(s.completed) ? s.completed.filter(Boolean).length : 0), 0);
 
                             const counts: Record<string, number> = {};
-                            resolved.data.forEach(s => {
+                            rows.forEach(s => {
+                                if (!s.psychotype_used) return;
                                 counts[s.psychotype_used] = (counts[s.psychotype_used] || 0) + 1;
                             });
 
@@ -46,7 +48,7 @@ export default function ActiveQuestsPage() {
                         return (
                             <div className="space-y-6">
                                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                                    <MonitorStat label={t("dailyQuests.stats.activeSessions")} val={resolved.total} icon={<User size={12} />} />
+                                    <MonitorStat label={t("dailyQuests.stats.activeSessions")} val={resolved?.total ?? 0} icon={<User size={12} />} />
                                     <MonitorStat
                                         label={t("dailyQuests.stats.globalSync")}
                                         val={`${stats.completionRate}%`}
@@ -68,8 +70,8 @@ export default function ActiveQuestsPage() {
                                 </div>
 
                                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-                                    {resolved.data.length > 0 ? (
-                                        resolved.data.map((session) => (
+                                    {rows.length > 0 ? (
+                                        rows.map((session) => (
                                             <SessionCard
                                                 key={session._id}
                                                 session={session}
@@ -79,7 +81,7 @@ export default function ActiveQuestsPage() {
                                     ) : (
                                         <div className="col-span-full py-20 border border-dashed border-admin-border/30 flex flex-col items-center justify-center opacity-40">
                                             <Ghost size={32} className="mb-2" />
-                                            <p className="text-[10px] font-black uppercase tracking-widest font-mono">{t("dailyQuests.empty")}</p>
+                                            <p className="text-[11px] font-semibold uppercase tracking-wider">{t("dailyQuests.empty")}</p>
                                         </div>
                                     )}
                                 </div>
@@ -105,9 +107,9 @@ function MonitorStat({ label, val, color = "text-admin-text", icon }: { label: s
         <div className="bg-admin-panel/40 border border-admin-border p-3 rounded-lg relative overflow-hidden group">
             <div className="flex items-center gap-2 mb-1">
                 <span className="text-admin-text-dim/50 group-hover:text-admin-accent transition-colors">{icon}</span>
-                <p className="text-[10px] font-black text-admin-text-dim uppercase tracking-[0.15em]">{label}</p>
+                <p className="text-[11px] font-semibold text-admin-text-dim uppercase tracking-wide">{label}</p>
             </div>
-            <p className={`text-xl font-black italic tracking-tighter ${color} leading-none group-hover:translate-x-1 transition-transform`}>
+            <p className={`text-xl font-bold ${color} leading-none group-hover:translate-x-1 transition-transform`}>
                 {val}
             </p>
             <div className="absolute bottom-0 left-0 h-px w-0 bg-admin-primary group-hover:w-full transition-all duration-500 opacity-20" />
@@ -126,14 +128,14 @@ function PayloadInspector({ data, onClose }: { data: QuestDailyTypes['data'][0],
     };
 
     return (
-        <div className="fixed inset-0 z-100 flex items-center justify-end bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-300">
-            <div className="w-full max-w-xl h-full bg-admin-bg border border-admin-primary/30 shadow-2xl flex flex-col animate-in slide-in-from-right duration-500">
+        <div className="fixed inset-0 z-100 flex items-center justify-end bg-black/80 backdrop-blur-sm p-4 admin-overlay-in">
+            <div className="w-full max-w-xl h-full bg-admin-bg border border-admin-primary/30 shadow-2xl flex flex-col admin-drawer-in">
                 <div className="p-4 border-b border-admin-border flex justify-between items-center bg-admin-panel">
                     <div className="flex items-center gap-3">
                         <Terminal size={14} className="text-admin-primary" />
                         <div>
-                            <h2 className="text-[10px] font-black text-admin-text uppercase">{t("dailyQuests.inspector.title")}</h2>
-                            <p className="text-[8px] text-admin-text-dim font-mono">{t("dailyQuests.inspector.nodeUid")} {data._id}</p>
+                            <h2 className="text-[11px] font-semibold text-admin-text uppercase">{t("dailyQuests.inspector.title")}</h2>
+                            <p className="text-[11px] text-admin-text-dim font-mono">{t("dailyQuests.inspector.nodeUid")} {data._id}</p>
                         </div>
                     </div>
                     <button onClick={onClose} className="p-1 hover:bg-admin-error/20 rounded-full transition-all text-admin-text-dim hover:text-white">
@@ -148,10 +150,10 @@ function PayloadInspector({ data, onClose }: { data: QuestDailyTypes['data'][0],
                 </div>
 
                 <div className="p-4 border-t border-admin-border flex justify-between items-center bg-admin-panel/50">
-                    <span className="text-[8px] text-admin-text-dim uppercase font-bold italic">{t("dailyQuests.inspector.status")}</span>
+                    <span className="text-[11px] text-admin-text-dim uppercase font-semibold">{t("dailyQuests.inspector.status")}</span>
                     <button
                         onClick={handleCopy}
-                        className="text-[9px] font-black text-admin-primary flex items-center gap-2 hover:text-white transition-colors"
+                        className="text-[11px] font-semibold text-admin-primary flex items-center gap-2 hover:text-admin-text transition-colors"
                     >
                         {copied ? t("dailyQuests.inspector.copied") : t("dailyQuests.inspector.copy")} <Copy size={10} />
                     </button>

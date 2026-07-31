@@ -114,8 +114,7 @@ export default function CloudPage() {
       <div className="grid gap-6 lg:grid-cols-12 lg:items-start admin-fade-up" style={{ animationDelay: "80ms" }}>
         {/* Live release */}
         <GlassCard
-          glow={!!release}
-          className={`border-admin-border/50 lg:col-span-7 ${release ? "shadow-[0_0_50px_-12px_rgba(16,185,129,0.35)]" : ""}`}
+          className="border-admin-border/50 lg:col-span-7"
         >
           <div className="flex flex-col gap-6">
             <div className="flex flex-wrap items-start justify-between gap-4">
@@ -221,7 +220,7 @@ export default function CloudPage() {
         </GlassCard>
 
         {/* Publish */}
-        <GlassCard className="border-admin-border/50 lg:col-span-5" glow>
+        <GlassCard className="border-admin-border/50 lg:col-span-5">
           <div className="flex flex-col gap-6">
             <div>
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-admin-text-dim">
@@ -269,7 +268,7 @@ export default function CloudPage() {
                     setSelectedFileName(f?.name ?? null);
                   }}
                 />
-                <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl border border-admin-border/80 bg-admin-panel text-admin-primary transition group-hover:border-admin-primary/40 group-hover:shadow-[0_0_20px_rgba(59,130,246,0.2)]">
+                <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl border border-admin-border/80 bg-admin-panel text-admin-primary transition group-hover:border-admin-primary/40">
                   <Upload className="h-6 w-6" aria-hidden />
                 </div>
                 <p className="text-center text-sm font-semibold text-admin-text">

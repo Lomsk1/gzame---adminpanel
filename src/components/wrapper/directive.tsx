@@ -57,10 +57,10 @@ export const DirectiveModal = ({ isOpen, onClose, recipient }: DirectiveModalPro
     return (
         <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
             {/* Backdrop */}
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in" onClick={onClose} />
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm admin-overlay-in" onClick={onClose} />
 
             {/* Modal Body */}
-            <div className="relative w-full max-w-md bg-admin-panel border border-admin-border shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="relative w-full max-w-md bg-admin-panel border border-admin-border shadow-2xl flex flex-col overflow-hidden admin-dialog-in">
 
                 {/* Header */}
                 <div className="p-4 border-b border-admin-border bg-admin-primary/5 flex justify-between items-center text-admin-primary">

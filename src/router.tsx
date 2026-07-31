@@ -8,6 +8,8 @@ import UsersPage from "./pages/users/users";
 import { dashboardLoader } from "./features/stats/dashboard.loaders";
 import AIGeminiPage from "./pages/ai/ai";
 import { geminiAction } from "./features/ai/ai.actions";
+import DeviPromptPage from "./pages/ai/devi-prompt/page";
+import { deviPromptPageLoader } from "./features/devi-prompt/devi-prompt.loaders";
 import { AIInstructionLoader } from "./features/ai/ai.loaders";
 import AIGeminiLogsPage from "./pages/ai/log/ai-logs";
 import { userStatsLoader } from "./features/stats/user.loaders";
@@ -38,6 +40,8 @@ import { earlyAccessPageLoader } from "./features/early-access/early-access.load
 import NotificationBroadcastPage from "./pages/notification-broadcast/page";
 import CloudPage from "./pages/cloud/page";
 import { cloudPageLoader } from "./features/cloud/cloud.loaders";
+import AppVersionPage from "./pages/app-version/page";
+import { appVersionPageLoader } from "./features/app-version/app-version.loaders";
 import WikiPage from "./pages/wiki/page";
 import { wikiPageLoader } from "./features/wiki/wiki.loaders";
 import { wikiPageAction } from "./features/wiki/wiki.actions";
@@ -89,6 +93,11 @@ export const router = createBrowserRouter([
             element: <AIGeminiPage />,
             action: geminiAction,
             loader: AIInstructionLoader,
+          },
+          {
+            path: "devi-prompt",
+            element: <DeviPromptPage />,
+            loader: deviPromptPageLoader,
           },
           {
             path: "memory",
@@ -169,6 +178,11 @@ export const router = createBrowserRouter([
         path: "cloud",
         element: <CloudPage />,
         loader: cloudPageLoader,
+      },
+      {
+        path: "app-version",
+        element: <AppVersionPage />,
+        loader: appVersionPageLoader,
       },
       {
         path: "wiki",

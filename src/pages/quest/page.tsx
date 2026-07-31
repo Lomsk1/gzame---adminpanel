@@ -72,7 +72,7 @@ export default function QuestsPage() {
     };
 
     return (
-        <AdminPageShell className="space-y-8 font-mono">
+    <AdminPageShell className="space-y-8">
             <AdminPageHeader
                 title={t("pages.quests.title")}
                 icon={<Sword className="text-admin-primary w-5 h-5" />}
@@ -83,8 +83,8 @@ export default function QuestsPage() {
                                 <button
                                     key={val}
                                     onClick={() => updateFilter("is_foundational", val)}
-                                    className={`px-4 py-1.5 rounded text-[11.5px] cursor-pointer font-black tracking-wider uppercase transition-all ${foundationalFilter === val
-                                        ? 'bg-admin-primary text-admin-bg shadow-lg shadow-admin-primary/20'
+                                    className={`px-4 py-1.5 rounded-lg text-[11px] cursor-pointer font-semibold tracking-wide uppercase transition-colors ${foundationalFilter === val
+                                        ? 'bg-admin-primary text-admin-bg'
                                         : 'text-admin-text-dim hover:text-admin-text'
                                         }`}
                                 >
@@ -100,20 +100,22 @@ export default function QuestsPage() {
 
             <Suspense fallback={<div className="grid grid-cols-3 gap-6 animate-pulse">{[...Array(6)].map((_, i) => <div key={i} className="h-48 bg-admin-panel rounded-xl" />)}</div>}>
                 <Await resolve={questsData}>
-                    {(resolved: QuestsTypes) => (
+                    {(resolved: QuestsTypes) => {
+                        const rows = Array.isArray(resolved?.data) ? resolved.data : [];
+                        return (
                         <div className="space-y-8">
                             {/* --- STATS BARS --- */}
                             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                                <QuickStat label={t("quests.stats.liveNodes")} val={resolved.total} icon={<Database size={14} />} />
-                                <QuickStat label={t("quests.stats.uplinkType")} val={resolved.fromCache ? t("quests.stats.cached") : t("quests.stats.database")} color="text-admin-accent" />
+                                <QuickStat label={t("quests.stats.liveNodes")} val={resolved?.total ?? 0} icon={<Database size={14} />} />
+                                <QuickStat label={t("quests.stats.uplinkType")} val={resolved?.fromCache ? t("quests.stats.cached") : t("quests.stats.database")} color="text-admin-accent" />
                                 <QuickStat label={t("quests.stats.sectorPage")} val={currentPage} />
-                                <QuickStat label={t("quests.stats.activeBuffer")} val={resolved.data.length} />
+                                <QuickStat label={t("quests.stats.activeBuffer")} val={rows.length} />
                             </div>
 
                             {/* --- GRID --- */}
                             <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-6">
-                                {resolved.data.length > 0 ? (
-                                    resolved.data.map((quest) => (
+                                {rows.length > 0 ? (
+                                    rows.map((quest) => (
                                         <QuestCard
                                             key={quest._id}
                                             quest={quest}
@@ -124,20 +126,21 @@ export default function QuestsPage() {
                                 ) : (
                                     <div className="col-span-full h-64 border border-dashed border-admin-border flex flex-col items-center justify-center opacity-40">
                                         <Search size={40} className="mb-2" />
-                                        <p className="text-xs font-black uppercase tracking-widest">{t("quests.empty")}</p>
+                                        <p className="text-[11px] font-semibold uppercase tracking-wider">{t("quests.empty")}</p>
                                     </div>
                                 )}
                             </div>
 
                             <Pagination
                                 current={currentPage}
-                                total={resolved.total}
+                                total={resolved?.total ?? 0}
                                 limit={20}
                                 onPageChange={(p) => updateFilter("page", p.toString())}
                                 t={t}
                             />
                         </div>
-                    )}
+                        );
+                    }}
                 </Await>
             </Suspense>
 
@@ -161,8 +164,8 @@ function QuickStat({ label, val, color = "text-admin-text", icon }: { label: str
     return (
         <div className="bg-admin-panel/40 border border-admin-border p-4 rounded-xl relative overflow-hidden">
             <div className="absolute right-2 top-2 opacity-5">{icon}</div>
-            <p className="text-[11px] font-black text-admin-text-dim uppercase tracking-widest">{label}</p>
-            <p className={`text-xl font-black mt-1 ${color}`}>{val}</p>
+            <p className="text-[11px] font-semibold text-admin-text-dim uppercase tracking-wider">{label}</p>
+            <p className={`text-xl font-bold mt-1 ${color}`}>{val}</p>
         </div>
     );
 }
@@ -173,7 +176,7 @@ function Pagination({ current, total, limit, onPageChange, t }: { current: numbe
     return (
         <div className="flex justify-between items-center bg-admin-panel border border-admin-border p-3 rounded-xl">
             <button disabled={current === 1} onClick={() => onPageChange(current - 1)} className="p-2 border border-admin-border rounded hover:bg-admin-primary/10 disabled:opacity-20 transition-all"><ChevronLeft size={16} /></button>
-            <span className="text-[10px] font-black uppercase text-admin-text-dim">{t("quests.pagination", { current, max: maxPage })}</span>
+            <span className="text-[11px] font-semibold uppercase text-admin-text-dim">{t("quests.pagination", { current, max: maxPage })}</span>
             <button disabled={current >= maxPage} onClick={() => onPageChange(current + 1)} className="p-2 border border-admin-border rounded hover:bg-admin-primary/10 disabled:opacity-20 transition-all"><ChevronRight size={16} /></button>
         </div>
     );

@@ -103,12 +103,12 @@ export default function LevelConfigPage() {
                             />
 
                             <div className="admin-fade-up" style={{ animationDelay: "80ms" }}>
-                            <GlassCard className="p-4 bg-admin-panel/10 border-admin-border/20">
+                            <GlassCard className="p-4 bg-admin-panel/40 border-admin-border/50">
                                 <div className="h-24 flex items-end gap-1 px-2 border-l border-b border-admin-border/20">
                                     {sortedLevels.map((l) => (
                                         <div
                                             key={l._id}
-                                            className={`flex-1 transition-all duration-500 border-t ${l.is_active ? 'bg-admin-primary/30 border-admin-primary/60' : 'bg-admin-border/20 border-admin-border/40'} hover:scale-105`}
+                                            className={`flex-1 transition-colors duration-300 border-t ${l.is_active ? 'bg-admin-primary/30 border-admin-primary/60' : 'bg-admin-border/20 border-admin-border/40'} hover:bg-admin-primary/40`}
                                             style={{ height: `${((l.exp_required || 0) / maxExp) * 100}%` }}
                                             title={t("levels.chartTooltip", { level: l.level, exp: l.exp_required })}
                                         />

@@ -73,13 +73,13 @@ export function ChipToggleGroup({
                 onClick={() => toggle(opt.value)}
                 className={`flex items-start gap-2 rounded-lg border px-3 py-2.5 text-left text-sm transition-all ${
                   on
-                    ? "border-admin-primary bg-admin-primary/15 text-admin-text shadow-[0_0_0_1px_rgba(59,130,246,0.25)]"
+                    ? "border-admin-primary bg-admin-primary/15 text-admin-text shadow-[0_0_0_1px_rgba(var(--admin-primary-rgb),0.25)]"
                     : "border-transparent bg-admin-panel/30 text-admin-text-dim hover:border-admin-border hover:bg-admin-panel/60 hover:text-admin-text"
                 }`}
               >
                 <span
                   className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border text-[10px] font-black ${
-                    on ? "border-admin-primary bg-admin-primary text-white" : "border-admin-border"
+                    on ? "border-admin-primary bg-admin-primary text-admin-bg" : "border-admin-border"
                   }`}
                 >
                   {on ? "✓" : ""}

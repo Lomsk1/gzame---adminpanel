@@ -4,15 +4,16 @@ import { useAdminT } from "../../store/locale/locale";
 
 export const PsychotypeRadar = ({ data }: { data: DashboardStats["psychotypeBalance"] }) => {
   const { t } = useAdminT();
+  const rows = Array.isArray(data) ? data : [];
 
   return (
-    <div className="bg-admin-card border border-admin-border rounded-3xl p-6 h-full flex flex-col admin-fade-up">
-      <h3 className="font-bold text-admin-text mb-4 uppercase text-xs tracking-widest">
+    <div className="bg-admin-card border border-admin-border rounded-xl p-5 h-full flex flex-col admin-fade-up shadow-[var(--shadow-admin-sm)]">
+      <h3 className="mb-4 text-xs font-semibold tracking-wider uppercase text-admin-text-muted">
         {t("home.chart.radarTitle")}
       </h3>
       <div className="relative flex-1 w-full min-h-80">
         <ResponsiveContainer width="100%" height="100%" initialDimension={{ width: 400, height: 300 }}>
-          <RadarChart cx="50%" cy="50%" outerRadius="80%" data={data}>
+          <RadarChart cx="50%" cy="50%" outerRadius="80%" data={rows}>
             <PolarGrid stroke="var(--color-admin-border)" />
             <PolarAngleAxis
               dataKey="subject"

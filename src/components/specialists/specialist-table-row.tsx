@@ -43,7 +43,7 @@ export function SpecialistTableRow({ specialist, onInspect, onEdit, onDelete }: 
       <td className="hidden px-4 py-4 md:table-cell">
         <div className="flex flex-wrap gap-1">
           {categories.slice(0, 2).map((c) => (
-            <span key={typeof c === "string" ? c : c._id} className="text-[10px] text-admin-primary">
+            <span key={typeof c === "string" ? c : c._id} className="text-[11px] font-medium text-admin-primary">
               {categoryTitle(c)}
             </span>
           ))}
@@ -58,7 +58,7 @@ export function SpecialistTableRow({ specialist, onInspect, onEdit, onDelete }: 
             ? countries.map((c) => countryToFlag(c)).join(" ")
             : "—"}
         </p>
-        <p className="mt-0.5 text-[10px] text-admin-text-muted">
+        <p className="mt-0.5 text-[11px] text-admin-text-muted">
           {countries.map((c) => getCountryName(c)).join(", ") || "No countries"}
         </p>
       </td>
@@ -82,7 +82,7 @@ export function SpecialistTableRow({ specialist, onInspect, onEdit, onDelete }: 
               e.stopPropagation();
               onEdit();
             }}
-            className="text-[11px] font-black uppercase tracking-wider text-admin-primary hover:underline"
+            className="text-[11px] font-semibold text-admin-primary hover:underline"
           >
             Edit
           </button>
@@ -96,7 +96,7 @@ export function SpecialistTableRow({ specialist, onInspect, onEdit, onDelete }: 
             <button
               type="button"
               onClick={(e) => e.stopPropagation()}
-              className="text-[11px] font-black uppercase tracking-wider text-admin-error hover:underline"
+              className="text-[11px] font-semibold text-admin-error hover:underline"
             >
               Delete
             </button>

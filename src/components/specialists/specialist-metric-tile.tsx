@@ -50,13 +50,13 @@ export function SpecialistMetricTile({ label, value, hint, tone = "primary", act
     <Tag
       type={onClick ? "button" : undefined}
       onClick={onClick}
-      className={`rounded-2xl border p-3.5 text-left transition-all duration-200 sm:p-4 ${
+      className={`rounded-xl border p-3.5 text-left transition-all duration-200 sm:p-4 ${
         onClick ? "cursor-pointer hover:-translate-y-0.5 hover:shadow-md active:scale-[0.99]" : ""
       } ${s.ring} ${active ? s.active : ""}`}
     >
-      <p className="text-[10px] font-bold uppercase tracking-wider text-admin-text-dim">{label}</p>
-      <p className={`mt-1.5 text-xl font-black tabular-nums sm:mt-2 sm:text-2xl ${s.value}`}>{value}</p>
-      {hint ? <p className="mt-0.5 text-[10px] text-admin-text-muted sm:text-[11px]">{hint}</p> : null}
+      <p className="text-[11px] font-semibold text-admin-text-dim">{label}</p>
+      <p className={`mt-1.5 text-xl font-semibold tabular-nums sm:mt-2 sm:text-2xl ${s.value}`}>{value}</p>
+      {hint ? <p className="mt-0.5 text-[11px] text-admin-text-muted">{hint}</p> : null}
       <div className="mt-2 h-0.5 w-full overflow-hidden rounded-full bg-admin-bg/80 sm:mt-3">
         <div className={`h-full w-2/3 ${s.bar} opacity-70`} />
       </div>

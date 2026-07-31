@@ -69,7 +69,7 @@ export function AdminDateField({
   min,
   max,
   className = "",
-  labelClassName = "text-[10px] font-black text-admin-text-dim uppercase tracking-wider block mb-1.5",
+  labelClassName = "text-[11px] font-semibold text-admin-text-dim tracking-wide block mb-1.5",
 }: AdminDateFieldProps) {
   const id = useId();
   const rootRef = useRef<HTMLDivElement>(null);
@@ -144,7 +144,7 @@ export function AdminDateField({
               aria-modal="true"
               aria-label={label}
               style={{ top: coords.top, left: coords.left, width: POPOVER_W }}
-              className="fixed z-[9999] rounded-2xl border border-admin-border bg-[#12141c] p-3 shadow-2xl ring-1 ring-black/40 admin-scale-in"
+              className="fixed z-[9999] rounded-xl border border-admin-border bg-admin-panel p-3 shadow-[var(--shadow-admin-lg)] admin-scale-in"
             >
               <div className="mb-3 flex items-center justify-between">
                 <button

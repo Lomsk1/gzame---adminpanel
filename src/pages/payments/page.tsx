@@ -82,7 +82,7 @@ export default function PaymentsPage() {
             <GlassCard className="p-4">
               <h2 className="text-sm font-bold text-admin-text mb-3">{t("payments.bookingsByStatus")}</h2>
               <ul className="space-y-2 text-sm">
-                {Object.entries(overview.bookingsByStatus).map(([status, count]) => (
+                {Object.entries(overview.bookingsByStatus ?? {}).map(([status, count]) => (
                   <li key={status} className="flex justify-between">
                     <span className="text-admin-text-dim">{status}</span>
                     <span className="font-mono text-admin-text">{count}</span>
@@ -93,7 +93,7 @@ export default function PaymentsPage() {
             <GlassCard className="p-4">
               <h2 className="text-sm font-bold text-admin-text mb-3">{t("payments.stripeSubscriptions")}</h2>
               <ul className="space-y-2 text-sm">
-                {Object.entries(overview.subscriptionsByStatus).map(([status, count]) => (
+                {Object.entries(overview.subscriptionsByStatus ?? {}).map(([status, count]) => (
                   <li key={status} className="flex justify-between">
                     <span className="text-admin-text-dim">{status || t("payments.unknown")}</span>
                     <span className="font-mono text-admin-text">{count}</span>
@@ -142,7 +142,13 @@ export default function PaymentsPage() {
               </tr>
             </thead>
             <tbody>
-              {bookings.data.map((b) => (
+              {(bookings?.data ?? []).length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="py-10 text-center text-sm text-admin-text-dim">
+                    {t("common.noResults")}
+                  </td>
+                </tr>
+              ) : (bookings?.data ?? []).map((b) => (
                 <tr key={b._id} className="border-b border-admin-border/40 align-top">
                   <td className="py-2 pr-3 whitespace-nowrap">
                     {b.scheduled_at ? format(new Date(b.scheduled_at), "yyyy-MM-dd HH:mm") : "—"}
@@ -194,7 +200,13 @@ export default function PaymentsPage() {
               </tr>
             </thead>
             <tbody>
-              {(subscriptions.data as Array<Record<string, string>>).map((u) => (
+              {((subscriptions?.data ?? []) as Array<Record<string, string>>).length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="py-10 text-center text-sm text-admin-text-dim">
+                    {t("common.noResults")}
+                  </td>
+                </tr>
+              ) : ((subscriptions?.data ?? []) as Array<Record<string, string>>).map((u) => (
                 <tr key={String(u._id)} className="border-b border-admin-border/40">
                   <td className="py-2 pr-3">{u.nickname ?? u.email}</td>
                   <td className="py-2 pr-3">{u.role}</td>
@@ -215,12 +227,14 @@ export default function PaymentsPage() {
       {activeTab === "ambassadors" ? (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <GlassCard className="p-4">
-            <h2 className="font-bold text-admin-text mb-2">{t("payments.ambassadors.title", { count: ambassadors.ambassadors.length })}</h2>
+            <h2 className="font-bold text-admin-text mb-2">{t("payments.ambassadors.title", { count: ambassadors?.ambassadors?.length ?? 0 })}</h2>
             <p className="text-xs text-admin-text-dim mb-3">
               {t("payments.ambassadors.desc")}
             </p>
             <ul className="space-y-2 text-sm">
-              {ambassadors.ambassadors.map((a) => (
+              {(ambassadors?.ambassadors ?? []).length === 0 ? (
+                <li className="py-6 text-center text-sm text-admin-text-dim">{t("common.noResults")}</li>
+              ) : (ambassadors?.ambassadors ?? []).map((a) => (
                 <li key={String(a._id)} className="flex justify-between border-b border-admin-border/40 py-2 gap-3">
                   <span>{String(a.name)}</span>
                   <span className="text-admin-text-dim font-mono text-xs text-right">
@@ -233,10 +247,12 @@ export default function PaymentsPage() {
           </GlassCard>
           <GlassCard className="p-4">
             <h2 className="font-bold text-admin-text mb-2">
-              {t("payments.recruits.title", { count: ambassadors.recruits.length })}
+              {t("payments.recruits.title", { count: ambassadors?.recruits?.length ?? 0 })}
             </h2>
             <ul className="space-y-2 text-sm">
-              {ambassadors.recruits.map((r) => {
+              {(ambassadors?.recruits ?? []).length === 0 ? (
+                <li className="py-6 text-center text-sm text-admin-text-dim">{t("common.noResults")}</li>
+              ) : (ambassadors?.recruits ?? []).map((r) => {
                 const ref = r.referred_by_specialist_id as { name?: string } | undefined;
                 return (
                   <li key={String(r._id)} className="border-b border-admin-border/40 py-2">
@@ -265,7 +281,13 @@ export default function PaymentsPage() {
               </tr>
             </thead>
             <tbody>
-              {(accruals.data as Array<Record<string, unknown>>).map((row) => {
+              {((accruals?.data ?? []) as Array<Record<string, unknown>>).length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="py-10 text-center text-sm text-admin-text-dim">
+                    {t("common.noResults")}
+                  </td>
+                </tr>
+              ) : ((accruals?.data ?? []) as Array<Record<string, unknown>>).map((row) => {
                 const ambassador = row.ambassador_id as { name?: string } | undefined;
                 const order = row.order_id as { service_snapshot?: { title?: string } } | undefined;
                 return (
@@ -397,7 +419,7 @@ function ComplianceTab() {
               type="button"
               onClick={saveMorSignOff}
               disabled={savingMor || !signedOffBy.trim()}
-              className="rounded-xl px-4 py-2 text-sm font-semibold bg-admin-primary text-white disabled:opacity-50"
+              className="rounded-xl px-4 py-2 text-sm font-semibold bg-admin-primary text-admin-bg disabled:opacity-50"
             >
               {savingMor ? t("payments.compliance.saving") : t("payments.compliance.recordSignOff")}
             </button>

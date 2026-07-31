@@ -11,7 +11,13 @@ export const TopOperatorsCard = ({ users }: { users: StatsUserTypes["data"]["top
                 {t("users.eliteOperators")}
             </h3>
             <div className="space-y-3">
-                {users.map((user, i) => (
+                {(users ?? []).length === 0 ? (
+                    <div className="py-6 border border-dashed border-admin-border/30 rounded flex items-center justify-center">
+                        <p className="text-[9px] italic text-admin-text-dim/50 uppercase tracking-tighter">
+                            {t("common.noResults")}
+                        </p>
+                    </div>
+                ) : (users ?? []).map((user, i) => (
                     <div
                         key={user._id}
                         className="flex items-center justify-between p-2 rounded bg-admin-bg/40 border border-admin-border/30 group hover:border-admin-accent/50 transition-all"

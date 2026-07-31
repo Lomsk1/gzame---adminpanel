@@ -13,7 +13,7 @@ export function AvatarUploadField({ previewUrl, onFileChange, onClear }: Props) 
   return (
     <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
       <div className="relative shrink-0">
-        <div className="h-28 w-28 overflow-hidden rounded-2xl border-2 border-admin-primary/30 bg-admin-bg shadow-[0_0_30px_rgba(59,130,246,0.12)]">
+        <div className="h-28 w-28 overflow-hidden rounded-2xl border-2 border-admin-primary/30 bg-admin-bg shadow-[0_0_16px_rgba(var(--admin-primary-rgb),0.15)]">
           <img
             src={previewUrl || DEFAULT_AVATAR}
             alt="Avatar preview"

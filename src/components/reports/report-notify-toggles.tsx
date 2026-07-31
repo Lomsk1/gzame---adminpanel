@@ -35,7 +35,7 @@ export function ReportNotifyToggles({
           onChange={(e) => onEmailChange(e.target.checked)}
           className="rounded border-admin-border"
         />
-        <Mail size={14} className="text-violet-300 shrink-0" />
+        <Mail size={14} className="text-admin-info shrink-0" />
         {t("reports.notifyEmail")}
       </label>
     </div>

@@ -1,71 +1,70 @@
 import type { RecentAnswer } from "../../types/stats/dashboard";
+import { AdminBadge, AdminCard, AdminTable, AdminTableBody, AdminTableHead, AdminTd, AdminTh, AdminTr } from "../admin";
 import { useAdminT } from "../../store/locale/locale";
 
 export const CalibrationTable = ({ items }: { items: RecentAnswer[] }) => {
   const { t } = useAdminT();
 
   return (
-    <div className="bg-admin-card border border-admin-border rounded-3xl overflow-hidden h-full admin-fade-up">
-      <div className="p-5 border-b border-admin-border bg-admin-panel/50">
-        <h3 className="font-bold text-admin-text text-sm uppercase tracking-wider">
+    <AdminCard padding="none" className="h-full overflow-hidden admin-fade-up">
+      <div className="border-b border-admin-border bg-admin-panel/60 px-4 py-3.5 md:px-5">
+        <h3 className="text-sm font-semibold text-admin-text">
           {t("home.table.title")}
         </h3>
       </div>
-      <div className="overflow-x-auto">
-        <table className="w-full text-left">
-          <thead className="text-[10px] uppercase text-admin-text-dim bg-admin-bg/30">
+      <AdminTable className="rounded-none border-x-0 border-b-0">
+        <AdminTableHead>
+          <tr>
+            <AdminTh>{t("home.table.subject")}</AdminTh>
+            <AdminTh>{t("home.table.psychometric")}</AdminTh>
+            <AdminTh>{t("home.table.consensus")}</AdminTh>
+            <AdminTh>{t("home.table.date")}</AdminTh>
+          </tr>
+        </AdminTableHead>
+        <AdminTableBody>
+          {(items ?? []).length === 0 ? (
             <tr>
-              <th className="p-4">{t("home.table.subject")}</th>
-              <th className="p-4">{t("home.table.psychometric")}</th>
-              <th className="p-4">{t("home.table.consensus")}</th>
-              <th className="p-4">{t("home.table.date")}</th>
+              <td colSpan={4} className="px-4 py-10 text-center text-sm text-admin-text-dim">
+                {t("common.noResults")}
+              </td>
             </tr>
-          </thead>
-          <tbody className="divide-y divide-admin-border/50">
-            {items.map((answer) => (
-              <tr key={answer._id} className="hover:bg-admin-primary/5 transition-colors group">
-                <td className="p-4">
-                  <div className="text-sm font-semibold text-admin-text">
-                    {answer.user_id?.nickname || t("common.unknown")}
-                  </div>
-                </td>
-                <td className="p-4">
-                  <div className="flex flex-col gap-0.5">
-                    <span className="text-xs font-bold text-admin-primary uppercase tracking-tight">
-                      {answer.finalPsychotype}
+          ) : (items ?? []).map((answer) => (
+            <AdminTr key={answer._id}>
+              <AdminTd>
+                <div className="text-sm font-semibold text-admin-text">
+                  {answer.user_id?.nickname || t("common.unknown")}
+                </div>
+              </AdminTd>
+              <AdminTd>
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-xs font-bold text-admin-primary uppercase tracking-tight">
+                    {answer.finalPsychotype}
+                  </span>
+                  {answer.subPsychotype ? (
+                    <span className="text-[11px] font-medium uppercase text-admin-text-dim">
+                      {t("home.table.subPrefix", { value: answer.subPsychotype })}
                     </span>
-                    {answer.subPsychotype ? (
-                      <span className="text-[10px] text-admin-text-dim font-medium uppercase italic">
-                        {t("home.table.subPrefix", { value: answer.subPsychotype })}
-                      </span>
-                    ) : null}
-                  </div>
-                </td>
-                <td className="p-4">
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={`text-xs px-2 py-0.5 rounded-full border ${
-                        answer.geminiVote === answer.finalPsychotype
-                          ? "bg-admin-success/10 border-admin-success text-admin-success"
-                          : "bg-admin-warning/10 border-admin-warning text-admin-warning"
-                      }`}
-                    >
-                      {answer.geminiVote}
-                    </span>
-                  </div>
-                </td>
-                <td className="p-4 text-[11px] text-admin-text-dim">
-                  {new Date(answer.created_at).toLocaleDateString(undefined, {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                  })}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+                  ) : null}
+                </div>
+              </AdminTd>
+              <AdminTd>
+                <div className="flex items-center">
+                  <AdminBadge tone={answer.geminiVote === answer.finalPsychotype ? "success" : "warning"}>
+                    {answer.geminiVote}
+                  </AdminBadge>
+                </div>
+              </AdminTd>
+              <AdminTd className="text-[11px] text-admin-text-dim">
+                {new Date(answer.created_at).toLocaleDateString(undefined, {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                })}
+              </AdminTd>
+            </AdminTr>
+          ))}
+        </AdminTableBody>
+      </AdminTable>
+    </AdminCard>
   );
 };

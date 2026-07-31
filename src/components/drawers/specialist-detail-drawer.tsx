@@ -99,7 +99,7 @@ export function SpecialistDetailDrawer({ specialist, onClose, onEdit, onDeleted 
   return (
     <div className="fixed inset-0 z-[100] flex justify-end">
       <button type="button" className="absolute inset-0 bg-black/60" onClick={onClose} aria-label="Close" />
-      <div className="relative flex h-full w-full max-w-md flex-col border-l border-admin-border bg-admin-panel shadow-2xl animate-in slide-in-from-right duration-300">
+      <div className="relative flex h-full w-full max-w-md flex-col border-l border-admin-border bg-admin-panel shadow-2xl admin-drawer-in">
         <div className="flex items-start justify-between border-b border-admin-border/50 p-5">
           <div className="flex min-w-0 gap-3">
             <img
@@ -153,7 +153,7 @@ export function SpecialistDetailDrawer({ specialist, onClose, onEdit, onDeleted 
               onClick={() => setTab(item.id)}
               className={`flex-1 rounded-lg px-3 py-2 text-[11px] font-bold uppercase tracking-wide transition-colors ${
                 tab === item.id
-                  ? "bg-admin-primary text-white"
+                  ? "bg-admin-primary text-admin-bg"
                   : "text-admin-text-dim hover:bg-admin-panel/60 hover:text-admin-text"
               }`}
             >
