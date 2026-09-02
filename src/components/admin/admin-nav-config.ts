@@ -18,10 +18,10 @@ import {
   CreditCard,
   AlertTriangle,
   Radio,
-  Cloud,
   Rocket,
   Wand2,
   Cpu,
+  Newspaper,
 } from "lucide-react";
 import type { AdminMessages } from "../../i18n/translations";
 
@@ -87,10 +87,13 @@ export const ADMIN_NAV_GROUPS: NavGroupDef[] = [
     ],
   },
   {
+    labelKey: "nav.groups.content",
+    links: [{ to: "/blog", labelKey: "nav.blog", icon: Newspaper }],
+  },
+  {
     labelKey: "nav.groups.system",
     links: [
       { to: "/notification-broadcast", labelKey: "nav.broadcast", icon: Radio },
-      { to: "/cloud", labelKey: "nav.cloud", icon: Cloud },
       { to: "/app-version", labelKey: "nav.appVersion", icon: Rocket },
     ],
   },

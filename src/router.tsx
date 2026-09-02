@@ -38,13 +38,14 @@ import { bookingClicksPageLoader } from "./features/specialists/booking-clicks.l
 import EarlyAccessPage from "./pages/early-access/page";
 import { earlyAccessPageLoader } from "./features/early-access/early-access.loaders";
 import NotificationBroadcastPage from "./pages/notification-broadcast/page";
-import CloudPage from "./pages/cloud/page";
-import { cloudPageLoader } from "./features/cloud/cloud.loaders";
 import AppVersionPage from "./pages/app-version/page";
 import { appVersionPageLoader } from "./features/app-version/app-version.loaders";
 import WikiPage from "./pages/wiki/page";
 import { wikiPageLoader } from "./features/wiki/wiki.loaders";
 import { wikiPageAction } from "./features/wiki/wiki.actions";
+import BlogPage from "./pages/blog/page";
+import { blogPageLoader } from "./features/blog/blog.loaders";
+import { blogPageAction } from "./features/blog/blog.actions";
 import AiMemoryPage from "./pages/ai/memory/page";
 import { aiMemoryLoader } from "./features/ai-memory/ai-memory.loaders";
 import AiOverviewPage from "./pages/ai/overview/page";
@@ -175,11 +176,6 @@ export const router = createBrowserRouter([
         element: <NotificationBroadcastPage />,
       },
       {
-        path: "cloud",
-        element: <CloudPage />,
-        loader: cloudPageLoader,
-      },
-      {
         path: "app-version",
         element: <AppVersionPage />,
         loader: appVersionPageLoader,
@@ -189,6 +185,12 @@ export const router = createBrowserRouter([
         element: <WikiPage />,
         loader: wikiPageLoader,
         action: wikiPageAction,
+      },
+      {
+        path: "blog",
+        element: <BlogPage />,
+        loader: blogPageLoader,
+        action: blogPageAction,
       },
     ]
   },

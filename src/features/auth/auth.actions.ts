@@ -3,6 +3,19 @@ import { axiosPublic } from "../../helper/axios";
 import useUserStore from "../../store/user/user";
 import axios from "axios";
 import type { UserDataType } from "../../types/user/user";
+import {
+  markAuthBootstrap,
+  writeStoredToken,
+} from "./auth.storage";
+
+function parseSignInResponse(data: unknown): { token: string; user: UserDataType } | null {
+  if (!data || typeof data !== "object") return null;
+  const body = data as Record<string, unknown>;
+  const token = typeof body.token === "string" ? body.token : null;
+  const user = body.user;
+  if (!token || !user || typeof user !== "object") return null;
+  return { token, user: user as UserDataType };
+}
 
 export const loginAction = async ({ request }: { request: Request }) => {
   const formData = await request.formData();
@@ -14,14 +27,21 @@ export const loginAction = async ({ request }: { request: Request }) => {
       login,
       password,
     });
-    const { token, user }: { token: string; user: UserDataType } = res.data;
 
-    if (user?.role !== "admin") {
-      useUserStore.getState().logout();
+    const parsed = parseSignInResponse(res.data);
+    if (!parsed) {
+      return { error: "Unexpected server response. Please try again." };
+    }
+
+    const { token, user } = parsed;
+
+    if (user.role !== "admin") {
       return { error: "Access denied. Admin privileges required." };
     }
 
-    useUserStore.getState().setUser(user, token);
+    writeStoredToken(token);
+    markAuthBootstrap();
+    useUserStore.setState({ user, token });
 
     return redirect("/");
   } catch (err) {

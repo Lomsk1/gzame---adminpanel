@@ -1,10 +1,11 @@
 import axios from "axios";
-import type { AxiosResponse, AxiosError } from "axios";
-import Cookies from "js-cookie";
+import type { AxiosResponse, AxiosError, InternalAxiosRequestConfig } from "axios";
 import { BASE_URL } from "../config/env.config";
+import useUserStore from "../store/user/user";
+import { clearStoredToken, readStoredToken } from "../features/auth/auth.storage";
 
 const getAuthToken = () => {
-  const token = Cookies.get("auth_token");
+  const token = readStoredToken() || useUserStore.getState().token;
   return token ? token : null;
 };
 
@@ -27,11 +28,9 @@ function isInvalidSignatureError(error: unknown): boolean {
   return INVALID_SIGNATURE_PATTERNS.some((p) => lower.includes(p));
 }
 
-function clearAuthAndRedirect(): void {
-  Cookies.remove("auth_token");
-  if (!window.location.pathname.includes("/login")) {
-    window.location.href = "/login";
-  }
+function clearAuthStateOnly(): void {
+  clearStoredToken();
+  useUserStore.setState({ user: null, token: null });
 }
 
 /* Auth */
@@ -61,7 +60,8 @@ const authResponseErrorInterceptor = (error: AxiosError): Promise<never> => {
     error.response?.status === 401 || isInvalidSignatureError(error);
 
   if (shouldClearAuth) {
-    clearAuthAndRedirect();
+    // Do not hard-navigate here — React Router loaders/actions handle redirects.
+    clearAuthStateOnly();
   }
 
   return Promise.reject(error);
@@ -76,21 +76,25 @@ axiosAuth.interceptors.response.use(
 
 export default axiosAuth;
 
-export const axiosMultipartAuth = axios.create({
-  baseURL: BASE_URL,
-  headers: {
-    "Content-Type": "multipart/form-data",
-  },
-  withCredentials: true,
-});
-
-axiosMultipartAuth.interceptors.request.use((config) => {
+function attachMultipartHeaders(config: InternalAxiosRequestConfig) {
   const authTokens = getAuthToken();
   if (authTokens) {
     config.headers.Authorization = `Bearer ${authTokens}`;
   }
+  // Let the browser set multipart boundary — a bare multipart/form-data breaks uploads.
+  if (config.data instanceof FormData) {
+    delete config.headers["Content-Type"];
+    delete config.headers["content-type"];
+  }
   return config;
+}
+
+export const axiosMultipartAuth = axios.create({
+  baseURL: BASE_URL,
+  withCredentials: true,
 });
+
+axiosMultipartAuth.interceptors.request.use(attachMultipartHeaders);
 
 axiosMultipartAuth.interceptors.response.use(
   authResponseInterceptor,
@@ -101,10 +105,15 @@ axiosMultipartAuth.interceptors.response.use(
 
 export const axiosMultipart = axios.create({
   baseURL: BASE_URL,
-  headers: {
-    "Content-Type": "multipart/form-data",
-  },
   withCredentials: true,
+});
+
+axiosMultipart.interceptors.request.use((config) => {
+  if (config.data instanceof FormData) {
+    delete config.headers["Content-Type"];
+    delete config.headers["content-type"];
+  }
+  return config;
 });
 
 export const axiosPublic = axios.create({

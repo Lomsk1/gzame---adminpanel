@@ -1,7 +1,11 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import Cookies from "js-cookie";
 import type { UserDataType } from "../../types/user/user";
+import {
+  clearStoredToken,
+  readStoredToken,
+  writeStoredToken,
+} from "../../features/auth/auth.storage";
 
 interface UserState {
   user: UserDataType | null;
@@ -15,15 +19,11 @@ const useUserStore = create<UserState>()(
   persist(
     (set) => ({
       user: null,
-      token: Cookies.get("auth_token") || null,
+      token: readStoredToken(),
 
       setUser: (user, token) => {
         if (token) {
-          Cookies.set("auth_token", token, {
-            secure: true,
-            sameSite: "strict",
-            expires: 7,
-          });
+          writeStoredToken(token);
           set({ user, token });
         } else {
           set({ user });
@@ -33,21 +33,18 @@ const useUserStore = create<UserState>()(
       updateUser: (user) => set({ user }),
 
       logout: () => {
-        Cookies.remove("auth_token");
+        clearStoredToken();
         set({ user: null, token: null });
-
-        localStorage.clear();
-
+        localStorage.removeItem("admin-user-storage");
         window.location.href = "/login";
       },
     }),
     {
       name: "admin-user-storage",
       storage: createJSONStorage(() => localStorage),
-
-      partialize: (state) => ({ user: state.user }),
-    }
-  )
+      partialize: (state) => ({ user: state.user, token: state.token }),
+    },
+  ),
 );
 
 export default useUserStore;
