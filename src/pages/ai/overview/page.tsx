@@ -23,6 +23,7 @@ import { AdminPageHeader, AdminPageShell } from "../../../components/admin";
 import { useAdminT } from "../../../store/locale/locale";
 
 const QUICK_LINK_KEYS = [
+  { to: "/system-checks", titleKey: "aiOverview.quickLinks.systemChecks", descKey: "aiOverview.quickLinks.systemChecksDesc", icon: Activity },
   { to: "/ai/devi-prompt", titleKey: "aiOverview.quickLinks.deviPrompt", descKey: "aiOverview.quickLinks.deviPromptDesc", icon: Wand2 },
   { to: "/wiki", titleKey: "aiOverview.quickLinks.wiki", descKey: "aiOverview.quickLinks.wikiDesc", icon: BookOpen },
   { to: "/ai/memory", titleKey: "aiOverview.quickLinks.memory", descKey: "aiOverview.quickLinks.memoryDesc", icon: Brain },
@@ -78,7 +79,7 @@ export default function AiOverviewPage() {
         />
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         {QUICK_LINK_KEYS.map((link) => {
           const Icon = link.icon;
           return (

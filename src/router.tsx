@@ -40,6 +40,7 @@ import { earlyAccessPageLoader } from "./features/early-access/early-access.load
 import NotificationBroadcastPage from "./pages/notification-broadcast/page";
 import AppVersionPage from "./pages/app-version/page";
 import { appVersionPageLoader } from "./features/app-version/app-version.loaders";
+import SystemChecksPage from "./pages/system-checks/page";
 import WikiPage from "./pages/wiki/page";
 import { wikiPageLoader } from "./features/wiki/wiki.loaders";
 import { wikiPageAction } from "./features/wiki/wiki.actions";
@@ -174,6 +175,10 @@ export const router = createBrowserRouter([
       {
         path: "notification-broadcast",
         element: <NotificationBroadcastPage />,
+      },
+      {
+        path: "system-checks",
+        element: <SystemChecksPage />,
       },
       {
         path: "app-version",

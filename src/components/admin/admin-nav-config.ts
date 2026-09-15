@@ -22,6 +22,7 @@ import {
   Wand2,
   Cpu,
   Newspaper,
+  Activity,
 } from "lucide-react";
 import type { AdminMessages } from "../../i18n/translations";
 
@@ -93,6 +94,7 @@ export const ADMIN_NAV_GROUPS: NavGroupDef[] = [
   {
     labelKey: "nav.groups.system",
     links: [
+      { to: "/system-checks", labelKey: "nav.systemChecks", icon: Activity },
       { to: "/notification-broadcast", labelKey: "nav.broadcast", icon: Radio },
       { to: "/app-version", labelKey: "nav.appVersion", icon: Rocket },
     ],
