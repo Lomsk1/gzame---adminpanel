@@ -812,6 +812,8 @@
   "specialists.editor.languages": "Languages",
   "specialists.editor.legalName": "Legal name",
   "specialists.editor.monthlyLimit": "Monthly client limit",
+  "specialists.editor.fullClientAccessTitle": "Full access to client features",
+  "specialists.editor.fullClientAccessDesc": "Specialist sees all Life Map spheres and any custom areas the client adds later — even if the client only shared some spheres. Use for coaches who need the full picture.",
   "specialists.editor.newTitle": "New specialist",
   "specialists.editor.portal": "Specialist portal",
   "specialists.editor.portalEmail": "Portal user email",

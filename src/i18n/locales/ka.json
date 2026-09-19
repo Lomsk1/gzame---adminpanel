@@ -812,6 +812,8 @@
   "specialists.editor.languages": "ენები",
   "specialists.editor.legalName": "იურ. სახელი",
   "specialists.editor.monthlyLimit": "თვიური ლიმიტი",
+  "specialists.editor.fullClientAccessTitle": "კლიენტის ფუნქციებზე სრული წვდომა",
+  "specialists.editor.fullClientAccessDesc": "სპეციალისტი ხედავს Life Map-ის ყველა სფეროს და ნებისმიერ ახალ custom არეალს, მაშინაც კი, თუ კლიენტმა მხოლოდ რამდენიმე სფერო გააზიარა.",
   "specialists.editor.newTitle": "ახალი სპecialist",
   "specialists.editor.portal": "პორტალი",
   "specialists.editor.portalEmail": "Email",

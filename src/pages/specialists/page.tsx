@@ -202,6 +202,7 @@ export default function SpecialistsPage() {
       specialty: rest.specialty || undefined,
       isActive: rest.isActive !== false,
       suggested_spheres: rest.suggestedSpheres ?? [],
+      full_client_access: rest.fullClientAccess === true,
       services,
       monthly_client_limit: Math.max(1, rest.monthlyClientLimit ?? 10),
       countries: rest.countries ?? [],

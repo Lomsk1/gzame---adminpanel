@@ -812,6 +812,8 @@
   "specialists.editor.languages": "Языки",
   "specialists.editor.legalName": "Юр. имя",
   "specialists.editor.monthlyLimit": "Лимит клиентов в месяц",
+  "specialists.editor.fullClientAccessTitle": "Полный доступ к функциям клиента",
+  "specialists.editor.fullClientAccessDesc": "Специалист видит все сферы Life Map и любые новые пользовательские области, даже если клиент поделился только частью сфер.",
   "specialists.editor.newTitle": "Новый специалист",
   "specialists.editor.portal": "Портал специалиста",
   "specialists.editor.portalEmail": "Email портала",

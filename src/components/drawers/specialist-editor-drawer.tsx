@@ -81,6 +81,8 @@ export type SpecialistFormData = {
   isActive: boolean;
   portalEmail?: string;
   suggestedSpheres?: string[];
+  /** See all client Life Map spheres + custom areas (bypasses client share selection). */
+  fullClientAccess?: boolean;
   serviceTitle?: string;
   serviceDuration?: number;
   servicePrice?: number | string;
@@ -156,6 +158,9 @@ export const SpecialistEditorDrawer = ({
   );
   const [suggestedSpheres, setSuggestedSpheres] = useState<string[]>(
     specialist?.suggested_spheres ?? [],
+  );
+  const [fullClientAccess, setFullClientAccess] = useState(
+    specialist?.full_client_access === true,
   );
   const existingService = specialist?.services?.[0];
   const [serviceTitle, setServiceTitle] = useState(existingService?.title ?? "");
@@ -346,6 +351,7 @@ export const SpecialistEditorDrawer = ({
       isActive,
       portalEmail: portalEmail.trim() || undefined,
       suggestedSpheres,
+      fullClientAccess,
       serviceTitle,
       serviceDuration,
       servicePrice,
@@ -661,6 +667,13 @@ export const SpecialistEditorDrawer = ({
                 columns={1}
               />
             </div>
+
+            <AmbassadorToggleCard
+              checked={fullClientAccess}
+              onChange={setFullClientAccess}
+              title={t("specialists.editor.fullClientAccessTitle")}
+              description={t("specialists.editor.fullClientAccessDesc")}
+            />
           </FormSection>
 
           <FormSection

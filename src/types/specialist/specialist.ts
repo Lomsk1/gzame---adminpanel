@@ -29,6 +29,8 @@ export interface Specialist {
   portal_enabled?: boolean;
   invite_code?: string;
   suggested_spheres?: string[];
+  /** Admin: see all client Life Map spheres + custom areas regardless of share. */
+  full_client_access?: boolean;
   kyc_status?: 'none' | 'pending' | 'verified' | 'rejected';
   trust_tier?: 'T0' | 'T1' | 'T2';
   reserve_pct?: number;
